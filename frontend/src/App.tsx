@@ -1,5 +1,7 @@
 import "./styles.css";
 
+import { SystemStatus } from "./components/SystemStatus";
+
 export function App() {
   return (
     <main className="app-shell">
@@ -10,6 +12,7 @@ export function App() {
           Sprint 1 establishes the application shell, tooling, validation, and runtime foundation
           before product features are implemented.
         </p>
+        <SystemStatus />
       </section>
     </main>
   );
