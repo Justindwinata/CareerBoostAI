@@ -1,0 +1,14 @@
+# CareerBoost AI repository ownership
+#
+# CODEOWNERS ensures changes receive review from the project maintainer before
+# merge. GitHub requires owners to be valid users, teams, or email addresses for
+# enforcement in repository settings.
+
+* @justindwinata
+
+/docs/ @justindwinata
+/.github/ @justindwinata
+/backend/ @justindwinata
+/frontend/ @justindwinata
+/docker/ @justindwinata
+/scripts/ @justindwinata
