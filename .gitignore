@@ -1,0 +1,102 @@
+# Operating system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+*~
+.fuse_hidden*
+.Trash-*
+.nfs*
+
+# Editor and IDE files
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+.project
+.classpath
+.settings/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.crt
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Node / React / Vite
+node_modules/
+dist/
+build/
+.vite/
+coverage/
+*.tsbuildinfo
+.eslintcache
+.stylelintcache
+
+# Python / FastAPI
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# Packaging
+*.egg-info/
+.eggs/
+pip-wheel-metadata/
+wheelhouse/
+
+# Local databases
+*.sqlite
+*.sqlite3
+*.sqlite.db
+local.db
+dev.db
+test.db
+
+# Docker and local runtime data
+docker-compose.override.yml
+.docker/
+postgres_data/
+tmp/
+temp/
+uploads/
+runtime/
+run/
+*.pid
+*.seed
+*.pid.lock
+
+# Test and tooling artifacts
+playwright-report/
+test-results/
+.nyc_output/
+reports/
+
+# Generated local documents
+*.local.md
+*.local.json
