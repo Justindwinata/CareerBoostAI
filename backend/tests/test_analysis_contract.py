@@ -5,6 +5,7 @@ from careerboost_api.domain import (
     AnalysisError,
     DetectedResumeSection,
     ResumeAnalysisContract,
+    ResumeCompletenessContract,
     ResumeExtractionContract,
     ResumeIntakeContract,
 )
@@ -40,6 +41,12 @@ def test_analysis_contract_represents_successful_resume_intake() -> None:
                 )
             ],
         ),
+        completeness=ResumeCompletenessContract(
+            expected_sections=["summary", "skills", "experience", "education", "projects"],
+            present_sections=["projects"],
+            missing_sections=["summary", "skills", "experience", "education"],
+            score=0.2,
+        ),
     )
 
     assert contract.status == "intake_completed"
@@ -48,6 +55,8 @@ def test_analysis_contract_represents_successful_resume_intake() -> None:
     assert contract.extraction.confidence == "high"
     assert contract.extraction.normalized_text is not None
     assert contract.extraction.sections[0].name == "projects"
+    assert contract.completeness is not None
+    assert contract.completeness.score == 0.2
     assert contract.ats.status == "not_started"
     assert contract.skills.status == "not_started"
     assert contract.roles.status == "not_started"
@@ -138,5 +147,37 @@ def test_contract_rejects_extra_fields() -> None:
                 extracted_text="Readable resume content for analysis contract validation.",
                 normalized_text="Readable resume content for analysis contract validation.",
             ),
+            completeness=ResumeCompletenessContract(
+                expected_sections=["summary", "skills", "experience", "education", "projects"],
+                present_sections=[],
+                missing_sections=["summary", "skills", "experience", "education", "projects"],
+                score=0,
+            ),
             unsupported_stage={"status": "not_started"},
+        )
+
+
+def test_successful_analysis_requires_completeness_metadata() -> None:
+    with pytest.raises(ValidationError):
+        ResumeAnalysisContract(
+            status="intake_completed",
+            intake=build_intake(),
+            extraction=ResumeExtractionContract(
+                status="extracted",
+                confidence="medium",
+                character_count=120,
+                page_count=1,
+                extracted_text="Readable resume content for analysis contract validation.",
+                normalized_text="Readable resume content for analysis contract validation.",
+            ),
+        )
+
+
+def test_completeness_rejects_incomplete_section_coverage() -> None:
+    with pytest.raises(ValidationError):
+        ResumeCompletenessContract(
+            expected_sections=["summary", "skills", "experience", "education", "projects"],
+            present_sections=["summary"],
+            missing_sections=["skills"],
+            score=0.2,
         )

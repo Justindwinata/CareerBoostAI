@@ -45,6 +45,10 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
         "skills",
         "projects",
     ]
+    assert contract.completeness is not None
+    assert contract.completeness.present_sections == ["summary", "skills", "projects"]
+    assert contract.completeness.missing_sections == ["experience", "education"]
+    assert contract.completeness.score == 0.6
     assert contract.ats.status == "not_started"
     assert contract.skills.status == "not_started"
     assert contract.roles.status == "not_started"
@@ -71,6 +75,7 @@ def test_orchestrator_builds_low_text_failure_contract() -> None:
     )
     assert contract.extraction.normalized_text is None
     assert contract.extraction.sections == []
+    assert contract.completeness is None
 
 
 def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
@@ -84,3 +89,4 @@ def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
     assert contract.status == "failed"
     assert contract.extraction.error is not None
     assert contract.extraction.error.category == "unreadable_pdf"
+    assert contract.completeness is None

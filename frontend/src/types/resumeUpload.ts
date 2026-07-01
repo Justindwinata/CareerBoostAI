@@ -62,10 +62,18 @@ export type AnalysisStagePlaceholder = {
   label: string;
 };
 
+export type ResumeCompletenessResult = {
+  expected_sections: ResumeSectionName[];
+  present_sections: ResumeSectionName[];
+  missing_sections: ResumeSectionName[];
+  score: number;
+};
+
 export type ResumeUploadResponse = {
   status: "intake_completed" | "failed";
   intake: ResumeIntakeResult;
   extraction: ResumeExtractionResult;
+  completeness: ResumeCompletenessResult | null;
   ats: AnalysisStagePlaceholder;
   skills: AnalysisStagePlaceholder;
   roles: AnalysisStagePlaceholder;

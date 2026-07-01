@@ -131,6 +131,34 @@ class DetectedResumeSection(BaseModel):
         return self
 
 
+class ResumeCompletenessContract(BaseModel):
+    """Deterministic section-presence baseline for future analysis stages."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    expected_sections: list[ResumeSectionName]
+    present_sections: list[ResumeSectionName]
+    missing_sections: list[ResumeSectionName]
+    score: float = Field(ge=0, le=1)
+
+    @model_validator(mode="after")
+    def validate_completeness_sets(self) -> Self:
+        expected = set(self.expected_sections)
+        present = set(self.present_sections)
+        missing = set(self.missing_sections)
+
+        if present - expected:
+            raise ValueError("present sections must be part of expected sections")
+        if missing - expected:
+            raise ValueError("missing sections must be part of expected sections")
+        if present & missing:
+            raise ValueError("sections cannot be both present and missing")
+        if present | missing != expected:
+            raise ValueError("present and missing sections must cover all expected sections")
+
+        return self
+
+
 class AnalysisStagePlaceholder(BaseModel):
     """Explicit placeholder for future analysis stages not implemented in Sprint 2."""
 
@@ -157,6 +185,7 @@ class ResumeAnalysisContract(BaseModel):
     status: AnalysisStatus
     intake: ResumeIntakeContract
     extraction: ResumeExtractionContract
+    completeness: ResumeCompletenessContract | None = None
     ats: AnalysisStagePlaceholder = Field(
         default_factory=lambda: AnalysisStagePlaceholder(name="ats", label="ATS analysis")
     )
@@ -180,5 +209,11 @@ class ResumeAnalysisContract(BaseModel):
 
         if self.status == "failed" and self.extraction.status != "failed":
             raise ValueError("failed analysis requires failed extraction")
+
+        if self.status == "intake_completed" and self.completeness is None:
+            raise ValueError("completed intake requires completeness metadata")
+
+        if self.status == "failed" and self.completeness is not None:
+            raise ValueError("failed analysis must not include completeness metadata")
 
         return self

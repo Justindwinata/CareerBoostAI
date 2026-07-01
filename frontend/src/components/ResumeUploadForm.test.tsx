@@ -34,6 +34,12 @@ describe("ResumeUploadForm", () => {
             sections: [],
             error: null,
           },
+          completeness: {
+            expected_sections: ["summary", "skills", "experience", "education", "projects"],
+            present_sections: [],
+            missing_sections: ["summary", "skills", "experience", "education", "projects"],
+            score: 0,
+          },
           ats: {
             status: "not_started",
             name: "ats",
@@ -195,6 +201,7 @@ describe("ResumeUploadForm", () => {
               message: "Resume text is too short to analyze. Upload a text-based PDF resume.",
             },
           },
+          completeness: null,
           ats: {
             status: "not_started",
             name: "ats",

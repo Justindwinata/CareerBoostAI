@@ -7,6 +7,7 @@ from careerboost_api.domain import (
     ResumeExtractionContract,
     ResumeIntakeContract,
 )
+from careerboost_api.services.resume_completeness import ResumeCompletenessCalculator
 from careerboost_api.services.resume_extraction import (
     ResumeTextExtractionError,
     ResumeTextExtractionResult,
@@ -20,8 +21,13 @@ LOW_TEXT_EXTRACTION_MESSAGE = "Resume text is too short to analyze. Upload a tex
 class ResumeIntakeOrchestrator:
     """Map validated resume intake outcomes into the canonical analysis contract."""
 
-    def __init__(self, text_processor: ResumeTextProcessor | None = None) -> None:
+    def __init__(
+        self,
+        text_processor: ResumeTextProcessor | None = None,
+        completeness_calculator: ResumeCompletenessCalculator | None = None,
+    ) -> None:
         self.text_processor = text_processor or ResumeTextProcessor()
+        self.completeness_calculator = completeness_calculator or ResumeCompletenessCalculator()
 
     def build_success(
         self,
@@ -30,6 +36,7 @@ class ResumeIntakeOrchestrator:
         extraction: ResumeTextExtractionResult,
     ) -> ResumeAnalysisContract:
         processed_text = self.text_processor.process(extraction.extracted_text)
+        completeness = self.completeness_calculator.calculate(processed_text.sections)
 
         return ResumeAnalysisContract(
             status="intake_completed",
@@ -43,6 +50,7 @@ class ResumeIntakeOrchestrator:
                 normalized_text=processed_text.normalized_text,
                 sections=processed_text.sections,
             ),
+            completeness=completeness,
         )
 
     def build_extraction_failure(

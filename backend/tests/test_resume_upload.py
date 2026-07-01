@@ -7,6 +7,7 @@ from pytest import MonkeyPatch
 
 from careerboost_api.domain import (
     ResumeAnalysisContract,
+    ResumeCompletenessContract,
     ResumeExtractionContract,
     ResumeIntakeContract,
 )
@@ -87,6 +88,12 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             "sections": [],
             "error": None,
         },
+        "completeness": {
+            "expected_sections": ["summary", "skills", "experience", "education", "projects"],
+            "present_sections": [],
+            "missing_sections": ["summary", "skills", "experience", "education", "projects"],
+            "score": 0,
+        },
         "ats": {
             "status": "not_started",
             "name": "ats",
@@ -143,6 +150,12 @@ def test_upload_resume_delegates_success_mapping_to_orchestrator(
                 extracted_text=extraction.extracted_text,
                 normalized_text=extraction.extracted_text,
             ),
+            completeness=ResumeCompletenessContract(
+                expected_sections=["summary", "skills", "experience", "education", "projects"],
+                present_sections=[],
+                missing_sections=["summary", "skills", "experience", "education", "projects"],
+                score=0,
+            ),
         )
 
     monkeypatch.setattr(ResumeIntakeOrchestrator, "build_success", build_success)
@@ -155,6 +168,7 @@ def test_upload_resume_delegates_success_mapping_to_orchestrator(
     assert response.status_code == 202
     assert delegation_calls == 1
     assert response.json()["status"] == "intake_completed"
+    assert response.json()["completeness"] is not None
 
 
 def test_upload_resume_rejects_non_pdf_content_type() -> None:
@@ -208,6 +222,7 @@ def test_upload_resume_rejects_low_text_pdf() -> None:
             "message": "Resume text is too short to analyze. Upload a text-based PDF resume.",
         },
     }
+    assert response_body["completeness"] is None
     assert response_body["ats"]["status"] == "not_started"
 
 
@@ -236,6 +251,7 @@ def test_upload_resume_returns_structured_unreadable_extraction_failure(
         "category": "unreadable_pdf",
         "message": "Resume text could not be extracted from this PDF.",
     }
+    assert response_body["completeness"] is None
 
 
 def test_upload_resume_rejects_oversized_pdf() -> None:
