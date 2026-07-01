@@ -15,11 +15,13 @@ describe("ResumeUploadForm", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
       new Response(
         JSON.stringify({
-          status: "accepted",
-          filename: "resume.pdf",
-          content_type: "application/pdf",
-          size_bytes: 2048,
-          message: "Resume upload accepted and text extraction completed.",
+          status: "intake_completed",
+          intake: {
+            status: "accepted",
+            filename: "resume.pdf",
+            content_type: "application/pdf",
+            size_bytes: 2048,
+          },
           extraction: {
             status: "extracted",
             confidence: "medium",
@@ -27,6 +29,27 @@ describe("ResumeUploadForm", () => {
             page_count: 1,
             extracted_text:
               "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
+            error: null,
+          },
+          ats: {
+            status: "not_started",
+            name: "ats",
+            label: "ATS analysis",
+          },
+          skills: {
+            status: "not_started",
+            name: "skills",
+            label: "Skill extraction",
+          },
+          roles: {
+            status: "not_started",
+            name: "roles",
+            label: "Role matching",
+          },
+          recommendations: {
+            status: "not_started",
+            name: "recommendations",
+            label: "Learning recommendations",
           },
         }),
         {
@@ -149,7 +172,44 @@ describe("ResumeUploadForm", () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
       new Response(
         JSON.stringify({
-          detail: "Resume text is too short to analyze. Upload a text-based PDF resume.",
+          status: "failed",
+          intake: {
+            status: "accepted",
+            filename: "blank.pdf",
+            content_type: "application/pdf",
+            size_bytes: 2048,
+          },
+          extraction: {
+            status: "failed",
+            confidence: null,
+            character_count: 0,
+            page_count: 0,
+            extracted_text: null,
+            error: {
+              category: "low_text",
+              message: "Resume text is too short to analyze. Upload a text-based PDF resume.",
+            },
+          },
+          ats: {
+            status: "not_started",
+            name: "ats",
+            label: "ATS analysis",
+          },
+          skills: {
+            status: "not_started",
+            name: "skills",
+            label: "Skill extraction",
+          },
+          roles: {
+            status: "not_started",
+            name: "roles",
+            label: "Role matching",
+          },
+          recommendations: {
+            status: "not_started",
+            name: "recommendations",
+            label: "Learning recommendations",
+          },
         }),
         {
           headers: { "Content-Type": "application/json" },

@@ -44,6 +44,10 @@ function formatUploadTimestamp(timestamp: string): string {
 }
 
 function formatConfidence(confidence: ResumeUploadResult["extraction"]["confidence"]): string {
+  if (confidence === null) {
+    return "Unavailable";
+  }
+
   return confidence === "high" ? "High confidence" : "Medium confidence";
 }
 
@@ -139,11 +143,11 @@ export function ResumeUploadForm() {
           <dl className="upload-result-list">
             <div>
               <dt>Filename</dt>
-              <dd>{uploadState.result.filename}</dd>
+              <dd>{uploadState.result.intake.filename}</dd>
             </div>
             <div>
               <dt>File size</dt>
-              <dd>{formatFileSize(uploadState.result.size_bytes)}</dd>
+              <dd>{formatFileSize(uploadState.result.intake.size_bytes)}</dd>
             </div>
             <div>
               <dt>Upload timestamp</dt>

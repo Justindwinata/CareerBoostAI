@@ -28,6 +28,16 @@ function getUploadErrorMessage(detail: string | undefined): string {
   return ERROR_MESSAGES[detail] ?? detail;
 }
 
+function isStructuredAnalysisResponse(value: unknown): value is ResumeUploadResponse {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "status" in value &&
+    "intake" in value &&
+    "extraction" in value
+  );
+}
+
 export async function uploadResume(file: File): Promise<ResumeUploadResponse> {
   const formData = new FormData();
   formData.append("file", file);
@@ -38,7 +48,12 @@ export async function uploadResume(file: File): Promise<ResumeUploadResponse> {
   });
 
   if (!response.ok) {
-    const error = (await response.json()) as ResumeUploadError;
+    const error = (await response.json()) as ResumeUploadError | ResumeUploadResponse;
+
+    if (isStructuredAnalysisResponse(error)) {
+      throw new Error(getUploadErrorMessage(error.extraction.error?.message));
+    }
+
     throw new Error(getUploadErrorMessage(error.detail));
   }
 
