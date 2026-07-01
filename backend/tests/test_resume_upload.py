@@ -5,11 +5,19 @@ from pypdf import PdfWriter
 from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 from pytest import MonkeyPatch
 
+from careerboost_api.domain import (
+    ResumeAnalysisContract,
+    ResumeExtractionContract,
+    ResumeIntakeContract,
+)
 from careerboost_api.main import create_app
 from careerboost_api.services.resume_extraction import (
     ResumeTextExtractionError,
+    ResumeTextExtractionResult,
     ResumeTextExtractor,
 )
+from careerboost_api.services.resume_intake import ResumeIntakeOrchestrator
+from careerboost_api.services.resume_upload import ValidatedResumeUpload
 
 RESUME_TEXT = (
     "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript "
@@ -98,6 +106,52 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             "label": "Learning recommendations",
         },
     }
+
+
+def test_upload_resume_delegates_success_mapping_to_orchestrator(
+    monkeypatch: MonkeyPatch,
+) -> None:
+    client = TestClient(create_app())
+    pdf_content = create_pdf_bytes()
+    delegation_calls = 0
+
+    def build_success(
+        self: ResumeIntakeOrchestrator,
+        *,
+        upload: ValidatedResumeUpload,
+        extraction: ResumeTextExtractionResult,
+    ) -> ResumeAnalysisContract:
+        nonlocal delegation_calls
+        delegation_calls += 1
+        assert upload.filename == "resume.pdf"
+        assert extraction.extracted_text == RESUME_TEXT
+        return ResumeAnalysisContract(
+            status="intake_completed",
+            intake=ResumeIntakeContract(
+                status="accepted",
+                filename=upload.filename,
+                content_type=upload.content_type,
+                size_bytes=upload.size_bytes,
+            ),
+            extraction=ResumeExtractionContract(
+                status="extracted",
+                confidence=extraction.confidence,
+                character_count=extraction.character_count,
+                page_count=extraction.page_count,
+                extracted_text=extraction.extracted_text,
+            ),
+        )
+
+    monkeypatch.setattr(ResumeIntakeOrchestrator, "build_success", build_success)
+
+    response = client.post(
+        "/resumes/upload",
+        files={"file": ("resume.pdf", pdf_content, "application/pdf")},
+    )
+
+    assert response.status_code == 202
+    assert delegation_calls == 1
+    assert response.json()["status"] == "intake_completed"
 
 
 def test_upload_resume_rejects_non_pdf_content_type() -> None:
