@@ -1,6 +1,10 @@
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 
-import { uploadResume } from "../services/resumeUploadService";
+import {
+  ResumeUploadRequestError,
+  uploadResume,
+  type ResumeUploadFailureCategory,
+} from "../services/resumeUploadService";
 import type {
   AtsFeedbackResult,
   ResumeSectionName,
@@ -26,19 +30,120 @@ type UploadState =
   | { kind: "selected"; file: File }
   | { kind: "submitting"; file: File }
   | { kind: "success"; result: ResumeUploadResult }
-  | { kind: "error"; message: string };
+  | { kind: "error"; error: UploadErrorPresentation; file: File | null };
 
-function validateSelectedFile(file: File): string | null {
+type UploadErrorPresentation = {
+  category: ResumeUploadFailureCategory;
+  title: string;
+  explanation: string;
+  recoveryInstruction: string;
+  actionLabel: string;
+  canRetryWithCurrentFile: boolean;
+};
+
+const ERROR_PRESENTATIONS: Record<ResumeUploadFailureCategory, UploadErrorPresentation> = {
+  unsupported_file_type: {
+    category: "unsupported_file_type",
+    title: "Unsupported file type",
+    explanation: "CareerBoost AI currently accepts PDF resume files only.",
+    recoveryInstruction: "Choose a PDF file.",
+    actionLabel: "Choose a PDF file",
+    canRetryWithCurrentFile: false,
+  },
+  file_too_large: {
+    category: "file_too_large",
+    title: "File is too large",
+    explanation: "The selected resume is larger than the current 5 MB upload limit.",
+    recoveryInstruction: "Keep the file below the current size limit.",
+    actionLabel: "Choose a smaller PDF",
+    canRetryWithCurrentFile: false,
+  },
+  empty_file: {
+    category: "empty_file",
+    title: "File is empty",
+    explanation: "The selected file does not contain uploadable resume content.",
+    recoveryInstruction: "Choose a PDF resume that contains content.",
+    actionLabel: "Choose another PDF",
+    canRetryWithCurrentFile: false,
+  },
+  invalid_pdf: {
+    category: "invalid_pdf",
+    title: "Invalid PDF",
+    explanation: "The selected file could not be read as a valid PDF document.",
+    recoveryInstruction: "Export the resume as a fresh searchable PDF.",
+    actionLabel: "Choose a valid PDF",
+    canRetryWithCurrentFile: false,
+  },
+  password_protected_pdf: {
+    category: "password_protected_pdf",
+    title: "Password-protected PDF",
+    explanation: "Password-protected PDFs cannot be processed in the current upload workflow.",
+    recoveryInstruction: "Remove the PDF password before uploading.",
+    actionLabel: "Choose an unlocked PDF",
+    canRetryWithCurrentFile: false,
+  },
+  unreadable_pdf: {
+    category: "unreadable_pdf",
+    title: "Unreadable PDF",
+    explanation: "Readable resume text could not be extracted from this PDF.",
+    recoveryInstruction: "Export the resume as a searchable PDF.",
+    actionLabel: "Choose a searchable PDF",
+    canRetryWithCurrentFile: false,
+  },
+  insufficient_text: {
+    category: "insufficient_text",
+    title: "Insufficient resume text",
+    explanation: "The PDF does not contain enough readable text for deterministic processing.",
+    recoveryInstruction: "Upload a text-based resume PDF instead of a scanned or blank file.",
+    actionLabel: "Choose a text-based PDF",
+    canRetryWithCurrentFile: false,
+  },
+  network_unavailable: {
+    category: "network_unavailable",
+    title: "Backend connection unavailable",
+    explanation: "The upload request could not reach the CareerBoost AI backend.",
+    recoveryInstruction: "Check the backend connection and try again.",
+    actionLabel: "Retry upload",
+    canRetryWithCurrentFile: true,
+  },
+  unexpected_error: {
+    category: "unexpected_error",
+    title: "Upload could not be completed",
+    explanation: "The upload request ended before CareerBoost AI could process the resume.",
+    recoveryInstruction:
+      "Try again with the selected PDF, or choose a new PDF if the issue repeats.",
+    actionLabel: "Retry upload",
+    canRetryWithCurrentFile: true,
+  },
+};
+
+function getErrorPresentation(category: ResumeUploadFailureCategory): UploadErrorPresentation {
+  return ERROR_PRESENTATIONS[category];
+}
+
+function getErrorCategory(error: unknown): ResumeUploadFailureCategory {
+  if (error instanceof ResumeUploadRequestError) {
+    return error.category;
+  }
+
+  if (error instanceof TypeError) {
+    return "network_unavailable";
+  }
+
+  return "unexpected_error";
+}
+
+function validateSelectedFile(file: File): ResumeUploadFailureCategory | null {
   if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-    return "Upload a PDF resume file. Other file types are not supported yet.";
+    return "unsupported_file_type";
   }
 
   if (file.size === 0) {
-    return "The selected file is empty. Choose a PDF resume that contains content.";
+    return "empty_file";
   }
 
   if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-    return "Your resume is larger than 5 MB. Compress the PDF and try again.";
+    return "file_too_large";
   }
 
   return null;
@@ -257,10 +362,22 @@ function getPreviewText(extractedText: string, isExpanded: boolean): string {
 export function ResumeUploadForm() {
   const [uploadState, setUploadState] = useState<UploadState>({ kind: "idle" });
   const [isTextPreviewExpanded, setIsTextPreviewExpanded] = useState(false);
+  const errorPanelRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const isProcessing = uploadState.kind === "submitting";
 
   const selectedFile =
-    uploadState.kind === "selected" || uploadState.kind === "submitting" ? uploadState.file : null;
+    uploadState.kind === "selected" ||
+    uploadState.kind === "submitting" ||
+    (uploadState.kind === "error" && uploadState.file)
+      ? uploadState.file
+      : null;
+
+  useEffect(() => {
+    if (uploadState.kind === "error") {
+      errorPanelRef.current?.focus();
+    }
+  }, [uploadState]);
 
   function handleFileChange(file: File | undefined) {
     if (!file) {
@@ -272,7 +389,11 @@ export function ResumeUploadForm() {
     const validationError = validateSelectedFile(file);
 
     if (validationError) {
-      setUploadState({ kind: "error", message: validationError });
+      fileInputRef.current?.focus();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      setUploadState({ kind: "error", error: getErrorPresentation(validationError), file: null });
       setIsTextPreviewExpanded(false);
       return;
     }
@@ -281,22 +402,11 @@ export function ResumeUploadForm() {
     setIsTextPreviewExpanded(false);
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (isProcessing) {
-      return;
-    }
-
-    if (!selectedFile) {
-      setUploadState({ kind: "error", message: "Select a PDF resume before uploading." });
-      return;
-    }
-
-    setUploadState({ kind: "submitting", file: selectedFile });
+  async function submitResume(file: File) {
+    setUploadState({ kind: "submitting", file });
 
     try {
-      const result = await uploadResume(selectedFile);
+      const result = await uploadResume(file);
       setUploadState({
         kind: "success",
         result: {
@@ -306,12 +416,48 @@ export function ResumeUploadForm() {
       });
       setIsTextPreviewExpanded(false);
     } catch (error) {
+      const errorPresentation = getErrorPresentation(getErrorCategory(error));
+      const fileForRetry = errorPresentation.canRetryWithCurrentFile ? file : null;
+
+      if (!fileForRetry && fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
       setUploadState({
         kind: "error",
-        message: error instanceof Error ? error.message : "Resume upload failed.",
+        error: errorPresentation,
+        file: fileForRetry,
       });
       setIsTextPreviewExpanded(false);
     }
+  }
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (isProcessing) {
+      return;
+    }
+
+    if (!selectedFile) {
+      setUploadState({
+        kind: "error",
+        error: getErrorPresentation("unexpected_error"),
+        file: null,
+      });
+      return;
+    }
+
+    void submitResume(selectedFile);
+  }
+
+  function handleRetry() {
+    if (isProcessing || uploadState.kind !== "error" || !uploadState.file) {
+      fileInputRef.current?.focus();
+      return;
+    }
+
+    void submitResume(uploadState.file);
   }
 
   return (
@@ -335,6 +481,7 @@ export function ResumeUploadForm() {
           Select PDF resume
         </label>
         <input
+          ref={fileInputRef}
           id="resume-file"
           name="resume-file"
           type="file"
@@ -728,9 +875,39 @@ export function ResumeUploadForm() {
       ) : null}
 
       {uploadState.kind === "error" ? (
-        <div className="upload-message upload-message--error" role="alert">
-          <p>{uploadState.message}</p>
-          <p>Choose a PDF resume and submit again.</p>
+        <div
+          ref={errorPanelRef}
+          className="upload-error-panel"
+          role="alert"
+          aria-live="assertive"
+          aria-labelledby="upload-error-title"
+          tabIndex={-1}
+        >
+          <div>
+            <p className="eyebrow">Upload Error</p>
+            <h3 id="upload-error-title">{uploadState.error.title}</h3>
+          </div>
+
+          <p>{uploadState.error.explanation}</p>
+
+          <dl className="upload-error-details">
+            <div>
+              <dt>Recovery</dt>
+              <dd>{uploadState.error.recoveryInstruction}</dd>
+            </div>
+            <div>
+              <dt>Selected file</dt>
+              <dd>
+                {uploadState.file
+                  ? `${uploadState.file.name} can be retried.`
+                  : "Choose a replacement file before submitting again."}
+              </dd>
+            </div>
+          </dl>
+
+          <button className="upload-error-action" type="button" onClick={handleRetry}>
+            {uploadState.file ? uploadState.error.actionLabel : "Choose replacement file"}
+          </button>
         </div>
       ) : null}
     </section>

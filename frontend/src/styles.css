@@ -178,32 +178,6 @@ button:disabled {
   margin-top: 0;
 }
 
-.upload-message {
-  border-radius: 8px;
-  padding: 12px;
-  font-weight: 700;
-}
-
-.upload-message p {
-  max-width: none;
-  margin: 0;
-}
-
-.upload-message p + p {
-  margin-top: 6px;
-  font-weight: 600;
-}
-
-.upload-message--success {
-  background: #ecfdf3;
-  color: #166534;
-}
-
-.upload-message--error {
-  background: #fef2f2;
-  color: #991b1b;
-}
-
 .processing-panel {
   display: grid;
   gap: 16px;
@@ -262,6 +236,60 @@ button:disabled {
   to {
     transform: rotate(360deg);
   }
+}
+
+.upload-error-panel {
+  display: grid;
+  gap: 14px;
+  margin-top: 24px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff7f7;
+  padding: 20px;
+  color: #172033;
+}
+
+.upload-error-panel:focus {
+  outline: 3px solid #fca5a5;
+  outline-offset: 3px;
+}
+
+.upload-error-panel p {
+  max-width: none;
+  margin: 0;
+}
+
+.upload-error-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.upload-error-details div {
+  min-width: 0;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.upload-error-details dt {
+  color: #991b1b;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.upload-error-details dd {
+  margin: 4px 0 0;
+  color: #172033;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.upload-error-action {
+  width: fit-content;
+  background: #991b1b;
 }
 
 .upload-result-panel {
@@ -757,6 +785,14 @@ button:disabled {
   }
 
   .processing-stage-list {
+    grid-template-columns: 1fr;
+  }
+
+  .upload-error-panel {
+    padding: 16px;
+  }
+
+  .upload-error-details {
     grid-template-columns: 1fr;
   }
 
