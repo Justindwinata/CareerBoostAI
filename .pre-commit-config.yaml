@@ -1,0 +1,26 @@
+repos:
+  - repo: local
+    hooks:
+      - id: backend-format-check
+        name: Backend format check
+        entry: backend/.venv/bin/python -m ruff format --check backend
+        language: system
+        pass_filenames: false
+
+      - id: backend-lint
+        name: Backend lint
+        entry: backend/.venv/bin/python -m ruff check backend
+        language: system
+        pass_filenames: false
+
+      - id: frontend-format-check
+        name: Frontend format check
+        entry: npm --prefix frontend run format:check
+        language: system
+        pass_filenames: false
+
+      - id: frontend-lint
+        name: Frontend lint
+        entry: npm --prefix frontend run lint
+        language: system
+        pass_filenames: false
