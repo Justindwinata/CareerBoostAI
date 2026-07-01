@@ -485,6 +485,76 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.role-matches-panel {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid #dcfce7;
+  padding-top: 16px;
+}
+
+.role-match-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.role-match-list li {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.role-match-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.role-match-header strong {
+  color: #166534;
+}
+
+.role-match-header span {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  padding: 4px 8px;
+  color: #475569;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.role-match-metadata {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.role-match-metadata div {
+  min-width: 0;
+}
+
+.role-match-metadata dt {
+  color: #475569;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.role-match-metadata dd {
+  margin: 3px 0 0;
+  color: #172033;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .text-preview-panel {
   display: grid;
   gap: 14px;
@@ -538,6 +608,10 @@ button:disabled {
   }
 
   .skill-evidence-list {
+    grid-template-columns: 1fr;
+  }
+
+  .role-match-metadata {
     grid-template-columns: 1fr;
   }
 }

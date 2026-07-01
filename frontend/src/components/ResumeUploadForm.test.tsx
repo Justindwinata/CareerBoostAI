@@ -133,6 +133,57 @@ function createSuccessfulUploadResponse(
       },
     ],
   },
+  roles: unknown = {
+    status: "metadata_ready",
+    source: "deterministic_resume_metadata",
+    candidates: [
+      {
+        role_name: "Backend Developer Intern",
+        match_status: "partial_match",
+        confidence_state: "metadata_ready",
+        deterministic_evidence: ["Explicit required skill signal detected: Python"],
+        matched_skill_signals: ["Python", "FastAPI"],
+        missing_required_signals: ["SQL"],
+        supporting_sections: ["skills", "projects"],
+      },
+      {
+        role_name: "Frontend Developer Intern",
+        match_status: "partial_match",
+        confidence_state: "metadata_ready",
+        deterministic_evidence: ["Explicit required skill signal detected: React"],
+        matched_skill_signals: ["React", "TypeScript"],
+        missing_required_signals: ["CSS"],
+        supporting_sections: ["skills", "projects"],
+      },
+      {
+        role_name: "Full Stack Developer Intern",
+        match_status: "partial_match",
+        confidence_state: "metadata_ready",
+        deterministic_evidence: ["Explicit required skill signal detected: FastAPI"],
+        matched_skill_signals: ["React", "TypeScript", "FastAPI"],
+        missing_required_signals: ["SQL"],
+        supporting_sections: ["skills", "projects"],
+      },
+      {
+        role_name: "Data Analyst Intern",
+        match_status: "partial_match",
+        confidence_state: "metadata_ready",
+        deterministic_evidence: ["Explicit required skill signal detected: Python"],
+        matched_skill_signals: ["Python"],
+        missing_required_signals: ["SQL"],
+        supporting_sections: ["skills", "projects"],
+      },
+      {
+        role_name: "Machine Learning Intern",
+        match_status: "partial_match",
+        confidence_state: "metadata_ready",
+        deterministic_evidence: ["Explicit required skill signal detected: Python"],
+        matched_skill_signals: ["Python"],
+        missing_required_signals: ["SQL"],
+        supporting_sections: ["skills", "projects"],
+      },
+    ],
+  },
 ) {
   return {
     status: "intake_completed",
@@ -155,11 +206,7 @@ function createSuccessfulUploadResponse(
     completeness,
     ats,
     skills,
-    roles: {
-      status: "not_started",
-      name: "roles",
-      label: "Role matching",
-    },
+    roles,
     recommendations: {
       status: "not_started",
       name: "recommendations",
@@ -220,7 +267,7 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByRole("button", { name: "Expand preview" })).toBeVisible();
     expect(screen.getByText("ATS Feedback Metadata")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Deterministic resume signals" })).toBeVisible();
-    expect(screen.getByText("Metadata ready")).toBeVisible();
+    expect(screen.getAllByText("Metadata ready").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Not scored")).toBeVisible();
     expect(screen.getByText("Section presence")).toBeVisible();
     expect(screen.getByText("Formatting risk indicator")).toBeVisible();
@@ -234,9 +281,9 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByText("Signals detected")).toBeVisible();
     expect(screen.getByText("Explicit signals")).toBeVisible();
     expect(screen.getByText("3")).toBeVisible();
-    expect(screen.getByText("Python")).toBeVisible();
-    expect(screen.getByText("FastAPI")).toBeVisible();
-    expect(screen.getByText("PostgreSQL")).toBeVisible();
+    expect(screen.getAllByText("Python").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("FastAPI").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("PostgreSQL").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Programming language")).toBeVisible();
     expect(screen.getByText("Framework")).toBeVisible();
     expect(screen.getByText("Database")).toBeVisible();
@@ -246,6 +293,25 @@ describe("ResumeUploadForm", () => {
     expect(screen.getAllByText("Matched text").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText(/rank/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/advice/i)).not.toBeInTheDocument();
+    expect(screen.getByText("Role Matching Metadata")).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Deterministic internship role candidates" }),
+    ).toBeVisible();
+    expect(screen.getByText("Backend Developer Intern")).toBeVisible();
+    expect(screen.getByText("Frontend Developer Intern")).toBeVisible();
+    expect(screen.getByText("Full Stack Developer Intern")).toBeVisible();
+    expect(screen.getByText("Data Analyst Intern")).toBeVisible();
+    expect(screen.getByText("Machine Learning Intern")).toBeVisible();
+    expect(screen.getAllByText("Partial metadata")).toHaveLength(5);
+    expect(screen.getAllByText("Confidence state")).toHaveLength(5);
+    expect(screen.getAllByText("Metadata ready").length).toBeGreaterThanOrEqual(6);
+    expect(screen.getAllByText("Matched skill signals")).toHaveLength(5);
+    expect(screen.getAllByText("Missing required signals")).toHaveLength(5);
+    expect(screen.getAllByText("SQL").length).toBeGreaterThanOrEqual(4);
+    expect(screen.getByText("CSS")).toBeVisible();
+    expect(screen.queryByText(/recommended/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/best match/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/you should become/i)).not.toBeInTheDocument();
     expect(screen.getByText("Ready for analysis workflow")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
@@ -333,6 +399,76 @@ describe("ResumeUploadForm", () => {
     expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
     expect(screen.getByText("No signals")).toBeVisible();
     expect(screen.getByText("No explicit skill signals available.")).toBeVisible();
+  });
+
+  it("shows a neutral unavailable state when role matching metadata is absent", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify(
+          createSuccessfulUploadResponse(
+            undefined,
+            undefined,
+            LONG_EXTRACTED_TEXT,
+            undefined,
+            undefined,
+            {
+              status: "not_started",
+              name: "roles",
+              label: "Role matching",
+            },
+          ),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 202,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("Role matching metadata unavailable.")).toBeVisible();
+  });
+
+  it("shows a neutral unavailable state when role candidates are absent", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify(
+          createSuccessfulUploadResponse(
+            undefined,
+            undefined,
+            LONG_EXTRACTED_TEXT,
+            undefined,
+            undefined,
+            {
+              status: "not_evaluated",
+              source: "deterministic_resume_metadata",
+              candidates: [],
+            },
+          ),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 202,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("Role matching metadata unavailable.")).toBeVisible();
   });
 
   it("expands and collapses long extracted text preview", async () => {

@@ -4,6 +4,7 @@ import { uploadResume } from "../services/resumeUploadService";
 import type {
   AtsFeedbackResult,
   ResumeSectionName,
+  RoleMatchesResult,
   SkillSignalCategory,
   SkillSignalsResult,
   SkillSourceArea,
@@ -143,6 +144,37 @@ function isSkillSignalsResult(skills: ResumeUploadResult["skills"]): skills is S
     skills.status === "signals_detected" ||
     skills.status === "no_signals" ||
     skills.status === "not_evaluated"
+  );
+}
+
+function formatRoleMatchStatus(status: RoleMatchesResult["candidates"][number]["match_status"]) {
+  const statusLabels: Record<RoleMatchesResult["candidates"][number]["match_status"], string> = {
+    matched: "Matched metadata",
+    partial_match: "Partial metadata",
+    not_matched: "No matched metadata",
+    insufficient_data: "Insufficient data",
+  };
+
+  return statusLabels[status];
+}
+
+function formatRoleConfidenceState(
+  confidenceState: RoleMatchesResult["candidates"][number]["confidence_state"],
+) {
+  const stateLabels: Record<RoleMatchesResult["candidates"][number]["confidence_state"], string> = {
+    metadata_ready: "Metadata ready",
+    insufficient_data: "Insufficient data",
+    not_evaluated: "Not evaluated",
+  };
+
+  return stateLabels[confidenceState];
+}
+
+function isRoleMatchesResult(roles: ResumeUploadResult["roles"]): roles is RoleMatchesResult {
+  return (
+    roles.status === "metadata_ready" ||
+    roles.status === "insufficient_data" ||
+    roles.status === "not_evaluated"
   );
 }
 
@@ -450,6 +482,55 @@ export function ResumeUploadForm() {
               </>
             ) : (
               <p className="section-empty-state">Skill signal metadata unavailable.</p>
+            )}
+          </section>
+
+          <section className="role-matches-panel" aria-labelledby="role-matches-title">
+            <div>
+              <p className="eyebrow">Role Matching Metadata</p>
+              <h4 id="role-matches-title">Deterministic internship role candidates</h4>
+            </div>
+
+            {isRoleMatchesResult(uploadState.result.roles) ? (
+              uploadState.result.roles.candidates.length > 0 ? (
+                <ul className="role-match-list">
+                  {uploadState.result.roles.candidates.map((candidate) => (
+                    <li key={candidate.role_name}>
+                      <div className="role-match-header">
+                        <strong>{candidate.role_name}</strong>
+                        <span>{formatRoleMatchStatus(candidate.match_status)}</span>
+                      </div>
+
+                      <dl className="role-match-metadata">
+                        <div>
+                          <dt>Confidence state</dt>
+                          <dd>{formatRoleConfidenceState(candidate.confidence_state)}</dd>
+                        </div>
+                        <div>
+                          <dt>Matched skill signals</dt>
+                          <dd>
+                            {candidate.matched_skill_signals.length > 0
+                              ? candidate.matched_skill_signals.join(", ")
+                              : "None detected"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Missing required signals</dt>
+                          <dd>
+                            {candidate.missing_required_signals.length > 0
+                              ? candidate.missing_required_signals.join(", ")
+                              : "None listed"}
+                          </dd>
+                        </div>
+                      </dl>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="section-empty-state">Role matching metadata unavailable.</p>
+              )
+            ) : (
+              <p className="section-empty-state">Role matching metadata unavailable.</p>
             )}
           </section>
 
