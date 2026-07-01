@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 
 import { uploadResume } from "../services/resumeUploadService";
-import type { ResumeUploadResult } from "../types/resumeUpload";
+import type { ResumeSectionName, ResumeUploadResult } from "../types/resumeUpload";
 
 const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -49,6 +49,26 @@ function formatConfidence(confidence: ResumeUploadResult["extraction"]["confiden
   }
 
   return confidence === "high" ? "High confidence" : "Medium confidence";
+}
+
+function formatSectionName(sectionName: ResumeSectionName): string {
+  const sectionLabels: Record<ResumeSectionName, string> = {
+    summary: "Summary",
+    skills: "Skills",
+    experience: "Experience",
+    education: "Education",
+    projects: "Projects",
+  };
+
+  return sectionLabels[sectionName];
+}
+
+function formatCompletenessRatio(completeness: NonNullable<ResumeUploadResult["completeness"]>) {
+  const detectedCount = completeness.present_sections.length;
+  const expectedCount = completeness.expected_sections.length;
+  const percentage = Math.round(completeness.score * 100);
+
+  return `${detectedCount} of ${expectedCount} expected sections detected (${percentage}%)`;
 }
 
 export function ResumeUploadForm() {
@@ -178,6 +198,51 @@ export function ResumeUploadForm() {
               <dd>Ready for analysis workflow</dd>
             </div>
           </dl>
+
+          <section className="completeness-panel" aria-labelledby="completeness-title">
+            <div>
+              <p className="eyebrow">Completeness Baseline</p>
+              <h4 id="completeness-title">Detected resume sections</h4>
+            </div>
+
+            {uploadState.result.completeness ? (
+              <>
+                <p className="completeness-score">
+                  {formatCompletenessRatio(uploadState.result.completeness)}
+                </p>
+
+                <div className="section-summary-grid">
+                  <section aria-labelledby="present-sections-title">
+                    <h5 id="present-sections-title">Present sections</h5>
+                    {uploadState.result.completeness.present_sections.length > 0 ? (
+                      <ul className="section-chip-list">
+                        {uploadState.result.completeness.present_sections.map((sectionName) => (
+                          <li key={sectionName}>{formatSectionName(sectionName)}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="section-empty-state">No expected sections detected.</p>
+                    )}
+                  </section>
+
+                  <section aria-labelledby="missing-sections-title">
+                    <h5 id="missing-sections-title">Missing sections</h5>
+                    {uploadState.result.completeness.missing_sections.length > 0 ? (
+                      <ul className="section-chip-list section-chip-list--muted">
+                        {uploadState.result.completeness.missing_sections.map((sectionName) => (
+                          <li key={sectionName}>{formatSectionName(sectionName)}</li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="section-empty-state">No expected sections missing.</p>
+                    )}
+                  </section>
+                </div>
+              </>
+            ) : (
+              <p className="section-empty-state">Completeness metadata unavailable.</p>
+            )}
+          </section>
         </section>
       ) : null}
 

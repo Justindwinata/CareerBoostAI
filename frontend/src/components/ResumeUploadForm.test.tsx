@@ -6,6 +6,58 @@ function createPdfFile(name = "resume.pdf") {
   return new File(["%PDF-1.7"], name, { type: "application/pdf" });
 }
 
+function createSuccessfulUploadResponse(
+  completeness: unknown = {
+    expected_sections: ["summary", "skills", "experience", "education", "projects"],
+    present_sections: ["summary", "skills", "projects"],
+    missing_sections: ["experience", "education"],
+    score: 0.6,
+  },
+) {
+  return {
+    status: "intake_completed",
+    intake: {
+      status: "accepted",
+      filename: "resume.pdf",
+      content_type: "application/pdf",
+      size_bytes: 2048,
+    },
+    extraction: {
+      status: "extracted",
+      confidence: "medium",
+      character_count: 148,
+      page_count: 1,
+      extracted_text:
+        "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
+      normalized_text:
+        "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
+      sections: [],
+      error: null,
+    },
+    completeness,
+    ats: {
+      status: "not_started",
+      name: "ats",
+      label: "ATS analysis",
+    },
+    skills: {
+      status: "not_started",
+      name: "skills",
+      label: "Skill extraction",
+    },
+    roles: {
+      status: "not_started",
+      name: "roles",
+      label: "Role matching",
+    },
+    recommendations: {
+      status: "not_started",
+      name: "recommendations",
+      label: "Learning recommendations",
+    },
+  };
+}
+
 describe("ResumeUploadForm", () => {
   afterEach(() => {
     vi.restoreAllMocks();
@@ -13,59 +65,10 @@ describe("ResumeUploadForm", () => {
 
   it("renders the upload result panel after a successful upload", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
-      new Response(
-        JSON.stringify({
-          status: "intake_completed",
-          intake: {
-            status: "accepted",
-            filename: "resume.pdf",
-            content_type: "application/pdf",
-            size_bytes: 2048,
-          },
-          extraction: {
-            status: "extracted",
-            confidence: "medium",
-            character_count: 148,
-            page_count: 1,
-            extracted_text:
-              "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
-            normalized_text:
-              "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
-            sections: [],
-            error: null,
-          },
-          completeness: {
-            expected_sections: ["summary", "skills", "experience", "education", "projects"],
-            present_sections: [],
-            missing_sections: ["summary", "skills", "experience", "education", "projects"],
-            score: 0,
-          },
-          ats: {
-            status: "not_started",
-            name: "ats",
-            label: "ATS analysis",
-          },
-          skills: {
-            status: "not_started",
-            name: "skills",
-            label: "Skill extraction",
-          },
-          roles: {
-            status: "not_started",
-            name: "roles",
-            label: "Role matching",
-          },
-          recommendations: {
-            status: "not_started",
-            name: "recommendations",
-            label: "Learning recommendations",
-          },
-        }),
-        {
-          headers: { "Content-Type": "application/json" },
-          status: 202,
-        },
-      ),
+      new Response(JSON.stringify(createSuccessfulUploadResponse()), {
+        headers: { "Content-Type": "application/json" },
+        status: 202,
+      }),
     );
 
     render(<ResumeUploadForm />);
@@ -83,8 +86,36 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByText("Medium confidence")).toBeVisible();
     expect(screen.getByText("148 readable characters")).toBeVisible();
     expect(screen.getByText("1")).toBeVisible();
+    expect(screen.getByText("Completeness Baseline")).toBeVisible();
+    expect(screen.getByText("3 of 5 expected sections detected (60%)")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Present sections" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Missing sections" })).toBeVisible();
+    expect(screen.getByText("Summary")).toBeVisible();
+    expect(screen.getByText("Skills")).toBeVisible();
+    expect(screen.getByText("Projects")).toBeVisible();
+    expect(screen.getByText("Experience")).toBeVisible();
+    expect(screen.getByText("Education")).toBeVisible();
     expect(screen.getByText("Ready for analysis workflow")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a neutral unavailable state when completeness metadata is absent", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify(createSuccessfulUploadResponse(null)), {
+        headers: { "Content-Type": "application/json" },
+        status: 202,
+      }),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("Completeness metadata unavailable.")).toBeVisible();
   });
 
   it("rejects non-PDF files before submitting", () => {

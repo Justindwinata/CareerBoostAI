@@ -123,6 +123,21 @@ h3 {
   line-height: 1.2;
 }
 
+h4,
+h5 {
+  margin: 0;
+  color: #172033;
+  line-height: 1.2;
+}
+
+h4 {
+  font-size: 1.05rem;
+}
+
+h5 {
+  font-size: 0.95rem;
+}
+
 .upload-form {
   display: grid;
   gap: 14px;
@@ -215,9 +230,70 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.completeness-panel {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid #dcfce7;
+  padding-top: 16px;
+}
+
+.completeness-score {
+  max-width: none;
+  margin: 0;
+  color: #172033;
+  font-weight: 700;
+}
+
+.section-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.section-summary-grid section {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+}
+
+.section-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.section-chip-list li {
+  border: 1px solid #86efac;
+  border-radius: 999px;
+  background: #ffffff;
+  padding: 6px 10px;
+  color: #166534;
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.section-chip-list--muted li {
+  border-color: #cbd5e1;
+  color: #475569;
+}
+
+.section-empty-state {
+  max-width: none;
+  margin: 0;
+  color: #475569;
+  font-size: 0.9375rem;
+}
+
 @media (max-width: 560px) {
   .upload-result-list div {
     grid-template-columns: 1fr;
     gap: 4px;
+  }
+
+  .section-summary-grid {
+    grid-template-columns: 1fr;
   }
 }
