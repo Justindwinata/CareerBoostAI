@@ -85,15 +85,16 @@ Planned structure:
 
 | Milestone | Focus | Status |
 | --- | --- | --- |
-| Sprint 0 | Repository foundation, product documentation, architecture documentation | In progress |
-| Sprint 1 | Frontend and backend project scaffolding | Planned |
+| Sprint 0 | Repository foundation and governance | Completed |
+| Sprint 1 | Backend and frontend engineering foundation | Completed |
+| Sprint 1.5 | Repository quality automation and release engineering | In progress |
 | Sprint 2 | Resume upload and validation workflow | Planned |
 | Sprint 3 | Resume parsing and analysis pipeline | Planned |
 | Sprint 4 | Dashboard, recommendations, history, and release hardening | Planned |
 
 ## Current Project Status
 
-CareerBoost AI is in repository foundation mode.
+CareerBoost AI is in foundation engineering mode.
 
 Completed foundation work:
 
@@ -102,15 +103,27 @@ Completed foundation work:
 - Editor formatting configuration.
 - Environment variable example.
 - Contribution, conduct, security, changelog, ownership, issue, and pull request standards.
+- FastAPI backend foundation with health endpoint.
+- React, Vite, and TypeScript frontend foundation.
+- GitHub Actions CI.
+- Dependabot dependency monitoring.
+- Pre-commit quality gate.
+- Backend and frontend coverage reporting.
 
 Not started yet:
 
-- Frontend application.
-- Backend application.
 - Database schema.
 - API contracts.
 - Docker Compose runtime.
+- Resume upload.
+- Resume analysis.
+- ATS scoring.
+- AI integration.
 - Screenshots and demo deployment.
+
+Blocked:
+
+- Docker Compose runtime, Dockerfiles, and Docker development workflow are blocked until a compatible Docker runtime is available.
 
 Screenshots: Coming in Sprint 4 after the user-facing dashboard exists.
 
@@ -143,13 +156,25 @@ make help
 make doctor
 ```
 
-Create local environment configuration when application development begins:
+Install local development dependencies:
+
+```bash
+make install
+```
+
+Run the standard validation suite:
+
+```bash
+make check
+```
+
+Create local runtime configuration when needed:
 
 ```bash
 cp .env.example .env
 ```
 
-Application setup commands will be added when the frontend and backend workspaces are created.
+Docker setup commands will be added after Docker validation is unblocked.
 
 ## Documentation Index
 
@@ -161,14 +186,16 @@ Existing documentation:
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
 - [Environment Example](.env.example)
+- [Development Guide](docs/DEVELOPMENT.md)
+- [Sprint 1 Completion Report](docs/SPRINT_1_COMPLETION_REPORT.md)
+- [Blocked Backlog](docs/BLOCKED_BACKLOG.md)
 
 Planned documentation:
 
 - Product Requirements Document: Coming in Sprint 0.
-- System Architecture Document: Coming in Sprint 0.
-- API Contract: Coming after architecture approval.
-- Database Design: Coming after API contract approval.
-- Local Development Guide: Coming with frontend/backend scaffolding.
+- System Architecture Document: Future tracked documentation artifact.
+- API Contract: Future tracked documentation artifact before feature implementation.
+- Database Design: Future tracked documentation artifact before persistence implementation.
 
 ## Versioning Strategy
 
