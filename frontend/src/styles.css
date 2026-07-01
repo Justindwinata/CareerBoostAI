@@ -104,3 +104,71 @@ p {
 .status-dot--warning {
   background: #c2410c;
 }
+
+.upload-panel {
+  margin-top: 28px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 28px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+.upload-form {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.file-label {
+  color: #172033;
+  font-weight: 700;
+}
+
+input[type="file"] {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+  color: #172033;
+}
+
+button {
+  width: fit-content;
+  border: 0;
+  border-radius: 8px;
+  background: #172033;
+  padding: 12px 18px;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.file-summary {
+  margin-top: 0;
+}
+
+.upload-message {
+  border-radius: 8px;
+  padding: 12px;
+  font-weight: 700;
+}
+
+.upload-message--success {
+  background: #ecfdf3;
+  color: #166534;
+}
+
+.upload-message--error {
+  background: #fef2f2;
+  color: #991b1b;
+}

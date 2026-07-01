@@ -1,8 +1,10 @@
 """FastAPI application entrypoint."""
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 from careerboost_api.api.health import router as health_router
+from careerboost_api.api.upload import router as upload_router
 from careerboost_api.core.config import get_settings
 from careerboost_api.core.logging import configure_logging
 
@@ -19,7 +21,16 @@ def create_app() -> FastAPI:
         debug=settings.app_debug,
     )
 
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=False,
+        allow_methods=["GET", "POST"],
+        allow_headers=["*"],
+    )
+
     app.include_router(health_router)
+    app.include_router(upload_router)
 
     return app
 

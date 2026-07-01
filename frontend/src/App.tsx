@@ -1,5 +1,6 @@
 import "./styles.css";
 
+import { ResumeUploadForm } from "./components/ResumeUploadForm";
 import { SystemStatus } from "./components/SystemStatus";
 
 export function App() {
@@ -9,10 +10,11 @@ export function App() {
         <p className="eyebrow">CareerBoost AI</p>
         <h1 id="app-title">Engineering foundation is running.</h1>
         <p>
-          Sprint 1 establishes the application shell, tooling, validation, and runtime foundation
-          before product features are implemented.
+          Upload a PDF resume to start the internship readiness workflow. This release validates the
+          file only; analysis features come later.
         </p>
         <SystemStatus />
+        <ResumeUploadForm />
       </section>
     </main>
   );

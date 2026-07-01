@@ -20,6 +20,19 @@ class Settings(BaseSettings):
     app_env: str = Field(default="development", validation_alias="APP_ENV")
     app_debug: bool = Field(default=False, validation_alias="APP_DEBUG")
     app_log_level: str = Field(default="INFO", validation_alias="APP_LOG_LEVEL")
+    backend_cors_origins: str = Field(
+        default="http://localhost:5173",
+        validation_alias="BACKEND_CORS_ORIGINS",
+    )
+    upload_max_file_size_bytes: int = Field(
+        default=5 * 1024 * 1024,
+        validation_alias="UPLOAD_MAX_FILE_SIZE_BYTES",
+    )
+
+    @property
+    def cors_origins(self) -> list[str]:
+        """Return configured CORS origins."""
+        return [origin.strip() for origin in self.backend_cors_origins.split(",") if origin.strip()]
 
 
 @lru_cache
