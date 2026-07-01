@@ -236,6 +236,33 @@ describe("ResumeUploadForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
 
     expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("Analysis Dashboard")).toBeVisible();
+    expect(
+      screen.getByText(
+        "Deterministic intake metadata from the current upload session. No scores, ordered matches, or AI interpretation is applied.",
+      ),
+    ).toBeVisible();
+    expect(screen.getByRole("navigation", { name: "Analysis dashboard sections" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Resume Intake" })).toHaveAttribute(
+      "href",
+      "#resume-intake-title",
+    );
+    expect(screen.getByRole("link", { name: "Resume Structure" })).toHaveAttribute(
+      "href",
+      "#resume-structure-title",
+    );
+    expect(screen.getByRole("link", { name: "Skill Signals" })).toHaveAttribute(
+      "href",
+      "#skill-signals-title",
+    );
+    expect(screen.getByRole("link", { name: "ATS Metadata" })).toHaveAttribute(
+      "href",
+      "#ats-feedback-title",
+    );
+    expect(screen.getByRole("link", { name: "Role Matching" })).toHaveAttribute(
+      "href",
+      "#role-matches-title",
+    );
     expect(screen.getByText("resume.pdf")).toBeVisible();
     expect(screen.getByText("2.0 KB")).toBeVisible();
     expect(screen.getByText("Accepted PDF resume")).toBeVisible();
@@ -267,6 +294,10 @@ describe("ResumeUploadForm", () => {
     expect(summaryPanel).not.toHaveTextContent(/bad/i);
     expect(summaryPanel).not.toHaveTextContent(/ready/i);
     expect(screen.getByText("Completeness Baseline")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Upload and extraction metadata" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Completeness and detected sections" }),
+    ).toBeVisible();
     expect(screen.getByText("3 of 5 expected sections detected (60%)")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Present sections" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Missing sections" })).toBeVisible();
@@ -288,7 +319,7 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByRole("heading", { name: "Extracted resume text" })).toBeVisible();
     expect(screen.getAllByText(/Professional Summary/).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByRole("button", { name: "Expand preview" })).toBeVisible();
-    expect(screen.getByText("ATS Feedback Metadata")).toBeVisible();
+    expect(screen.getAllByText("ATS Metadata").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByRole("heading", { name: "Deterministic resume signals" })).toBeVisible();
     expect(screen.getAllByText("Metadata ready").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Not scored")).toBeVisible();
@@ -316,7 +347,6 @@ describe("ResumeUploadForm", () => {
     expect(screen.getAllByText("Matched text").length).toBeGreaterThanOrEqual(1);
     expect(screen.queryByText(/rank/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/advice/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Role Matching Metadata")).toBeVisible();
     expect(
       screen.getByRole("heading", { name: "Deterministic internship role candidates" }),
     ).toBeVisible();
@@ -335,7 +365,7 @@ describe("ResumeUploadForm", () => {
     expect(screen.queryByText(/recommended/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/best match/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/you should become/i)).not.toBeInTheDocument();
-    expect(screen.getByText("Ready for analysis workflow")).toBeVisible();
+    expect(screen.getByText("Analysis workflow metadata available")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 

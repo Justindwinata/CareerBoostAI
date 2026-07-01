@@ -338,9 +338,15 @@ export function ResumeUploadForm() {
 
       {uploadState.kind === "success" ? (
         <section className="upload-result-panel" aria-labelledby="upload-result-title">
-          <div>
-            <p className="eyebrow">Extraction Complete</p>
-            <h3 id="upload-result-title">Resume upload accepted</h3>
+          <div className="analysis-dashboard-header">
+            <div>
+              <p className="eyebrow">Analysis Dashboard</p>
+              <h3 id="upload-result-title">Resume upload accepted</h3>
+            </div>
+            <p>
+              Deterministic intake metadata from the current upload session. No scores, ordered
+              matches, or AI interpretation is applied.
+            </p>
           </div>
 
           <section className="analysis-summary-panel" aria-labelledby="analysis-summary-title">
@@ -359,116 +365,240 @@ export function ResumeUploadForm() {
             </dl>
           </section>
 
-          <dl className="upload-result-list">
-            <div>
-              <dt>Filename</dt>
-              <dd>{uploadState.result.intake.filename}</dd>
-            </div>
-            <div>
-              <dt>File size</dt>
-              <dd>{formatFileSize(uploadState.result.intake.size_bytes)}</dd>
-            </div>
-            <div>
-              <dt>Upload timestamp</dt>
-              <dd>{formatUploadTimestamp(uploadState.result.uploaded_at)}</dd>
-            </div>
-            <div>
-              <dt>Validation status</dt>
-              <dd>Accepted PDF resume</dd>
-            </div>
-            <div>
-              <dt>Extraction status</dt>
-              <dd>Text extraction complete</dd>
-            </div>
-            <div>
-              <dt>Extraction confidence</dt>
-              <dd>{formatConfidence(uploadState.result.extraction.confidence)}</dd>
-            </div>
-            <div>
-              <dt>Extracted text</dt>
-              <dd>{uploadState.result.extraction.character_count} readable characters</dd>
-            </div>
-            <div>
-              <dt>Pages processed</dt>
-              <dd>{uploadState.result.extraction.page_count}</dd>
-            </div>
-            <div>
-              <dt>Next step</dt>
-              <dd>Ready for analysis workflow</dd>
-            </div>
-          </dl>
+          <nav className="analysis-dashboard-nav" aria-label="Analysis dashboard sections">
+            <a href="#resume-intake-title">Resume Intake</a>
+            <a href="#resume-structure-title">Resume Structure</a>
+            <a href="#skill-signals-title">Skill Signals</a>
+            <a href="#ats-feedback-title">ATS Metadata</a>
+            <a href="#role-matches-title">Role Matching</a>
+          </nav>
 
-          <section className="completeness-panel" aria-labelledby="completeness-title">
-            <div>
-              <p className="eyebrow">Completeness Baseline</p>
-              <h4 id="completeness-title">Detected resume sections</h4>
+          <section className="dashboard-section" aria-labelledby="resume-intake-title">
+            <div className="dashboard-section-header">
+              <p className="eyebrow">Resume Intake</p>
+              <h4 id="resume-intake-title">Upload and extraction metadata</h4>
             </div>
 
-            {uploadState.result.completeness ? (
-              <>
-                <p className="completeness-score">
-                  {formatCompletenessRatio(uploadState.result.completeness)}
-                </p>
-
-                <div className="section-summary-grid">
-                  <section aria-labelledby="present-sections-title">
-                    <h5 id="present-sections-title">Present sections</h5>
-                    {uploadState.result.completeness.present_sections.length > 0 ? (
-                      <ul className="section-chip-list">
-                        {uploadState.result.completeness.present_sections.map((sectionName) => (
-                          <li key={sectionName}>{formatSectionName(sectionName)}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="section-empty-state">No expected sections detected.</p>
-                    )}
-                  </section>
-
-                  <section aria-labelledby="missing-sections-title">
-                    <h5 id="missing-sections-title">Missing sections</h5>
-                    {uploadState.result.completeness.missing_sections.length > 0 ? (
-                      <ul className="section-chip-list section-chip-list--muted">
-                        {uploadState.result.completeness.missing_sections.map((sectionName) => (
-                          <li key={sectionName}>{formatSectionName(sectionName)}</li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="section-empty-state">No expected sections missing.</p>
-                    )}
-                  </section>
+            <div className="dashboard-two-column">
+              <dl className="upload-result-list">
+                <div>
+                  <dt>Filename</dt>
+                  <dd>{uploadState.result.intake.filename}</dd>
                 </div>
-              </>
-            ) : (
-              <p className="section-empty-state">Completeness metadata unavailable.</p>
-            )}
+                <div>
+                  <dt>File size</dt>
+                  <dd>{formatFileSize(uploadState.result.intake.size_bytes)}</dd>
+                </div>
+                <div>
+                  <dt>Upload timestamp</dt>
+                  <dd>{formatUploadTimestamp(uploadState.result.uploaded_at)}</dd>
+                </div>
+                <div>
+                  <dt>Validation status</dt>
+                  <dd>Accepted PDF resume</dd>
+                </div>
+                <div>
+                  <dt>Extraction status</dt>
+                  <dd>Text extraction complete</dd>
+                </div>
+                <div>
+                  <dt>Extraction confidence</dt>
+                  <dd>{formatConfidence(uploadState.result.extraction.confidence)}</dd>
+                </div>
+                <div>
+                  <dt>Extracted text</dt>
+                  <dd>{uploadState.result.extraction.character_count} readable characters</dd>
+                </div>
+                <div>
+                  <dt>Pages processed</dt>
+                  <dd>{uploadState.result.extraction.page_count}</dd>
+                </div>
+                <div>
+                  <dt>Pipeline state</dt>
+                  <dd>Analysis workflow metadata available</dd>
+                </div>
+              </dl>
+
+              <section className="text-preview-panel" aria-labelledby="text-preview-title">
+                <div>
+                  <p className="eyebrow">Extracted Text Preview</p>
+                  <h5 id="text-preview-title">Extracted resume text</h5>
+                </div>
+
+                {uploadState.result.extraction.extracted_text ? (
+                  <>
+                    <pre className="text-preview-content">
+                      {getPreviewText(
+                        uploadState.result.extraction.extracted_text,
+                        isTextPreviewExpanded,
+                      )}
+                    </pre>
+                    {uploadState.result.extraction.extracted_text.length >
+                    EXTRACTED_TEXT_PREVIEW_LIMIT ? (
+                      <button
+                        className="text-preview-toggle"
+                        type="button"
+                        aria-expanded={isTextPreviewExpanded}
+                        onClick={() => setIsTextPreviewExpanded((currentValue) => !currentValue)}
+                      >
+                        {isTextPreviewExpanded ? "Collapse preview" : "Expand preview"}
+                      </button>
+                    ) : null}
+                  </>
+                ) : (
+                  <p className="section-empty-state">Extracted text preview unavailable.</p>
+                )}
+              </section>
+            </div>
           </section>
 
-          <section className="detected-sections-panel" aria-labelledby="detected-sections-title">
-            <div>
-              <p className="eyebrow">Detected Sections</p>
-              <h4 id="detected-sections-title">Detected headings and line ranges</h4>
+          <section className="dashboard-section" aria-labelledby="resume-structure-title">
+            <div className="dashboard-section-header">
+              <p className="eyebrow">Resume Structure</p>
+              <h4 id="resume-structure-title">Completeness and detected sections</h4>
             </div>
 
-            {uploadState.result.extraction.sections.length > 0 ? (
-              <ul className="detected-section-list">
-                {uploadState.result.extraction.sections.map((section) => (
-                  <li key={`${section.name}-${section.start_line}-${section.end_line}`}>
-                    <div>
-                      <strong>{formatSectionName(section.name)}</strong>
-                      <span>{section.heading}</span>
+            <div className="dashboard-two-column">
+              <section className="completeness-panel" aria-labelledby="completeness-title">
+                <div>
+                  <p className="eyebrow">Completeness Baseline</p>
+                  <h5 id="completeness-title">Detected resume sections</h5>
+                </div>
+
+                {uploadState.result.completeness ? (
+                  <>
+                    <p className="completeness-score">
+                      {formatCompletenessRatio(uploadState.result.completeness)}
+                    </p>
+
+                    <div className="section-summary-grid">
+                      <section aria-labelledby="present-sections-title">
+                        <h5 id="present-sections-title">Present sections</h5>
+                        {uploadState.result.completeness.present_sections.length > 0 ? (
+                          <ul className="section-chip-list">
+                            {uploadState.result.completeness.present_sections.map((sectionName) => (
+                              <li key={sectionName}>{formatSectionName(sectionName)}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="section-empty-state">No expected sections detected.</p>
+                        )}
+                      </section>
+
+                      <section aria-labelledby="missing-sections-title">
+                        <h5 id="missing-sections-title">Missing sections</h5>
+                        {uploadState.result.completeness.missing_sections.length > 0 ? (
+                          <ul className="section-chip-list section-chip-list--muted">
+                            {uploadState.result.completeness.missing_sections.map((sectionName) => (
+                              <li key={sectionName}>{formatSectionName(sectionName)}</li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="section-empty-state">No expected sections missing.</p>
+                        )}
+                      </section>
                     </div>
-                    <p>{formatLineRange(section.start_line, section.end_line)}</p>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="section-empty-state">No detected section details available.</p>
-            )}
+                  </>
+                ) : (
+                  <p className="section-empty-state">Completeness metadata unavailable.</p>
+                )}
+              </section>
+
+              <section
+                className="detected-sections-panel"
+                aria-labelledby="detected-sections-title"
+              >
+                <div>
+                  <p className="eyebrow">Detected Sections</p>
+                  <h5 id="detected-sections-title">Detected headings and line ranges</h5>
+                </div>
+
+                {uploadState.result.extraction.sections.length > 0 ? (
+                  <ul className="detected-section-list">
+                    {uploadState.result.extraction.sections.map((section) => (
+                      <li key={`${section.name}-${section.start_line}-${section.end_line}`}>
+                        <div>
+                          <strong>{formatSectionName(section.name)}</strong>
+                          <span>{section.heading}</span>
+                        </div>
+                        <p>{formatLineRange(section.start_line, section.end_line)}</p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="section-empty-state">No detected section details available.</p>
+                )}
+              </section>
+            </div>
           </section>
 
-          <section className="ats-feedback-panel" aria-labelledby="ats-feedback-title">
-            <div>
-              <p className="eyebrow">ATS Feedback Metadata</p>
+          <section className="dashboard-section" aria-labelledby="skill-signals-title">
+            <div className="dashboard-section-header">
+              <p className="eyebrow">Skill Signals</p>
+              <h4 id="skill-signals-title">Explicit skill mention metadata</h4>
+            </div>
+
+            <section className="skill-signals-panel" aria-labelledby="skill-signals-detail-title">
+              <div>
+                <p className="eyebrow">Skill Signals Metadata</p>
+                <h5 id="skill-signals-detail-title">Explicit skill mentions</h5>
+              </div>
+
+              {isSkillSignalsResult(uploadState.result.skills) ? (
+                <>
+                  <dl className="metadata-summary-list">
+                    <div>
+                      <dt>Signal status</dt>
+                      <dd>{formatSkillSignalStatus(uploadState.result.skills.status)}</dd>
+                    </div>
+                    <div>
+                      <dt>Explicit signals</dt>
+                      <dd>{uploadState.result.skills.signals.length}</dd>
+                    </div>
+                  </dl>
+
+                  {uploadState.result.skills.signals.length > 0 ? (
+                    <ul className="skill-signals-list">
+                      {uploadState.result.skills.signals.map((signal) => {
+                        const primaryEvidence = signal.evidence[0];
+
+                        return (
+                          <li key={`${signal.name}-${primaryEvidence.line_number}`}>
+                            <div className="skill-signal-header">
+                              <strong>{signal.name}</strong>
+                              <span>{formatSkillCategory(signal.category)}</span>
+                            </div>
+                            <dl className="skill-evidence-list">
+                              <div>
+                                <dt>Source area</dt>
+                                <dd>{formatSkillSourceArea(primaryEvidence.source_area)}</dd>
+                              </div>
+                              <div>
+                                <dt>Evidence line</dt>
+                                <dd>{primaryEvidence.line_number}</dd>
+                              </div>
+                              <div>
+                                <dt>Matched text</dt>
+                                <dd>{primaryEvidence.matched_text}</dd>
+                              </div>
+                            </dl>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <p className="section-empty-state">No explicit skill signals available.</p>
+                  )}
+                </>
+              ) : (
+                <p className="section-empty-state">Skill signal metadata unavailable.</p>
+              )}
+            </section>
+          </section>
+
+          <section className="dashboard-section" aria-labelledby="ats-feedback-title">
+            <div className="dashboard-section-header">
+              <p className="eyebrow">ATS Metadata</p>
               <h4 id="ats-feedback-title">Deterministic resume signals</h4>
             </div>
 
@@ -506,66 +636,9 @@ export function ResumeUploadForm() {
             )}
           </section>
 
-          <section className="skill-signals-panel" aria-labelledby="skill-signals-title">
-            <div>
-              <p className="eyebrow">Skill Signals Metadata</p>
-              <h4 id="skill-signals-title">Explicit skill mentions</h4>
-            </div>
-
-            {isSkillSignalsResult(uploadState.result.skills) ? (
-              <>
-                <dl className="metadata-summary-list">
-                  <div>
-                    <dt>Signal status</dt>
-                    <dd>{formatSkillSignalStatus(uploadState.result.skills.status)}</dd>
-                  </div>
-                  <div>
-                    <dt>Explicit signals</dt>
-                    <dd>{uploadState.result.skills.signals.length}</dd>
-                  </div>
-                </dl>
-
-                {uploadState.result.skills.signals.length > 0 ? (
-                  <ul className="skill-signals-list">
-                    {uploadState.result.skills.signals.map((signal) => {
-                      const primaryEvidence = signal.evidence[0];
-
-                      return (
-                        <li key={`${signal.name}-${primaryEvidence.line_number}`}>
-                          <div className="skill-signal-header">
-                            <strong>{signal.name}</strong>
-                            <span>{formatSkillCategory(signal.category)}</span>
-                          </div>
-                          <dl className="skill-evidence-list">
-                            <div>
-                              <dt>Source area</dt>
-                              <dd>{formatSkillSourceArea(primaryEvidence.source_area)}</dd>
-                            </div>
-                            <div>
-                              <dt>Evidence line</dt>
-                              <dd>{primaryEvidence.line_number}</dd>
-                            </div>
-                            <div>
-                              <dt>Matched text</dt>
-                              <dd>{primaryEvidence.matched_text}</dd>
-                            </div>
-                          </dl>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                ) : (
-                  <p className="section-empty-state">No explicit skill signals available.</p>
-                )}
-              </>
-            ) : (
-              <p className="section-empty-state">Skill signal metadata unavailable.</p>
-            )}
-          </section>
-
-          <section className="role-matches-panel" aria-labelledby="role-matches-title">
-            <div>
-              <p className="eyebrow">Role Matching Metadata</p>
+          <section className="dashboard-section" aria-labelledby="role-matches-title">
+            <div className="dashboard-section-header">
+              <p className="eyebrow">Role Matching</p>
               <h4 id="role-matches-title">Deterministic internship role candidates</h4>
             </div>
 
@@ -609,37 +682,6 @@ export function ResumeUploadForm() {
               )
             ) : (
               <p className="section-empty-state">Role matching metadata unavailable.</p>
-            )}
-          </section>
-
-          <section className="text-preview-panel" aria-labelledby="text-preview-title">
-            <div>
-              <p className="eyebrow">Extracted Text Preview</p>
-              <h4 id="text-preview-title">Extracted resume text</h4>
-            </div>
-
-            {uploadState.result.extraction.extracted_text ? (
-              <>
-                <pre className="text-preview-content">
-                  {getPreviewText(
-                    uploadState.result.extraction.extracted_text,
-                    isTextPreviewExpanded,
-                  )}
-                </pre>
-                {uploadState.result.extraction.extracted_text.length >
-                EXTRACTED_TEXT_PREVIEW_LIMIT ? (
-                  <button
-                    className="text-preview-toggle"
-                    type="button"
-                    aria-expanded={isTextPreviewExpanded}
-                    onClick={() => setIsTextPreviewExpanded((currentValue) => !currentValue)}
-                  >
-                    {isTextPreviewExpanded ? "Collapse preview" : "Expand preview"}
-                  </button>
-                ) : null}
-              </>
-            ) : (
-              <p className="section-empty-state">Extracted text preview unavailable.</p>
             )}
           </section>
         </section>
