@@ -178,6 +178,67 @@ function isRoleMatchesResult(roles: ResumeUploadResult["roles"]): roles is RoleM
   );
 }
 
+function formatMetadataAvailability(status: string): string {
+  return status === "metadata_ready" || status === "signals_detected" ? "Available" : "Unavailable";
+}
+
+function getAnalysisSummaryItems(result: ResumeUploadResult) {
+  const hasAtsMetadata = isAtsFeedbackResult(result.ats);
+  const hasSkillMetadata = isSkillSignalsResult(result.skills);
+  const hasRoleMetadata = isRoleMatchesResult(result.roles);
+  let explicitSkillSignalCount: number | null = null;
+
+  if (isSkillSignalsResult(result.skills)) {
+    explicitSkillSignalCount = result.skills.signals.length;
+  }
+
+  const deterministicPipelineComplete =
+    result.status === "intake_completed" &&
+    result.extraction.status === "extracted" &&
+    result.completeness !== null &&
+    hasAtsMetadata &&
+    hasSkillMetadata &&
+    hasRoleMetadata;
+
+  return [
+    {
+      label: "Upload status",
+      value: result.intake.status === "accepted" ? "Accepted" : "Unavailable",
+    },
+    {
+      label: "Extraction status",
+      value: result.extraction.status === "extracted" ? "Extracted" : "Unavailable",
+    },
+    {
+      label: "Completeness status",
+      value: result.completeness ? "Available" : "Unavailable",
+    },
+    {
+      label: "Detected sections",
+      value: `${result.extraction.sections.length} detected`,
+    },
+    {
+      label: "Explicit skill signals",
+      value:
+        explicitSkillSignalCount !== null ? `${explicitSkillSignalCount} detected` : "Unavailable",
+    },
+    {
+      label: "ATS metadata status",
+      value: hasAtsMetadata ? formatMetadataAvailability(result.ats.status) : "Unavailable",
+    },
+    {
+      label: "Role matching status",
+      value: hasRoleMetadata ? formatMetadataAvailability(result.roles.status) : "Unavailable",
+    },
+    {
+      label: "Overall pipeline status",
+      value: deterministicPipelineComplete
+        ? "Deterministic pipeline complete"
+        : "Deterministic pipeline incomplete",
+    },
+  ];
+}
+
 function getPreviewText(extractedText: string, isExpanded: boolean): string {
   if (isExpanded || extractedText.length <= EXTRACTED_TEXT_PREVIEW_LIMIT) {
     return extractedText;
@@ -281,6 +342,23 @@ export function ResumeUploadForm() {
             <p className="eyebrow">Extraction Complete</p>
             <h3 id="upload-result-title">Resume upload accepted</h3>
           </div>
+
+          <section className="analysis-summary-panel" aria-labelledby="analysis-summary-title">
+            <div>
+              <p className="eyebrow">Analysis Summary</p>
+              <h4 id="analysis-summary-title">Deterministic pipeline overview</h4>
+            </div>
+
+            <dl className="analysis-summary-grid">
+              {getAnalysisSummaryItems(uploadState.result).map((item) => (
+                <div key={item.label}>
+                  <dt>{item.label}</dt>
+                  <dd>{item.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+
           <dl className="upload-result-list">
             <div>
               <dt>Filename</dt>

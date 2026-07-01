@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 
 import { ResumeUploadForm } from "./ResumeUploadForm";
 
@@ -243,6 +243,29 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByText("Medium confidence")).toBeVisible();
     expect(screen.getByText(`${LONG_EXTRACTED_TEXT.length} readable characters`)).toBeVisible();
     expect(screen.getByText("1")).toBeVisible();
+    expect(screen.getByText("Analysis Summary")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Deterministic pipeline overview" })).toBeVisible();
+    const summaryPanel = screen.getByLabelText("Deterministic pipeline overview");
+    expect(within(summaryPanel).getByText("Upload status")).toBeVisible();
+    expect(within(summaryPanel).getByText("Accepted")).toBeVisible();
+    expect(within(summaryPanel).getByText("Extraction status")).toBeVisible();
+    expect(within(summaryPanel).getByText("Extracted")).toBeVisible();
+    expect(within(summaryPanel).getByText("Completeness status")).toBeVisible();
+    expect(within(summaryPanel).getAllByText("Available").length).toBeGreaterThanOrEqual(3);
+    expect(within(summaryPanel).getByText("Detected sections")).toBeVisible();
+    expect(within(summaryPanel).getAllByText("3 detected")).toHaveLength(2);
+    expect(within(summaryPanel).getByText("Explicit skill signals")).toBeVisible();
+    expect(within(summaryPanel).getByText("ATS metadata status")).toBeVisible();
+    expect(within(summaryPanel).getByText("Role matching status")).toBeVisible();
+    expect(within(summaryPanel).getByText("Overall pipeline status")).toBeVisible();
+    expect(within(summaryPanel).getByText("Deterministic pipeline complete")).toBeVisible();
+    expect(summaryPanel).not.toHaveTextContent(/recommended/i);
+    expect(summaryPanel).not.toHaveTextContent(/suitable/i);
+    expect(summaryPanel).not.toHaveTextContent(/strong/i);
+    expect(summaryPanel).not.toHaveTextContent(/weak/i);
+    expect(summaryPanel).not.toHaveTextContent(/good/i);
+    expect(summaryPanel).not.toHaveTextContent(/bad/i);
+    expect(summaryPanel).not.toHaveTextContent(/ready/i);
     expect(screen.getByText("Completeness Baseline")).toBeVisible();
     expect(screen.getByText("3 of 5 expected sections detected (60%)")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Present sections" })).toBeVisible();
@@ -469,6 +492,62 @@ describe("ResumeUploadForm", () => {
 
     expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
     expect(screen.getByText("Role matching metadata unavailable.")).toBeVisible();
+  });
+
+  it("shows factual summary fallback states when metadata is unavailable", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify(
+          createSuccessfulUploadResponse(
+            null,
+            [],
+            LONG_EXTRACTED_TEXT,
+            {
+              status: "not_started",
+              name: "ats",
+              label: "ATS analysis",
+            },
+            {
+              status: "not_started",
+              name: "skills",
+              label: "Skill extraction",
+            },
+            {
+              status: "not_started",
+              name: "roles",
+              label: "Role matching",
+            },
+          ),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 202,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    const summaryPanel = screen.getByLabelText("Deterministic pipeline overview");
+
+    expect(within(summaryPanel).getByText("Accepted")).toBeVisible();
+    expect(within(summaryPanel).getByText("Extracted")).toBeVisible();
+    expect(within(summaryPanel).getByText("0 detected")).toBeVisible();
+    expect(within(summaryPanel).getAllByText("Unavailable").length).toBeGreaterThanOrEqual(4);
+    expect(within(summaryPanel).getByText("Deterministic pipeline incomplete")).toBeVisible();
+    expect(summaryPanel).not.toHaveTextContent(/recommended/i);
+    expect(summaryPanel).not.toHaveTextContent(/suitable/i);
+    expect(summaryPanel).not.toHaveTextContent(/strong/i);
+    expect(summaryPanel).not.toHaveTextContent(/weak/i);
+    expect(summaryPanel).not.toHaveTextContent(/good/i);
+    expect(summaryPanel).not.toHaveTextContent(/bad/i);
+    expect(summaryPanel).not.toHaveTextContent(/ready/i);
   });
 
   it("expands and collapses long extracted text preview", async () => {

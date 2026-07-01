@@ -230,6 +230,41 @@ button:disabled {
   overflow-wrap: anywhere;
 }
 
+.analysis-summary-panel {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid #dcfce7;
+  padding-top: 16px;
+}
+
+.analysis-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+
+.analysis-summary-grid div {
+  min-width: 0;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 12px;
+}
+
+.analysis-summary-grid dt {
+  color: #475569;
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.analysis-summary-grid dd {
+  margin: 4px 0 0;
+  color: #172033;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
 .completeness-panel {
   display: grid;
   gap: 14px;
@@ -592,6 +627,10 @@ button:disabled {
   }
 
   .section-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analysis-summary-grid {
     grid-template-columns: 1fr;
   }
 
