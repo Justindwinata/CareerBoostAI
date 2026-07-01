@@ -337,6 +337,36 @@ button:disabled {
   white-space: nowrap;
 }
 
+.text-preview-panel {
+  display: grid;
+  gap: 14px;
+  border-top: 1px solid #dcfce7;
+  padding-top: 16px;
+}
+
+.text-preview-content {
+  max-height: 280px;
+  margin: 0;
+  overflow: auto;
+  border: 1px solid #d9e0ea;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 14px;
+  color: #172033;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.text-preview-toggle {
+  width: fit-content;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #172033;
+}
+
 @media (max-width: 560px) {
   .upload-result-list div {
     grid-template-columns: 1fr;

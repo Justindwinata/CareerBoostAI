@@ -4,6 +4,7 @@ import { uploadResume } from "../services/resumeUploadService";
 import type { ResumeSectionName, ResumeUploadResult } from "../types/resumeUpload";
 
 const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
+const EXTRACTED_TEXT_PREVIEW_LIMIT = 360;
 
 type UploadState =
   | { kind: "idle" }
@@ -79,8 +80,17 @@ function formatLineRange(startLine: number, endLine: number): string {
   return `Lines ${startLine}-${endLine}`;
 }
 
+function getPreviewText(extractedText: string, isExpanded: boolean): string {
+  if (isExpanded || extractedText.length <= EXTRACTED_TEXT_PREVIEW_LIMIT) {
+    return extractedText;
+  }
+
+  return `${extractedText.slice(0, EXTRACTED_TEXT_PREVIEW_LIMIT).trimEnd()}...`;
+}
+
 export function ResumeUploadForm() {
   const [uploadState, setUploadState] = useState<UploadState>({ kind: "idle" });
+  const [isTextPreviewExpanded, setIsTextPreviewExpanded] = useState(false);
 
   const selectedFile =
     uploadState.kind === "selected" || uploadState.kind === "submitting" ? uploadState.file : null;
@@ -88,6 +98,7 @@ export function ResumeUploadForm() {
   function handleFileChange(file: File | undefined) {
     if (!file) {
       setUploadState({ kind: "idle" });
+      setIsTextPreviewExpanded(false);
       return;
     }
 
@@ -95,10 +106,12 @@ export function ResumeUploadForm() {
 
     if (validationError) {
       setUploadState({ kind: "error", message: validationError });
+      setIsTextPreviewExpanded(false);
       return;
     }
 
     setUploadState({ kind: "selected", file });
+    setIsTextPreviewExpanded(false);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -120,11 +133,13 @@ export function ResumeUploadForm() {
           uploaded_at: new Date().toISOString(),
         },
       });
+      setIsTextPreviewExpanded(false);
     } catch (error) {
       setUploadState({
         kind: "error",
         message: error instanceof Error ? error.message : "Resume upload failed.",
       });
+      setIsTextPreviewExpanded(false);
     }
   }
 
@@ -272,6 +287,37 @@ export function ResumeUploadForm() {
               </ul>
             ) : (
               <p className="section-empty-state">No detected section details available.</p>
+            )}
+          </section>
+
+          <section className="text-preview-panel" aria-labelledby="text-preview-title">
+            <div>
+              <p className="eyebrow">Extracted Text Preview</p>
+              <h4 id="text-preview-title">Extracted resume text</h4>
+            </div>
+
+            {uploadState.result.extraction.extracted_text ? (
+              <>
+                <pre className="text-preview-content">
+                  {getPreviewText(
+                    uploadState.result.extraction.extracted_text,
+                    isTextPreviewExpanded,
+                  )}
+                </pre>
+                {uploadState.result.extraction.extracted_text.length >
+                EXTRACTED_TEXT_PREVIEW_LIMIT ? (
+                  <button
+                    className="text-preview-toggle"
+                    type="button"
+                    aria-expanded={isTextPreviewExpanded}
+                    onClick={() => setIsTextPreviewExpanded((currentValue) => !currentValue)}
+                  >
+                    {isTextPreviewExpanded ? "Collapse preview" : "Expand preview"}
+                  </button>
+                ) : null}
+              </>
+            ) : (
+              <p className="section-empty-state">Extracted text preview unavailable.</p>
             )}
           </section>
         </section>

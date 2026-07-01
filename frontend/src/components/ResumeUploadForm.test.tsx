@@ -2,6 +2,14 @@ import { fireEvent, render, screen } from "@testing-library/react";
 
 import { ResumeUploadForm } from "./ResumeUploadForm";
 
+const LONG_EXTRACTED_TEXT =
+  "Professional Summary\n" +
+  "Backend-focused student developer building production-quality portfolio projects with React, TypeScript, FastAPI, PostgreSQL, automated tests, clean architecture, and careful documentation.\n" +
+  "Technical Skills\n" +
+  "Python, FastAPI, TypeScript, React, PostgreSQL, testing, linting, CI, Git, and API design.\n" +
+  "Projects\n" +
+  "CareerBoost AI resume intake pipeline with deterministic text extraction, section detection, completeness metadata, and recruiter-demo-ready upload results.";
+
 function createPdfFile(name = "resume.pdf") {
   return new File(["%PDF-1.7"], name, { type: "application/pdf" });
 }
@@ -36,6 +44,7 @@ function createSuccessfulUploadResponse(
       content: "CareerBoost AI",
     },
   ],
+  extractedText = LONG_EXTRACTED_TEXT,
 ) {
   return {
     status: "intake_completed",
@@ -48,12 +57,10 @@ function createSuccessfulUploadResponse(
     extraction: {
       status: "extracted",
       confidence: "medium",
-      character_count: 148,
+      character_count: extractedText.length,
       page_count: 1,
-      extracted_text:
-        "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
-      normalized_text:
-        "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
+      extracted_text: extractedText,
+      normalized_text: extractedText,
       sections,
       error: null,
     },
@@ -107,7 +114,7 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByText("Accepted PDF resume")).toBeVisible();
     expect(screen.getByText("Text extraction complete")).toBeVisible();
     expect(screen.getByText("Medium confidence")).toBeVisible();
-    expect(screen.getByText("148 readable characters")).toBeVisible();
+    expect(screen.getByText(`${LONG_EXTRACTED_TEXT.length} readable characters`)).toBeVisible();
     expect(screen.getByText("1")).toBeVisible();
     expect(screen.getByText("Completeness Baseline")).toBeVisible();
     expect(screen.getByText("3 of 5 expected sections detected (60%)")).toBeVisible();
@@ -127,8 +134,60 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByText("Lines 1-3")).toBeVisible();
     expect(screen.getByText("Lines 4-6")).toBeVisible();
     expect(screen.getByText("Line 7")).toBeVisible();
+    expect(screen.getByText("Extracted Text Preview")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Extracted resume text" })).toBeVisible();
+    expect(screen.getAllByText(/Professional Summary/).length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByRole("button", { name: "Expand preview" })).toBeVisible();
     expect(screen.getByText("Ready for analysis workflow")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("expands and collapses long extracted text preview", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify(createSuccessfulUploadResponse()), {
+        headers: { "Content-Type": "application/json" },
+        status: 202,
+      }),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("button", { name: "Expand preview" })).toBeVisible();
+    expect(screen.queryByText(/recruiter-demo-ready upload results/)).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "Expand preview" }));
+
+    expect(screen.getByRole("button", { name: "Collapse preview" })).toBeVisible();
+    expect(screen.getByText(/recruiter-demo-ready upload results/)).toBeVisible();
+
+    fireEvent.click(screen.getByRole("button", { name: "Collapse preview" }));
+
+    expect(screen.getByRole("button", { name: "Expand preview" })).toBeVisible();
+    expect(screen.queryByText(/recruiter-demo-ready upload results/)).not.toBeInTheDocument();
+  });
+
+  it("shows a neutral unavailable state when extracted text is absent", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify(createSuccessfulUploadResponse(undefined, undefined, "")), {
+        headers: { "Content-Type": "application/json" },
+        status: 202,
+      }),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("Extracted text preview unavailable.")).toBeVisible();
   });
 
   it("shows a neutral unavailable state when detected sections are absent", async () => {
