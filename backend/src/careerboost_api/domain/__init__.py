@@ -16,12 +16,30 @@ from careerboost_api.domain.analysis import (
     ResumeIntakeContract,
     ResumeSectionName,
 )
+from careerboost_api.domain.ats import (
+    AtsFeedbackContract,
+    AtsFeedbackIssue,
+    AtsFeedbackStatus,
+    AtsIssueCategory,
+    AtsIssueSeverity,
+    AtsKeywordCoveragePlaceholder,
+    AtsScorePlaceholder,
+    AtsScoreStatus,
+)
 
 __all__ = [
     "AnalysisError",
     "AnalysisErrorCategory",
     "AnalysisStagePlaceholder",
     "AnalysisStatus",
+    "AtsFeedbackContract",
+    "AtsFeedbackIssue",
+    "AtsFeedbackStatus",
+    "AtsIssueCategory",
+    "AtsIssueSeverity",
+    "AtsKeywordCoveragePlaceholder",
+    "AtsScorePlaceholder",
+    "AtsScoreStatus",
     "DetectedResumeSection",
     "ExtractionConfidence",
     "ExtractionStatus",
