@@ -45,6 +45,46 @@ function createSuccessfulUploadResponse(
     },
   ],
   extractedText = LONG_EXTRACTED_TEXT,
+  ats: unknown = {
+    status: "metadata_ready",
+    source: "deterministic_resume_signals",
+    issues: [
+      {
+        category: "section_presence",
+        severity: "warning",
+        title: "Expected section not detected",
+        description: "The Experience section was not detected by deterministic resume headings.",
+        observed_signal: "missing_section:experience",
+        related_sections: ["experience"],
+      },
+      {
+        category: "formatting_risk",
+        severity: "warning",
+        title: "Low extracted text volume",
+        description:
+          "The extracted text length is below the deterministic metadata review threshold.",
+        observed_signal: "character_count:<600",
+        related_sections: [],
+      },
+      {
+        category: "keyword_coverage_placeholder",
+        severity: "info",
+        title: "Keyword coverage not evaluated",
+        description: "Keyword coverage requires a future role-specific keyword source.",
+        observed_signal: "keyword_coverage:not_evaluated",
+        related_sections: [],
+      },
+    ],
+    keyword_coverage: {
+      status: "not_evaluated",
+      matched_keywords: [],
+      missing_keywords: [],
+    },
+    score: {
+      status: "not_scored",
+      score: null,
+    },
+  },
 ) {
   return {
     status: "intake_completed",
@@ -65,11 +105,7 @@ function createSuccessfulUploadResponse(
       error: null,
     },
     completeness,
-    ats: {
-      status: "not_started",
-      name: "ats",
-      label: "ATS analysis",
-    },
+    ats,
     skills: {
       status: "not_started",
       name: "skills",
@@ -138,8 +174,47 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByRole("heading", { name: "Extracted resume text" })).toBeVisible();
     expect(screen.getAllByText(/Professional Summary/).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByRole("button", { name: "Expand preview" })).toBeVisible();
+    expect(screen.getByText("ATS Feedback Metadata")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Deterministic resume signals" })).toBeVisible();
+    expect(screen.getByText("Metadata ready")).toBeVisible();
+    expect(screen.getByText("Not scored")).toBeVisible();
+    expect(screen.getByText("Section presence")).toBeVisible();
+    expect(screen.getByText("Formatting risk indicator")).toBeVisible();
+    expect(screen.getByText("Keyword coverage placeholder")).toBeVisible();
+    expect(screen.getAllByText("Warning").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getByText("Info")).toBeVisible();
+    expect(screen.queryByText(/ATS score/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/ready for ATS/i)).not.toBeInTheDocument();
     expect(screen.getByText("Ready for analysis workflow")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a neutral unavailable state when ATS feedback metadata is absent", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify(
+          createSuccessfulUploadResponse(undefined, undefined, LONG_EXTRACTED_TEXT, {
+            status: "not_started",
+            name: "ats",
+            label: "ATS analysis",
+          }),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 202,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("ATS feedback metadata unavailable.")).toBeVisible();
   });
 
   it("expands and collapses long extracted text preview", async () => {

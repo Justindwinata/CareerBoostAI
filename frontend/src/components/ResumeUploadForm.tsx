@@ -1,7 +1,11 @@
 import { FormEvent, useState } from "react";
 
 import { uploadResume } from "../services/resumeUploadService";
-import type { ResumeSectionName, ResumeUploadResult } from "../types/resumeUpload";
+import type {
+  AtsFeedbackResult,
+  ResumeSectionName,
+  ResumeUploadResult,
+} from "../types/resumeUpload";
 
 const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 const EXTRACTED_TEXT_PREVIEW_LIMIT = 360;
@@ -80,6 +84,30 @@ function formatLineRange(startLine: number, endLine: number): string {
   return `Lines ${startLine}-${endLine}`;
 }
 
+function formatAtsFeedbackStatus(status: AtsFeedbackResult["status"]): string {
+  return status === "metadata_ready" ? "Metadata ready" : "Not evaluated";
+}
+
+function formatAtsIssueCategory(category: AtsFeedbackResult["issues"][number]["category"]): string {
+  const categoryLabels: Record<AtsFeedbackResult["issues"][number]["category"], string> = {
+    section_presence: "Section presence",
+    section_structure: "Section structure",
+    formatting_risk: "Formatting risk indicator",
+    keyword_coverage_placeholder: "Keyword coverage placeholder",
+    readability_structure: "Readability structure",
+  };
+
+  return categoryLabels[category];
+}
+
+function formatAtsScorePlaceholder(status: AtsFeedbackResult["score"]["status"]): string {
+  return status === "not_scored" ? "Not scored" : "Unavailable";
+}
+
+function isAtsFeedbackResult(ats: ResumeUploadResult["ats"]): ats is AtsFeedbackResult {
+  return ats.status === "metadata_ready" || ats.status === "not_evaluated";
+}
+
 function getPreviewText(extractedText: string, isExpanded: boolean): string {
   if (isExpanded || extractedText.length <= EXTRACTED_TEXT_PREVIEW_LIMIT) {
     return extractedText;
@@ -150,7 +178,7 @@ export function ResumeUploadForm() {
         <h2 id="upload-title">Upload a PDF resume</h2>
         <p>
           This foundation step validates the file and extracts readable text. Resume analysis, ATS
-          scoring, and recommendations are intentionally not started yet.
+          evaluation, and recommendations are intentionally limited to deterministic metadata.
         </p>
       </div>
 
@@ -287,6 +315,46 @@ export function ResumeUploadForm() {
               </ul>
             ) : (
               <p className="section-empty-state">No detected section details available.</p>
+            )}
+          </section>
+
+          <section className="ats-feedback-panel" aria-labelledby="ats-feedback-title">
+            <div>
+              <p className="eyebrow">ATS Feedback Metadata</p>
+              <h4 id="ats-feedback-title">Deterministic resume signals</h4>
+            </div>
+
+            {isAtsFeedbackResult(uploadState.result.ats) ? (
+              <>
+                <dl className="metadata-summary-list">
+                  <div>
+                    <dt>Feedback status</dt>
+                    <dd>{formatAtsFeedbackStatus(uploadState.result.ats.status)}</dd>
+                  </div>
+                  <div>
+                    <dt>Score state</dt>
+                    <dd>{formatAtsScorePlaceholder(uploadState.result.ats.score.status)}</dd>
+                  </div>
+                </dl>
+
+                {uploadState.result.ats.issues.length > 0 ? (
+                  <ul className="ats-feedback-list">
+                    {uploadState.result.ats.issues.map((issue) => (
+                      <li key={`${issue.category}-${issue.observed_signal}`}>
+                        <div>
+                          <strong>{formatAtsIssueCategory(issue.category)}</strong>
+                          <span>{issue.severity === "warning" ? "Warning" : "Info"}</span>
+                        </div>
+                        <p>{issue.title}</p>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="section-empty-state">No ATS feedback issues available.</p>
+                )}
+              </>
+            ) : (
+              <p className="section-empty-state">ATS feedback metadata unavailable.</p>
             )}
           </section>
 
