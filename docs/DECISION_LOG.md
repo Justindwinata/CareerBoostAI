@@ -22,6 +22,7 @@ Canonical record of important product, architecture, and delivery decisions alre
 | ADR-012 | Add coverage reporting without external SaaS | Improves quality visibility without accounts or tokens | No hosted coverage badge yet |
 | ADR-013 | Block Docker work until runtime exists | Prevents unvalidated infrastructure artifacts | Delays Docker Compose deliverable |
 | ADR-014 | Complete resume intake before analysis features | Establishes validated upload, extraction, normalization, section detection, and completeness metadata before ATS, AI, recommendations, or persistence | Sprint 2 produces preparation metadata, not final internship readiness analysis |
+| ADR-015 | Implement deterministic ATS feedback metadata before ATS scoring | Allows observable resume signals to be surfaced safely while preserving the approved boundary against readiness claims | Users see non-scored metadata before full ATS scoring exists |
 
 ## Blocked Backlog Notes
 
@@ -50,7 +51,16 @@ These exclusions keep the project focused on internship readiness analysis and m
 
 ## Sprint 2 Analysis Boundary
 
-Sprint 2 has implemented the resume intake and preparation pipeline only. The current system can validate a PDF resume, extract text, normalize text, detect basic sections, compute a deterministic completeness baseline, and display neutral upload result metadata.
+Sprint 2 has implemented the resume intake and preparation pipeline plus deterministic ATS feedback metadata. The current system can validate a PDF resume, extract text, normalize text, detect basic sections, compute a deterministic completeness baseline, generate non-scored ATS feedback issues from existing metadata, and display neutral upload result metadata.
+
+The deterministic ATS slice includes:
+
+- ATS feedback domain contract with stable categories for section presence, section structure, formatting risk indicators, keyword coverage placeholder state, and readability structure.
+- ATS feedback service that maps extraction, detected-section, and completeness metadata into non-scored feedback issues.
+- Explicit score placeholder state of `not_scored`.
+- Neutral frontend display for feedback status, deterministic issue categories, severity labels, and score placeholder state.
+
+The current ATS metadata is not an ATS score, not a pass/fail evaluation, and not an internship readiness judgment.
 
 The following analysis capabilities remain intentionally out of scope until later contracts:
 

@@ -44,7 +44,7 @@ flowchart LR
 | Landing | Presents product value and routes users into upload flow |
 | Upload | Handles file selection, client hints, and upload state |
 | Parser | Extracts text and confidence metadata from PDFs |
-| ATS Evaluation | Assesses resume structure, section clarity, and keyword coverage |
+| ATS Feedback Metadata | Maps existing deterministic resume metadata into non-scored ATS feedback categories |
 | Skill Extraction | Identifies skills and evidence from resume text |
 | Role Matching | Maps profile signals to suitable internship roles |
 | Recommendation Engine | Produces prioritized resume and learning actions |
@@ -71,8 +71,8 @@ sequenceDiagram
   API->>App: Start resume analysis workflow
   App->>Parser: Extract resume text
   Parser-->>App: Text and confidence result
-  App->>Analysis: Generate structured analysis
-  Analysis-->>App: Readiness, ATS, skills, roles, recommendations
+  App->>Analysis: Generate structured metadata
+  Analysis-->>App: Intake, extraction, completeness, ATS metadata, future-stage placeholders
   App->>Repo: Persist analysis record
   Repo->>DB: Write result and status
   DB-->>Repo: Confirm persistence
@@ -116,7 +116,9 @@ Implemented:
 - Deterministic extracted-text normalization.
 - Deterministic section detection for `summary`, `skills`, `experience`, `education`, and `projects`.
 - Deterministic completeness baseline based only on detected section presence.
-- Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, and extracted-text preview.
+- Deterministic ATS feedback contract with stable issue categories and a `not_scored` score placeholder.
+- Deterministic ATS feedback service based only on extraction, detected-section, and completeness metadata.
+- Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, ATS feedback metadata, and extracted-text preview.
 
 Not yet implemented:
 
@@ -129,6 +131,6 @@ Not yet implemented:
 - AI integration.
 - Docker runtime artifacts.
 
-The current pipeline prepares resume data for future analysis. It does not claim internship readiness, ATS compatibility, role fit, or improvement recommendations.
+The current pipeline prepares resume data and displays deterministic metadata for future analysis. It does not claim internship readiness, ATS compatibility, ATS pass/fail status, role fit, or improvement recommendations.
 
 Docker remains blocked until a compatible runtime is available and validation can run.
