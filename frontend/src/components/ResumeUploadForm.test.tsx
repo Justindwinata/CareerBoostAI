@@ -85,6 +85,54 @@ function createSuccessfulUploadResponse(
       score: null,
     },
   },
+  skills: unknown = {
+    status: "signals_detected",
+    source: "deterministic_normalized_text",
+    signals: [
+      {
+        name: "Python",
+        category: "programming_language",
+        evidence_level: "explicit_mention",
+        evidence: [
+          {
+            matched_text: "python",
+            source_area: "skills",
+            line_number: 4,
+            evidence_text:
+              "Python, FastAPI, TypeScript, React, PostgreSQL, testing, linting, CI, Git, and API design.",
+          },
+        ],
+      },
+      {
+        name: "FastAPI",
+        category: "framework",
+        evidence_level: "explicit_mention",
+        evidence: [
+          {
+            matched_text: "fastapi",
+            source_area: "skills",
+            line_number: 4,
+            evidence_text:
+              "Python, FastAPI, TypeScript, React, PostgreSQL, testing, linting, CI, Git, and API design.",
+          },
+        ],
+      },
+      {
+        name: "PostgreSQL",
+        category: "database",
+        evidence_level: "explicit_mention",
+        evidence: [
+          {
+            matched_text: "postgresql",
+            source_area: "skills",
+            line_number: 4,
+            evidence_text:
+              "Python, FastAPI, TypeScript, React, PostgreSQL, testing, linting, CI, Git, and API design.",
+          },
+        ],
+      },
+    ],
+  },
 ) {
   return {
     status: "intake_completed",
@@ -106,11 +154,7 @@ function createSuccessfulUploadResponse(
     },
     completeness,
     ats,
-    skills: {
-      status: "not_started",
-      name: "skills",
-      label: "Skill extraction",
-    },
+    skills,
     roles: {
       status: "not_started",
       name: "roles",
@@ -185,6 +229,23 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByText("Info")).toBeVisible();
     expect(screen.queryByText(/ATS score/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/ready for ATS/i)).not.toBeInTheDocument();
+    expect(screen.getByText("Skill Signals Metadata")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Explicit skill mentions" })).toBeVisible();
+    expect(screen.getByText("Signals detected")).toBeVisible();
+    expect(screen.getByText("Explicit signals")).toBeVisible();
+    expect(screen.getByText("3")).toBeVisible();
+    expect(screen.getByText("Python")).toBeVisible();
+    expect(screen.getByText("FastAPI")).toBeVisible();
+    expect(screen.getByText("PostgreSQL")).toBeVisible();
+    expect(screen.getByText("Programming language")).toBeVisible();
+    expect(screen.getByText("Framework")).toBeVisible();
+    expect(screen.getByText("Database")).toBeVisible();
+    expect(screen.getAllByText("Source area").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Skills").length).toBeGreaterThanOrEqual(3);
+    expect(screen.getAllByText("Evidence line").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Matched text").length).toBeGreaterThanOrEqual(1);
+    expect(screen.queryByText(/rank/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/advice/i)).not.toBeInTheDocument();
     expect(screen.getByText("Ready for analysis workflow")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
@@ -215,6 +276,63 @@ describe("ResumeUploadForm", () => {
 
     expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
     expect(screen.getByText("ATS feedback metadata unavailable.")).toBeVisible();
+  });
+
+  it("shows a neutral unavailable state when skill signal metadata is absent", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify(
+          createSuccessfulUploadResponse(undefined, undefined, LONG_EXTRACTED_TEXT, undefined, {
+            status: "not_started",
+            name: "skills",
+            label: "Skill extraction",
+          }),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 202,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("Skill signal metadata unavailable.")).toBeVisible();
+  });
+
+  it("shows a neutral empty state when no explicit skill signals are detected", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify(
+          createSuccessfulUploadResponse(undefined, undefined, LONG_EXTRACTED_TEXT, undefined, {
+            status: "no_signals",
+            source: "deterministic_normalized_text",
+            signals: [],
+          }),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 202,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("No signals")).toBeVisible();
+    expect(screen.getByText("No explicit skill signals available.")).toBeVisible();
   });
 
   it("expands and collapses long extracted text preview", async () => {

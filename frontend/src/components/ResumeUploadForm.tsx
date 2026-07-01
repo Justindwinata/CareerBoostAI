@@ -4,6 +4,9 @@ import { uploadResume } from "../services/resumeUploadService";
 import type {
   AtsFeedbackResult,
   ResumeSectionName,
+  SkillSignalCategory,
+  SkillSignalsResult,
+  SkillSourceArea,
   ResumeUploadResult,
 } from "../types/resumeUpload";
 
@@ -106,6 +109,41 @@ function formatAtsScorePlaceholder(status: AtsFeedbackResult["score"]["status"])
 
 function isAtsFeedbackResult(ats: ResumeUploadResult["ats"]): ats is AtsFeedbackResult {
   return ats.status === "metadata_ready" || ats.status === "not_evaluated";
+}
+
+function formatSkillSignalStatus(status: SkillSignalsResult["status"]): string {
+  const statusLabels: Record<SkillSignalsResult["status"], string> = {
+    signals_detected: "Signals detected",
+    no_signals: "No signals",
+    not_evaluated: "Not evaluated",
+  };
+
+  return statusLabels[status];
+}
+
+function formatSkillCategory(category: SkillSignalCategory): string {
+  const categoryLabels: Record<SkillSignalCategory, string> = {
+    programming_language: "Programming language",
+    framework: "Framework",
+    database: "Database",
+    tooling: "Tooling",
+    testing: "Testing",
+    web_technology: "Web technology",
+  };
+
+  return categoryLabels[category];
+}
+
+function formatSkillSourceArea(sourceArea: SkillSourceArea): string {
+  return sourceArea === "document" ? "Document" : formatSectionName(sourceArea);
+}
+
+function isSkillSignalsResult(skills: ResumeUploadResult["skills"]): skills is SkillSignalsResult {
+  return (
+    skills.status === "signals_detected" ||
+    skills.status === "no_signals" ||
+    skills.status === "not_evaluated"
+  );
 }
 
 function getPreviewText(extractedText: string, isExpanded: boolean): string {
@@ -355,6 +393,63 @@ export function ResumeUploadForm() {
               </>
             ) : (
               <p className="section-empty-state">ATS feedback metadata unavailable.</p>
+            )}
+          </section>
+
+          <section className="skill-signals-panel" aria-labelledby="skill-signals-title">
+            <div>
+              <p className="eyebrow">Skill Signals Metadata</p>
+              <h4 id="skill-signals-title">Explicit skill mentions</h4>
+            </div>
+
+            {isSkillSignalsResult(uploadState.result.skills) ? (
+              <>
+                <dl className="metadata-summary-list">
+                  <div>
+                    <dt>Signal status</dt>
+                    <dd>{formatSkillSignalStatus(uploadState.result.skills.status)}</dd>
+                  </div>
+                  <div>
+                    <dt>Explicit signals</dt>
+                    <dd>{uploadState.result.skills.signals.length}</dd>
+                  </div>
+                </dl>
+
+                {uploadState.result.skills.signals.length > 0 ? (
+                  <ul className="skill-signals-list">
+                    {uploadState.result.skills.signals.map((signal) => {
+                      const primaryEvidence = signal.evidence[0];
+
+                      return (
+                        <li key={`${signal.name}-${primaryEvidence.line_number}`}>
+                          <div className="skill-signal-header">
+                            <strong>{signal.name}</strong>
+                            <span>{formatSkillCategory(signal.category)}</span>
+                          </div>
+                          <dl className="skill-evidence-list">
+                            <div>
+                              <dt>Source area</dt>
+                              <dd>{formatSkillSourceArea(primaryEvidence.source_area)}</dd>
+                            </div>
+                            <div>
+                              <dt>Evidence line</dt>
+                              <dd>{primaryEvidence.line_number}</dd>
+                            </div>
+                            <div>
+                              <dt>Matched text</dt>
+                              <dd>{primaryEvidence.matched_text}</dd>
+                            </div>
+                          </dl>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                ) : (
+                  <p className="section-empty-state">No explicit skill signals available.</p>
+                )}
+              </>
+            ) : (
+              <p className="section-empty-state">Skill signal metadata unavailable.</p>
             )}
           </section>
 
