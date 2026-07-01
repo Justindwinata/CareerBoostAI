@@ -263,9 +263,56 @@ function expectStructuredError({
   expect(within(errorPanel).getByRole("button", { name: actionLabel })).toBeVisible();
 }
 
+function expectValidAriaIdReferences() {
+  const referencedAttributes = ["aria-controls", "aria-describedby", "aria-labelledby"];
+
+  referencedAttributes.forEach((attributeName) => {
+    document.querySelectorAll<HTMLElement>(`[${attributeName}]`).forEach((element) => {
+      const referencedIds = element.getAttribute(attributeName)?.split(/\s+/).filter(Boolean) ?? [];
+
+      referencedIds.forEach((referencedId) => {
+        expect(document.getElementById(referencedId)).not.toBeNull();
+      });
+    });
+  });
+}
+
 describe("ResumeUploadForm", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("provides accessible labels and descriptions for resume file selection", () => {
+    render(<ResumeUploadForm />);
+
+    const uploadForm = screen.getByRole("form", { name: "Resume upload form" });
+    const fileInput = screen.getByLabelText("Select PDF resume");
+
+    expect(screen.getByRole("heading", { name: "Upload a PDF resume" })).toBeVisible();
+    expect(uploadForm).toHaveAttribute("aria-describedby", "upload-description");
+    expect(document.getElementById("upload-description")).toHaveTextContent(
+      "This foundation step validates the file and extracts readable text.",
+    );
+    expect(fileInput).toHaveAttribute("aria-describedby", "resume-file-help");
+    expect(screen.getByText("PDF only. Maximum file size is 5 MB.")).toBeVisible();
+    expectValidAriaIdReferences();
+  });
+
+  it("focuses a clear empty-upload error when submitting without a selected file", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    await waitFor(() => expect(screen.getByRole("alert")).toHaveFocus());
+    expectStructuredError({
+      title: "No file selected",
+      explanation: "Choose a PDF resume before starting the upload workflow.",
+      recovery: "Select a PDF file from your device.",
+      actionLabel: "Choose replacement file",
+    });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it("shows an accessible processing state immediately after submit", async () => {
@@ -338,6 +385,9 @@ describe("ResumeUploadForm", () => {
     expect(screen.queryByRole("heading", { name: "Processing document metadata" })).toBeNull();
     expect(screen.getByLabelText("Select PDF resume")).not.toBeDisabled();
     expect(screen.getByRole("button", { name: "Upload resume" })).not.toBeDisabled();
+    await waitFor(() =>
+      expect(screen.getByLabelText("Deterministic pipeline overview")).toHaveFocus(),
+    );
   });
 
   it("restores controls and shows retry guidance after upload failure", async () => {
@@ -800,7 +850,46 @@ describe("ResumeUploadForm", () => {
     expect(screen.queryByText(/best match/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/you should become/i)).not.toBeInTheDocument();
     expect(screen.getByText("Analysis workflow metadata available")).toBeVisible();
+    expectValidAriaIdReferences();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps dashboard headings and navigation landmarks accessible", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(createUploadSuccessResponse());
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+
+    const dashboardNavigation = screen.getByRole("navigation", {
+      name: "Analysis dashboard sections",
+    });
+    const headingLevels = screen
+      .getAllByRole("heading")
+      .map((heading) => Number(heading.tagName.replace("H", "")));
+
+    headingLevels.reduce((previousLevel, currentLevel) => {
+      expect(currentLevel - previousLevel).toBeLessThanOrEqual(1);
+      return currentLevel;
+    });
+
+    [
+      ["Resume Intake", "resume-intake-title"],
+      ["Resume Structure", "resume-structure-title"],
+      ["Skill Signals", "skill-signals-title"],
+      ["ATS Metadata", "ats-feedback-title"],
+      ["Role Matching", "role-matches-title"],
+    ].forEach(([linkName, targetId]) => {
+      const link = within(dashboardNavigation).getByRole("link", { name: linkName });
+
+      expect(link).toHaveAttribute("href", `#${targetId}`);
+      expect(document.getElementById(targetId)).not.toBeNull();
+    });
   });
 
   it("shows a neutral unavailable state when ATS feedback metadata is absent", async () => {
@@ -1030,11 +1119,24 @@ describe("ResumeUploadForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
 
     expect(await screen.findByRole("button", { name: "Expand preview" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Expand preview" })).toHaveAttribute(
+      "aria-controls",
+      "text-preview-content",
+    );
+    expect(screen.getByRole("button", { name: "Expand preview" })).toHaveAttribute(
+      "aria-expanded",
+      "false",
+    );
+    expect(document.getElementById("text-preview-content")).not.toBeNull();
     expect(screen.queryByText(/recruiter-demo-ready upload results/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "Expand preview" }));
 
     expect(screen.getByRole("button", { name: "Collapse preview" })).toBeVisible();
+    expect(screen.getByRole("button", { name: "Collapse preview" })).toHaveAttribute(
+      "aria-expanded",
+      "true",
+    );
     expect(screen.getByText(/recruiter-demo-ready upload results/)).toBeVisible();
 
     fireEvent.click(screen.getByRole("button", { name: "Collapse preview" }));

@@ -17,6 +17,7 @@ describe("App", () => {
         name: "Engineering foundation is running.",
       }),
     ).toBeInTheDocument();
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(screen.getByRole("heading", { name: "Upload a PDF resume" })).toBeInTheDocument();
   });
 });

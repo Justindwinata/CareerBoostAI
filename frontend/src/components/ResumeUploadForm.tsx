@@ -32,8 +32,10 @@ type UploadState =
   | { kind: "success"; result: ResumeUploadResult }
   | { kind: "error"; error: UploadErrorPresentation; file: File | null };
 
+type UploadErrorCategory = ResumeUploadFailureCategory | "no_file_selected";
+
 type UploadErrorPresentation = {
-  category: ResumeUploadFailureCategory;
+  category: UploadErrorCategory;
   title: string;
   explanation: string;
   recoveryInstruction: string;
@@ -41,7 +43,15 @@ type UploadErrorPresentation = {
   canRetryWithCurrentFile: boolean;
 };
 
-const ERROR_PRESENTATIONS: Record<ResumeUploadFailureCategory, UploadErrorPresentation> = {
+const ERROR_PRESENTATIONS: Record<UploadErrorCategory, UploadErrorPresentation> = {
+  no_file_selected: {
+    category: "no_file_selected",
+    title: "No file selected",
+    explanation: "Choose a PDF resume before starting the upload workflow.",
+    recoveryInstruction: "Select a PDF file from your device.",
+    actionLabel: "Choose a PDF file",
+    canRetryWithCurrentFile: false,
+  },
   unsupported_file_type: {
     category: "unsupported_file_type",
     title: "Unsupported file type",
@@ -117,7 +127,7 @@ const ERROR_PRESENTATIONS: Record<ResumeUploadFailureCategory, UploadErrorPresen
   },
 };
 
-function getErrorPresentation(category: ResumeUploadFailureCategory): UploadErrorPresentation {
+function getErrorPresentation(category: UploadErrorCategory): UploadErrorPresentation {
   return ERROR_PRESENTATIONS[category];
 }
 
@@ -364,6 +374,7 @@ export function ResumeUploadForm() {
   const [isTextPreviewExpanded, setIsTextPreviewExpanded] = useState(false);
   const errorPanelRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const analysisSummaryRef = useRef<HTMLElement>(null);
   const isProcessing = uploadState.kind === "submitting";
 
   const selectedFile =
@@ -376,6 +387,10 @@ export function ResumeUploadForm() {
   useEffect(() => {
     if (uploadState.kind === "error") {
       errorPanelRef.current?.focus();
+    }
+
+    if (uploadState.kind === "success") {
+      analysisSummaryRef.current?.focus();
     }
   }, [uploadState]);
 
@@ -442,7 +457,7 @@ export function ResumeUploadForm() {
     if (!selectedFile) {
       setUploadState({
         kind: "error",
-        error: getErrorPresentation("unexpected_error"),
+        error: getErrorPresentation("no_file_selected"),
         file: null,
       });
       return;
@@ -465,7 +480,7 @@ export function ResumeUploadForm() {
       <div>
         <p className="eyebrow">Resume Upload</p>
         <h2 id="upload-title">Upload a PDF resume</h2>
-        <p>
+        <p id="upload-description">
           This foundation step validates the file and extracts readable text. Resume analysis, ATS
           evaluation, and recommendations are intentionally limited to deterministic metadata.
         </p>
@@ -475,17 +490,22 @@ export function ResumeUploadForm() {
         className="upload-form"
         aria-label="Resume upload form"
         aria-busy={isProcessing}
+        aria-describedby="upload-description"
         onSubmit={handleSubmit}
       >
         <label className="file-label" htmlFor="resume-file">
           Select PDF resume
         </label>
+        <p id="resume-file-help" className="file-help">
+          PDF only. Maximum file size is 5 MB.
+        </p>
         <input
           ref={fileInputRef}
           id="resume-file"
           name="resume-file"
           type="file"
           accept="application/pdf,.pdf"
+          aria-describedby="resume-file-help"
           disabled={isProcessing}
           onChange={(event) => handleFileChange(event.target.files?.[0])}
         />
@@ -536,7 +556,12 @@ export function ResumeUploadForm() {
             </p>
           </div>
 
-          <section className="analysis-summary-panel" aria-labelledby="analysis-summary-title">
+          <section
+            ref={analysisSummaryRef}
+            className="analysis-summary-panel"
+            aria-labelledby="analysis-summary-title"
+            tabIndex={-1}
+          >
             <div>
               <p className="eyebrow">Analysis Summary</p>
               <h4 id="analysis-summary-title">Deterministic pipeline overview</h4>
@@ -614,7 +639,11 @@ export function ResumeUploadForm() {
 
                 {uploadState.result.extraction.extracted_text ? (
                   <>
-                    <pre className="text-preview-content">
+                    <pre
+                      id="text-preview-content"
+                      className="text-preview-content"
+                      aria-labelledby="text-preview-title"
+                    >
                       {getPreviewText(
                         uploadState.result.extraction.extracted_text,
                         isTextPreviewExpanded,
@@ -626,6 +655,7 @@ export function ResumeUploadForm() {
                         className="text-preview-toggle"
                         type="button"
                         aria-expanded={isTextPreviewExpanded}
+                        aria-controls="text-preview-content"
                         onClick={() => setIsTextPreviewExpanded((currentValue) => !currentValue)}
                       >
                         {isTextPreviewExpanded ? "Collapse preview" : "Expand preview"}

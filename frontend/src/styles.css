@@ -31,6 +31,14 @@ select {
   font: inherit;
 }
 
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+[tabindex="-1"]:focus-visible {
+  outline: 3px solid #284b63;
+  outline-offset: 3px;
+}
+
 .app-shell {
   display: grid;
   min-height: 100vh;
@@ -151,6 +159,7 @@ h5 {
 
 input[type="file"] {
   width: 100%;
+  min-height: 44px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;
@@ -160,6 +169,7 @@ input[type="file"] {
 
 button {
   width: fit-content;
+  min-height: 44px;
   border: 0;
   border-radius: 8px;
   background: #172033;
@@ -176,6 +186,13 @@ button:disabled {
 
 .file-summary {
   margin-top: 0;
+}
+
+.file-help {
+  max-width: none;
+  margin: 0;
+  color: #475569;
+  font-size: 0.9375rem;
 }
 
 .processing-panel {
@@ -235,6 +252,12 @@ button:disabled {
 @keyframes loading-spin {
   to {
     transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loading-indicator {
+    animation: none;
   }
 }
 
@@ -325,6 +348,9 @@ button:disabled {
 }
 
 .analysis-dashboard-nav a {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
   border: 1px solid #cbd5e1;
   border-radius: 999px;
   padding: 7px 10px;
@@ -396,6 +422,11 @@ button:disabled {
   border-radius: 8px;
   background: #eef7f7;
   padding: 18px;
+}
+
+.analysis-summary-panel:focus {
+  outline: 3px solid #284b63;
+  outline-offset: 3px;
 }
 
 .analysis-summary-grid {
