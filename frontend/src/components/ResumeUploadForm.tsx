@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 
 import { uploadResume } from "../services/resumeUploadService";
-import type { ResumeUploadResponse } from "../types/resumeUpload";
+import type { ResumeUploadResult } from "../types/resumeUpload";
 
 const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 
@@ -9,23 +9,38 @@ type UploadState =
   | { kind: "idle" }
   | { kind: "selected"; file: File }
   | { kind: "submitting"; file: File }
-  | { kind: "success"; result: ResumeUploadResponse }
+  | { kind: "success"; result: ResumeUploadResult }
   | { kind: "error"; message: string };
 
 function validateSelectedFile(file: File): string | null {
   if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
-    return "Resume must be a PDF file.";
+    return "Upload a PDF resume file. Other file types are not supported yet.";
   }
 
   if (file.size === 0) {
-    return "Resume file cannot be empty.";
+    return "The selected file is empty. Choose a PDF resume that contains content.";
   }
 
   if (file.size > MAX_UPLOAD_SIZE_BYTES) {
-    return "Resume file must be 5 MB or smaller.";
+    return "Your resume is larger than 5 MB. Compress the PDF and try again.";
   }
 
   return null;
+}
+
+function formatFileSize(sizeBytes: number): string {
+  if (sizeBytes < 1024 * 1024) {
+    return `${(sizeBytes / 1024).toFixed(1)} KB`;
+  }
+
+  return `${(sizeBytes / (1024 * 1024)).toFixed(2)} MB`;
+}
+
+function formatUploadTimestamp(timestamp: string): string {
+  return new Intl.DateTimeFormat(undefined, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(timestamp));
 }
 
 export function ResumeUploadForm() {
@@ -62,7 +77,13 @@ export function ResumeUploadForm() {
 
     try {
       const result = await uploadResume(selectedFile);
-      setUploadState({ kind: "success", result });
+      setUploadState({
+        kind: "success",
+        result: {
+          ...result,
+          uploaded_at: new Date().toISOString(),
+        },
+      });
     } catch (error) {
       setUploadState({
         kind: "error",
@@ -106,9 +127,34 @@ export function ResumeUploadForm() {
       </form>
 
       {uploadState.kind === "success" ? (
-        <p className="upload-message upload-message--success" role="status">
-          {uploadState.result.message}
-        </p>
+        <section className="upload-result-panel" aria-labelledby="upload-result-title">
+          <div>
+            <p className="eyebrow">Validation Complete</p>
+            <h3 id="upload-result-title">Resume upload accepted</h3>
+          </div>
+          <dl className="upload-result-list">
+            <div>
+              <dt>Filename</dt>
+              <dd>{uploadState.result.filename}</dd>
+            </div>
+            <div>
+              <dt>File size</dt>
+              <dd>{formatFileSize(uploadState.result.size_bytes)}</dd>
+            </div>
+            <div>
+              <dt>Upload timestamp</dt>
+              <dd>{formatUploadTimestamp(uploadState.result.uploaded_at)}</dd>
+            </div>
+            <div>
+              <dt>Validation status</dt>
+              <dd>Accepted PDF resume</dd>
+            </div>
+            <div>
+              <dt>Next step</dt>
+              <dd>Ready for text extraction</dd>
+            </div>
+          </dl>
+        </section>
       ) : null}
 
       {uploadState.kind === "error" ? (

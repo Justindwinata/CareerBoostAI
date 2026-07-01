@@ -117,6 +117,12 @@ h2 {
   line-height: 1.2;
 }
 
+h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
 .upload-form {
   display: grid;
   gap: 14px;
@@ -171,4 +177,47 @@ button:disabled {
 .upload-message--error {
   background: #fef2f2;
   color: #991b1b;
+}
+
+.upload-result-panel {
+  display: grid;
+  gap: 18px;
+  margin-top: 24px;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  background: #f0fdf4;
+  padding: 20px;
+}
+
+.upload-result-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+}
+
+.upload-result-list div {
+  display: grid;
+  grid-template-columns: minmax(140px, 0.45fr) 1fr;
+  gap: 16px;
+  border-top: 1px solid #dcfce7;
+  padding-top: 12px;
+}
+
+.upload-result-list dt {
+  color: #166534;
+  font-weight: 700;
+}
+
+.upload-result-list dd {
+  min-width: 0;
+  margin: 0;
+  color: #172033;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .upload-result-list div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
 }

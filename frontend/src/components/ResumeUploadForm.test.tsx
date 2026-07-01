@@ -11,14 +11,14 @@ describe("ResumeUploadForm", () => {
     vi.restoreAllMocks();
   });
 
-  it("submits a selected PDF resume", async () => {
+  it("renders the upload result panel after a successful upload", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
       new Response(
         JSON.stringify({
           status: "accepted",
           filename: "resume.pdf",
           content_type: "application/pdf",
-          size_bytes: 8,
+          size_bytes: 2048,
           message: "Resume upload accepted. Analysis is not started in this contract.",
         }),
         {
@@ -35,9 +35,11 @@ describe("ResumeUploadForm", () => {
     });
     fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
 
-    expect(
-      await screen.findByText("Resume upload accepted. Analysis is not started in this contract."),
-    ).toBeVisible();
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("resume.pdf")).toBeVisible();
+    expect(screen.getByText("2.0 KB")).toBeVisible();
+    expect(screen.getByText("Accepted PDF resume")).toBeVisible();
+    expect(screen.getByText("Ready for text extraction")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
@@ -51,11 +53,47 @@ describe("ResumeUploadForm", () => {
       target: { files: [textFile] },
     });
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Resume must be a PDF file.");
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Upload a PDF resume file. Other file types are not supported yet.",
+    );
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
-  it("shows backend validation errors", async () => {
+  it("rejects empty files before submitting", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const emptyFile = new File([], "resume.pdf", { type: "application/pdf" });
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [emptyFile] },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "The selected file is empty. Choose a PDF resume that contains content.",
+    );
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("rejects oversized files before submitting", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+    const oversizedFile = new File(["0".repeat(5 * 1024 * 1024 + 1)], "resume.pdf", {
+      type: "application/pdf",
+    });
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [oversizedFile] },
+    });
+
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Your resume is larger than 5 MB. Compress the PDF and try again.",
+    );
+    expect(fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("shows password-protected PDF errors from the backend", async () => {
     vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
       new Response(JSON.stringify({ detail: "Password-protected PDFs are not supported." }), {
         headers: { "Content-Type": "application/json" },
@@ -71,7 +109,27 @@ describe("ResumeUploadForm", () => {
     fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
-      "Password-protected PDFs are not supported.",
+      "Remove the PDF password protection and upload the resume again.",
+    );
+  });
+
+  it("shows invalid PDF errors from the backend", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify({ detail: "Resume file is not a valid PDF." }), {
+        headers: { "Content-Type": "application/json" },
+        status: 422,
+      }),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile("invalid.pdf")] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This file could not be read as a valid PDF. Export your resume as a new PDF and try again.",
     );
   });
 });

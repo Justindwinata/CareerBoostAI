@@ -9,3 +9,7 @@ export type ResumeUploadResponse = {
 export type ResumeUploadError = {
   detail: string;
 };
+
+export type ResumeUploadResult = ResumeUploadResponse & {
+  uploaded_at: string;
+};
