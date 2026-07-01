@@ -11,6 +11,7 @@ from careerboost_api.services.resume_extraction import (
     ResumeTextExtractionError,
     ResumeTextExtractionResult,
 )
+from careerboost_api.services.resume_text_processing import ResumeTextProcessor
 from careerboost_api.services.resume_upload import ValidatedResumeUpload
 
 LOW_TEXT_EXTRACTION_MESSAGE = "Resume text is too short to analyze. Upload a text-based PDF resume."
@@ -19,12 +20,17 @@ LOW_TEXT_EXTRACTION_MESSAGE = "Resume text is too short to analyze. Upload a tex
 class ResumeIntakeOrchestrator:
     """Map validated resume intake outcomes into the canonical analysis contract."""
 
+    def __init__(self, text_processor: ResumeTextProcessor | None = None) -> None:
+        self.text_processor = text_processor or ResumeTextProcessor()
+
     def build_success(
         self,
         *,
         upload: ValidatedResumeUpload,
         extraction: ResumeTextExtractionResult,
     ) -> ResumeAnalysisContract:
+        processed_text = self.text_processor.process(extraction.extracted_text)
+
         return ResumeAnalysisContract(
             status="intake_completed",
             intake=self._build_intake(upload),
@@ -34,6 +40,8 @@ class ResumeIntakeOrchestrator:
                 character_count=extraction.character_count,
                 page_count=extraction.page_count,
                 extracted_text=extraction.extracted_text,
+                normalized_text=processed_text.normalized_text,
+                sections=processed_text.sections,
             ),
         )
 

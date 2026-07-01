@@ -5,6 +5,7 @@ from careerboost_api.domain.analysis import (
     AnalysisErrorCategory,
     AnalysisStagePlaceholder,
     AnalysisStatus,
+    DetectedResumeSection,
     ExtractionConfidence,
     ExtractionStatus,
     FutureStageStatus,
@@ -12,6 +13,7 @@ from careerboost_api.domain.analysis import (
     ResumeAnalysisContract,
     ResumeExtractionContract,
     ResumeIntakeContract,
+    ResumeSectionName,
 )
 
 __all__ = [
@@ -19,6 +21,7 @@ __all__ = [
     "AnalysisErrorCategory",
     "AnalysisStagePlaceholder",
     "AnalysisStatus",
+    "DetectedResumeSection",
     "ExtractionConfidence",
     "ExtractionStatus",
     "FutureStageStatus",
@@ -26,4 +29,5 @@ __all__ = [
     "ResumeAnalysisContract",
     "ResumeExtractionContract",
     "ResumeIntakeContract",
+    "ResumeSectionName",
 ]

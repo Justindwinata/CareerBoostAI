@@ -21,12 +21,24 @@ export type AnalysisError = {
   message: string;
 };
 
+export type ResumeSectionName = "summary" | "skills" | "experience" | "education" | "projects";
+
+export type DetectedResumeSection = {
+  name: ResumeSectionName;
+  heading: string;
+  start_line: number;
+  end_line: number;
+  content: string;
+};
+
 export type SuccessfulResumeExtractionResult = {
   status: "extracted";
   confidence: "medium" | "high";
   character_count: number;
   page_count: number;
   extracted_text: string;
+  normalized_text: string;
+  sections: DetectedResumeSection[];
   error: null;
 };
 
@@ -36,6 +48,8 @@ export type FailedResumeExtractionResult = {
   character_count: number;
   page_count: number;
   extracted_text: null;
+  normalized_text: null;
+  sections: [];
   error: AnalysisError;
 };
 

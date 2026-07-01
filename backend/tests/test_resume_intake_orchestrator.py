@@ -20,9 +20,16 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
     contract = orchestrator.build_success(
         upload=build_upload(),
         extraction=ResumeTextExtractionResult(
-            extracted_text="Readable resume text with enough content for future analysis.",
+            extracted_text=(
+                "Summary\n"
+                "Backend-focused student developer.\n\n"
+                "Technical Skills\n"
+                "Python, FastAPI, React\n\n"
+                "Projects\n"
+                "CareerBoost AI"
+            ),
             confidence="medium",
-            character_count=128,
+            character_count=118,
             page_count=1,
         ),
     )
@@ -31,6 +38,13 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
     assert contract.intake.filename == "resume.pdf"
     assert contract.extraction.status == "extracted"
     assert contract.extraction.confidence == "medium"
+    assert contract.extraction.normalized_text is not None
+    assert "Technical Skills" in contract.extraction.normalized_text
+    assert [section.name for section in contract.extraction.sections] == [
+        "summary",
+        "skills",
+        "projects",
+    ]
     assert contract.ats.status == "not_started"
     assert contract.skills.status == "not_started"
     assert contract.roles.status == "not_started"
@@ -55,6 +69,8 @@ def test_orchestrator_builds_low_text_failure_contract() -> None:
     assert contract.extraction.error.message == (
         "Resume text is too short to analyze. Upload a text-based PDF resume."
     )
+    assert contract.extraction.normalized_text is None
+    assert contract.extraction.sections == []
 
 
 def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:

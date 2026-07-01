@@ -20,6 +20,7 @@ ExtractionConfidence = Literal["medium", "high"]
 ExtractionStatus = Literal["extracted", "failed"]
 FutureStageStatus = Literal["not_started"]
 IntakeStatus = Literal["accepted"]
+ResumeSectionName = Literal["summary", "skills", "experience", "education", "projects"]
 
 
 class AnalysisError(BaseModel):
@@ -68,6 +69,8 @@ class ResumeExtractionContract(BaseModel):
     character_count: int = Field(default=0, ge=0)
     page_count: int = Field(default=0, ge=0)
     extracted_text: str | None = None
+    normalized_text: str | None = None
+    sections: list["DetectedResumeSection"] = Field(default_factory=list)
     error: AnalysisError | None = None
 
     @model_validator(mode="after")
@@ -77,6 +80,8 @@ class ResumeExtractionContract(BaseModel):
                 raise ValueError("successful extraction requires confidence")
             if not self.extracted_text:
                 raise ValueError("successful extraction requires extracted text")
+            if not self.normalized_text:
+                raise ValueError("successful extraction requires normalized text")
             if self.character_count <= 0:
                 raise ValueError("successful extraction requires a positive character count")
             if self.page_count <= 0:
@@ -91,6 +96,37 @@ class ResumeExtractionContract(BaseModel):
             raise ValueError("failed extraction must not include confidence")
         if self.extracted_text is not None:
             raise ValueError("failed extraction must not include extracted text")
+        if self.normalized_text is not None:
+            raise ValueError("failed extraction must not include normalized text")
+        if self.sections:
+            raise ValueError("failed extraction must not include detected sections")
+
+        return self
+
+
+class DetectedResumeSection(BaseModel):
+    """Deterministically detected resume section prepared for future analysis."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: ResumeSectionName
+    heading: str
+    start_line: int = Field(ge=1)
+    end_line: int = Field(ge=1)
+    content: str = ""
+
+    @field_validator("heading")
+    @classmethod
+    def require_heading(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("section heading must not be empty")
+
+        return value
+
+    @model_validator(mode="after")
+    def validate_line_range(self) -> Self:
+        if self.end_line < self.start_line:
+            raise ValueError("section end line must not be before start line")
 
         return self
 

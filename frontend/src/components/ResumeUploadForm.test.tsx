@@ -29,6 +29,9 @@ describe("ResumeUploadForm", () => {
             page_count: 1,
             extracted_text:
               "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
+            normalized_text:
+              "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
+            sections: [],
             error: null,
           },
           ats: {
@@ -185,6 +188,8 @@ describe("ResumeUploadForm", () => {
             character_count: 0,
             page_count: 0,
             extracted_text: null,
+            normalized_text: null,
+            sections: [],
             error: {
               category: "low_text",
               message: "Resume text is too short to analyze. Upload a text-based PDF resume.",

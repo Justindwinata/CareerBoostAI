@@ -3,6 +3,7 @@ from pydantic import ValidationError
 
 from careerboost_api.domain import (
     AnalysisError,
+    DetectedResumeSection,
     ResumeAnalysisContract,
     ResumeExtractionContract,
     ResumeIntakeContract,
@@ -28,6 +29,16 @@ def test_analysis_contract_represents_successful_resume_intake() -> None:
             character_count=850,
             page_count=2,
             extracted_text="Software engineering resume with project and internship experience.",
+            normalized_text="Software engineering resume with project and internship experience.",
+            sections=[
+                DetectedResumeSection(
+                    name="projects",
+                    heading="Projects",
+                    start_line=1,
+                    end_line=2,
+                    content="Portfolio API",
+                )
+            ],
         ),
     )
 
@@ -35,6 +46,8 @@ def test_analysis_contract_represents_successful_resume_intake() -> None:
     assert contract.intake.filename == "resume.pdf"
     assert contract.extraction.status == "extracted"
     assert contract.extraction.confidence == "high"
+    assert contract.extraction.normalized_text is not None
+    assert contract.extraction.sections[0].name == "projects"
     assert contract.ats.status == "not_started"
     assert contract.skills.status == "not_started"
     assert contract.roles.status == "not_started"
@@ -61,6 +74,8 @@ def test_analysis_contract_represents_low_text_extraction_failure() -> None:
     assert contract.extraction.error.category == "low_text"
     assert contract.extraction.confidence is None
     assert contract.extraction.extracted_text is None
+    assert contract.extraction.normalized_text is None
+    assert contract.extraction.sections == []
 
 
 def test_analysis_contract_represents_unreadable_pdf_failure() -> None:
@@ -86,6 +101,7 @@ def test_successful_extraction_requires_text_and_confidence() -> None:
             status="extracted",
             character_count=120,
             page_count=1,
+            normalized_text="Readable resume text.",
         )
 
 
@@ -120,6 +136,7 @@ def test_contract_rejects_extra_fields() -> None:
                 character_count=120,
                 page_count=1,
                 extracted_text="Readable resume content for analysis contract validation.",
+                normalized_text="Readable resume content for analysis contract validation.",
             ),
             unsupported_stage={"status": "not_started"},
         )

@@ -83,6 +83,8 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             "character_count": len(RESUME_TEXT),
             "page_count": 1,
             "extracted_text": RESUME_TEXT,
+            "normalized_text": RESUME_TEXT,
+            "sections": [],
             "error": None,
         },
         "ats": {
@@ -139,6 +141,7 @@ def test_upload_resume_delegates_success_mapping_to_orchestrator(
                 character_count=extraction.character_count,
                 page_count=extraction.page_count,
                 extracted_text=extraction.extracted_text,
+                normalized_text=extraction.extracted_text,
             ),
         )
 
@@ -198,6 +201,8 @@ def test_upload_resume_rejects_low_text_pdf() -> None:
         "character_count": 0,
         "page_count": 0,
         "extracted_text": None,
+        "normalized_text": None,
+        "sections": [],
         "error": {
             "category": "low_text",
             "message": "Resume text is too short to analyze. Upload a text-based PDF resume.",
