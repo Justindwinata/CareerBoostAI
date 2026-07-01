@@ -21,6 +21,7 @@ Canonical record of important product, architecture, and delivery decisions alre
 | ADR-011 | Add pre-commit local hooks | Catches quality issues before commit | Requires local setup with `.venv` and `backend/.venv` |
 | ADR-012 | Add coverage reporting without external SaaS | Improves quality visibility without accounts or tokens | No hosted coverage badge yet |
 | ADR-013 | Block Docker work until runtime exists | Prevents unvalidated infrastructure artifacts | Delays Docker Compose deliverable |
+| ADR-014 | Complete resume intake before analysis features | Establishes validated upload, extraction, normalization, section detection, and completeness metadata before ATS, AI, recommendations, or persistence | Sprint 2 produces preparation metadata, not final internship readiness analysis |
 
 ## Blocked Backlog Notes
 
@@ -46,6 +47,21 @@ Version 1.0 excludes:
 - Live job listings.
 
 These exclusions keep the project focused on internship readiness analysis and make the 30-day build path realistic.
+
+## Sprint 2 Analysis Boundary
+
+Sprint 2 has implemented the resume intake and preparation pipeline only. The current system can validate a PDF resume, extract text, normalize text, detect basic sections, compute a deterministic completeness baseline, and display neutral upload result metadata.
+
+The following analysis capabilities remain intentionally out of scope until later contracts:
+
+- ATS scoring.
+- Skill extraction.
+- Role matching.
+- Recommendations.
+- Persistence and history.
+- AI integration.
+
+This boundary prevents the UI or backend from overstating the current product state. Completeness and detected-section metadata are preparation signals only, not readiness judgments.
 
 ## Decision Update Rule
 

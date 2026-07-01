@@ -108,15 +108,27 @@ Implemented:
 - Frontend Vite React TypeScript foundation.
 - Frontend backend-health status panel.
 - CI, Dependabot, pre-commit, coverage, and Makefile quality gates.
+- PDF-only resume upload endpoint with defensive backend validation.
+- User-safe upload validation and extraction failure responses.
+- PDF text extraction with extraction confidence metadata.
+- Canonical structured analysis response contract.
+- Backend resume intake orchestration service.
+- Deterministic extracted-text normalization.
+- Deterministic section detection for `summary`, `skills`, `experience`, `education`, and `projects`.
+- Deterministic completeness baseline based only on detected section presence.
+- Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, and extracted-text preview.
 
 Not yet implemented:
 
-- Resume upload.
-- PDF parsing.
-- Database schema.
-- API contract for analysis.
 - ATS scoring.
+- Skill extraction.
+- Role matching.
+- Recommendations.
+- Persistence and analysis history.
+- Database schema.
 - AI integration.
 - Docker runtime artifacts.
+
+The current pipeline prepares resume data for future analysis. It does not claim internship readiness, ATS compatibility, role fit, or improvement recommendations.
 
 Docker remains blocked until a compatible runtime is available and validation can run.

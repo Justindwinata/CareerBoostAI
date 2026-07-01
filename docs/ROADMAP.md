@@ -12,8 +12,8 @@ Canonical delivery roadmap toward Version 1.0.
 | Sprint 1 | Backend and frontend engineering foundation | Completed |
 | Sprint 1.5 | Repository quality automation and release engineering | Completed |
 | Sprint 1.75 | Source-of-truth documentation baseline | Completed |
-| Sprint 2 | Resume upload and validation workflow | Planned |
-| Sprint 3 | Resume parsing and analysis pipeline | Planned |
+| Sprint 2 | Resume intake pipeline and neutral upload result UX | In progress: intake foundation complete through EC-0119 |
+| Sprint 3 | Deterministic analysis, ATS feedback, and recommendation foundations | Planned |
 | Sprint 4 | Dashboard, recommendations, history, and release hardening | Planned |
 
 ## Major Milestones
@@ -24,7 +24,7 @@ Canonical delivery roadmap toward Version 1.0.
 | `v0.2.0` | Backend foundation | FastAPI app, config, logging, health, tests |
 | `v0.3.0` | Frontend foundation | React/Vite app, lint, tests, build, health status |
 | `v0.4.0` | Resume upload | Validated PDF upload and user-safe error states |
-| `v0.5.0` | Resume parsing and analysis workflow | Text extraction, confidence handling, structured analysis contracts |
+| `v0.5.0` | Resume intake pipeline | Text extraction, confidence handling, structured analysis contracts, normalization, section detection, completeness metadata, neutral result UX |
 | `v0.6.0` | Dashboard and history | Results dashboard and previous analysis records |
 | `v0.9.0` | Release candidate | Full Version 1.0 scope complete and hardened |
 | `v1.0.0` | Public portfolio release | Approved MVP scope complete, documented, validated, and deployable |
@@ -41,15 +41,42 @@ Docker work is blocked by unavailable runtime validation:
 
 Do not implement Docker artifacts until the blocker is removed.
 
+## Sprint 2 Progress Snapshot
+
+Sprint 2 has completed the resume intake foundation. The current implementation supports:
+
+- PDF-only resume upload with backend validation for file type, file size, invalid PDFs, empty files, and password-protected PDFs.
+- User-safe upload and extraction error states.
+- PDF text extraction for valid text-based resumes.
+- Extraction confidence metadata.
+- Canonical structured analysis response contract.
+- Backend orchestration service for mapping validated uploads and extraction outcomes into the response contract.
+- Deterministic text normalization for extracted text.
+- Deterministic resume section detection for `summary`, `skills`, `experience`, `education`, and `projects`.
+- Deterministic completeness baseline based only on detected section presence.
+- Neutral upload result UI showing upload metadata, extraction metadata, completeness baseline, detected section details, and an extracted-text preview toggle.
+
+Sprint 2 has intentionally not implemented:
+
+- ATS scoring.
+- Skill extraction.
+- Role matching.
+- Recommendations.
+- Persistence or analysis history.
+- AI integration.
+- Docker artifacts.
+
+The current Sprint 2 result is an intake and preparation pipeline, not a completed resume analysis product.
+
 ## Release Path to `v1.0.0`
 
 1. Complete source-of-truth documentation.
 2. Define API contracts for upload, analysis status, results, and history.
 3. Define database design before persistence implementation.
-4. Implement resume upload with backend validation and frontend error states.
-5. Implement PDF parsing with confidence reporting.
-6. Implement structured analysis engine boundaries.
-7. Implement dashboard, recommendations, and history.
+4. Implement resume upload with backend validation and frontend error states. Completed in Sprint 2.
+5. Implement PDF parsing with confidence reporting. Completed in Sprint 2.
+6. Implement structured intake and preparation boundaries. Completed in Sprint 2.
+7. Implement deterministic analysis, ATS feedback, skill extraction, role matching, recommendations, dashboard, and history.
 8. Complete security, accessibility, performance, and release hardening.
 9. Resume Docker work only after runtime validation is available.
 10. Tag `v1.0.0` only after full MVP scope passes validation.
