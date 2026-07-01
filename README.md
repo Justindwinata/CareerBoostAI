@@ -87,7 +87,7 @@ Planned structure:
 | --- | --- | --- |
 | Sprint 0 | Repository foundation and governance | Completed |
 | Sprint 1 | Backend and frontend engineering foundation | Completed |
-| Sprint 1.5 | Repository quality automation and release engineering | In progress |
+| Sprint 1.5 | Repository quality automation and release engineering | Completed |
 | Sprint 2 | Resume upload and validation workflow | Planned |
 | Sprint 3 | Resume parsing and analysis pipeline | Planned |
 | Sprint 4 | Dashboard, recommendations, history, and release hardening | Planned |
@@ -188,6 +188,7 @@ Existing documentation:
 - [Environment Example](.env.example)
 - [Development Guide](docs/DEVELOPMENT.md)
 - [Sprint 1 Completion Report](docs/SPRINT_1_COMPLETION_REPORT.md)
+- [Sprint 1.5 Completion Report](docs/SPRINT_1_5_COMPLETION_REPORT.md)
 - [Blocked Backlog](docs/BLOCKED_BACKLOG.md)
 
 Planned documentation:

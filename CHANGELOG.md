@@ -11,10 +11,18 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 
 - Repository governance files for licensing, contribution rules, security reporting, issue templates, pull request review, and local automation.
 - Environment configuration example for the planned React, FastAPI, PostgreSQL, and Docker-based development workflow.
+- FastAPI backend foundation with application factory, configuration, structured logging, health endpoint, linting, formatting, and tests.
+- React, Vite, and TypeScript frontend foundation with linting, formatting, tests, production build, and backend health status integration.
+- GitHub Actions CI workflow for backend and frontend validation.
+- Dependabot configuration for GitHub Actions, backend Python dependencies, and frontend npm dependencies.
+- Pre-commit quality gate using local backend and frontend validation commands.
+- Backend and frontend coverage reporting.
+- Sprint completion reports, blocked backlog, and development guide.
 
 ### Changed
 
 - Established repository standards before application feature development begins.
+- Updated root Makefile commands to match the active backend and frontend workspaces.
 
 ### Security
 
