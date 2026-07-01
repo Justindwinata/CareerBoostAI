@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 
 from careerboost_api.domain.ats import AtsFeedbackContract
 from careerboost_api.domain.resume_sections import ResumeSectionName
+from careerboost_api.domain.skills import SkillSignalsContract
 
 AnalysisStatus = Literal["intake_completed", "failed"]
 AnalysisErrorCategory = Literal[
@@ -191,7 +192,7 @@ class ResumeAnalysisContract(BaseModel):
     ats: AtsFeedbackContract | AnalysisStagePlaceholder = Field(
         default_factory=lambda: AnalysisStagePlaceholder(name="ats", label="ATS analysis")
     )
-    skills: AnalysisStagePlaceholder = Field(
+    skills: SkillSignalsContract | AnalysisStagePlaceholder = Field(
         default_factory=lambda: AnalysisStagePlaceholder(name="skills", label="Skill extraction")
     )
     roles: AnalysisStagePlaceholder = Field(

@@ -58,7 +58,9 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
         "extraction_confidence:medium",
         "keyword_coverage:not_evaluated",
     ]
-    assert contract.skills.status == "not_started"
+    assert contract.skills.status == "signals_detected"
+    assert [signal.name for signal in contract.skills.signals] == ["Python", "FastAPI", "React"]
+    assert contract.skills.signals[0].evidence[0].source_area == "skills"
     assert contract.roles.status == "not_started"
     assert contract.recommendations.status == "not_started"
 
@@ -86,6 +88,7 @@ def test_orchestrator_builds_low_text_failure_contract() -> None:
     assert contract.completeness is None
     assert contract.ats.status == "not_evaluated"
     assert contract.ats.issues[0].observed_signal == "ats_feedback:insufficient_data"
+    assert contract.skills.status == "not_evaluated"
 
 
 def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
@@ -101,3 +104,4 @@ def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
     assert contract.extraction.error.category == "unreadable_pdf"
     assert contract.completeness is None
     assert contract.ats.status == "not_evaluated"
+    assert contract.skills.status == "not_evaluated"

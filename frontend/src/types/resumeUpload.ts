@@ -93,6 +93,31 @@ export type AtsFeedbackResult = {
   };
 };
 
+export type SkillSignalCategory =
+  "programming_language" | "framework" | "database" | "tooling" | "testing" | "web_technology";
+
+export type SkillSourceArea = ResumeSectionName | "document";
+
+export type SkillSignalEvidence = {
+  matched_text: string;
+  source_area: SkillSourceArea;
+  line_number: number;
+  evidence_text: string;
+};
+
+export type SkillSignal = {
+  name: string;
+  category: SkillSignalCategory;
+  evidence_level: "explicit_mention";
+  evidence: SkillSignalEvidence[];
+};
+
+export type SkillSignalsResult = {
+  status: "signals_detected" | "no_signals" | "not_evaluated";
+  source: "deterministic_normalized_text";
+  signals: SkillSignal[];
+};
+
 export type ResumeCompletenessResult = {
   expected_sections: ResumeSectionName[];
   present_sections: ResumeSectionName[];
@@ -106,7 +131,7 @@ export type ResumeUploadResponse = {
   extraction: ResumeExtractionResult;
   completeness: ResumeCompletenessResult | null;
   ats: AnalysisStagePlaceholder | AtsFeedbackResult;
-  skills: AnalysisStagePlaceholder;
+  skills: AnalysisStagePlaceholder | SkillSignalsResult;
   roles: AnalysisStagePlaceholder;
   recommendations: AnalysisStagePlaceholder;
 };

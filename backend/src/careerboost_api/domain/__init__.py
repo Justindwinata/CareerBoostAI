@@ -26,6 +26,15 @@ from careerboost_api.domain.ats import (
     AtsScoreStatus,
 )
 from careerboost_api.domain.resume_sections import ResumeSectionName
+from careerboost_api.domain.skills import (
+    SkillEvidenceLevel,
+    SkillSignal,
+    SkillSignalCategory,
+    SkillSignalEvidence,
+    SkillSignalsContract,
+    SkillSignalStatus,
+    SkillSourceArea,
+)
 
 __all__ = [
     "AnalysisError",
@@ -50,4 +59,11 @@ __all__ = [
     "ResumeExtractionContract",
     "ResumeIntakeContract",
     "ResumeSectionName",
+    "SkillEvidenceLevel",
+    "SkillSignal",
+    "SkillSignalCategory",
+    "SkillSignalEvidence",
+    "SkillSignalsContract",
+    "SkillSignalStatus",
+    "SkillSourceArea",
 ]

@@ -202,9 +202,75 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             },
         },
         "skills": {
-            "status": "not_started",
-            "name": "skills",
-            "label": "Skill extraction",
+            "status": "signals_detected",
+            "source": "deterministic_normalized_text",
+            "signals": [
+                {
+                    "name": "Python",
+                    "category": "programming_language",
+                    "evidence_level": "explicit_mention",
+                    "evidence": [
+                        {
+                            "matched_text": "python",
+                            "source_area": "document",
+                            "line_number": 1,
+                            "evidence_text": RESUME_TEXT,
+                        }
+                    ],
+                },
+                {
+                    "name": "TypeScript",
+                    "category": "programming_language",
+                    "evidence_level": "explicit_mention",
+                    "evidence": [
+                        {
+                            "matched_text": "typescript",
+                            "source_area": "document",
+                            "line_number": 1,
+                            "evidence_text": RESUME_TEXT,
+                        }
+                    ],
+                },
+                {
+                    "name": "FastAPI",
+                    "category": "framework",
+                    "evidence_level": "explicit_mention",
+                    "evidence": [
+                        {
+                            "matched_text": "fastapi",
+                            "source_area": "document",
+                            "line_number": 1,
+                            "evidence_text": RESUME_TEXT,
+                        }
+                    ],
+                },
+                {
+                    "name": "React",
+                    "category": "framework",
+                    "evidence_level": "explicit_mention",
+                    "evidence": [
+                        {
+                            "matched_text": "react",
+                            "source_area": "document",
+                            "line_number": 1,
+                            "evidence_text": RESUME_TEXT,
+                        }
+                    ],
+                },
+                {
+                    "name": "PostgreSQL",
+                    "category": "database",
+                    "evidence_level": "explicit_mention",
+                    "evidence": [
+                        {
+                            "matched_text": "postgresql",
+                            "source_area": "document",
+                            "line_number": 1,
+                            "evidence_text": RESUME_TEXT,
+                        }
+                    ],
+                },
+            ],
         },
         "roles": {
             "status": "not_started",
@@ -327,6 +393,7 @@ def test_upload_resume_rejects_low_text_pdf() -> None:
     assert response_body["completeness"] is None
     assert response_body["ats"]["status"] == "not_evaluated"
     assert response_body["ats"]["score"] == {"status": "not_scored", "score": None}
+    assert response_body["skills"]["status"] == "not_evaluated"
 
 
 def test_upload_resume_returns_structured_unreadable_extraction_failure(
