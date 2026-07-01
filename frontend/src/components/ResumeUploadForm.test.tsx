@@ -13,6 +13,29 @@ function createSuccessfulUploadResponse(
     missing_sections: ["experience", "education"],
     score: 0.6,
   },
+  sections: unknown = [
+    {
+      name: "summary",
+      heading: "Professional Summary",
+      start_line: 1,
+      end_line: 3,
+      content: "Backend-focused student developer.",
+    },
+    {
+      name: "skills",
+      heading: "Technical Skills",
+      start_line: 4,
+      end_line: 6,
+      content: "Python, FastAPI, React",
+    },
+    {
+      name: "projects",
+      heading: "Projects",
+      start_line: 7,
+      end_line: 7,
+      content: "CareerBoost AI",
+    },
+  ],
 ) {
   return {
     status: "intake_completed",
@@ -31,7 +54,7 @@ function createSuccessfulUploadResponse(
         "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
       normalized_text:
         "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
-      sections: [],
+      sections,
       error: null,
     },
     completeness,
@@ -90,13 +113,41 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByText("3 of 5 expected sections detected (60%)")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Present sections" })).toBeVisible();
     expect(screen.getByRole("heading", { name: "Missing sections" })).toBeVisible();
-    expect(screen.getByText("Summary")).toBeVisible();
-    expect(screen.getByText("Skills")).toBeVisible();
-    expect(screen.getByText("Projects")).toBeVisible();
+    expect(screen.getAllByText("Summary").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText("Skills").length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText("Projects").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByText("Experience")).toBeVisible();
     expect(screen.getByText("Education")).toBeVisible();
+    expect(screen.getByText("Detected Sections")).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Detected headings and line ranges" }),
+    ).toBeVisible();
+    expect(screen.getByText("Professional Summary")).toBeVisible();
+    expect(screen.getByText("Technical Skills")).toBeVisible();
+    expect(screen.getByText("Lines 1-3")).toBeVisible();
+    expect(screen.getByText("Lines 4-6")).toBeVisible();
+    expect(screen.getByText("Line 7")).toBeVisible();
     expect(screen.getByText("Ready for analysis workflow")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows a neutral unavailable state when detected sections are absent", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(JSON.stringify(createSuccessfulUploadResponse(undefined, [])), {
+        headers: { "Content-Type": "application/json" },
+        status: 202,
+      }),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("No detected section details available.")).toBeVisible();
   });
 
   it("shows a neutral unavailable state when completeness metadata is absent", async () => {

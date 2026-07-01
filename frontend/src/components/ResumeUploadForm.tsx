@@ -71,6 +71,14 @@ function formatCompletenessRatio(completeness: NonNullable<ResumeUploadResult["c
   return `${detectedCount} of ${expectedCount} expected sections detected (${percentage}%)`;
 }
 
+function formatLineRange(startLine: number, endLine: number): string {
+  if (startLine === endLine) {
+    return `Line ${startLine}`;
+  }
+
+  return `Lines ${startLine}-${endLine}`;
+}
+
 export function ResumeUploadForm() {
   const [uploadState, setUploadState] = useState<UploadState>({ kind: "idle" });
 
@@ -241,6 +249,29 @@ export function ResumeUploadForm() {
               </>
             ) : (
               <p className="section-empty-state">Completeness metadata unavailable.</p>
+            )}
+          </section>
+
+          <section className="detected-sections-panel" aria-labelledby="detected-sections-title">
+            <div>
+              <p className="eyebrow">Detected Sections</p>
+              <h4 id="detected-sections-title">Detected headings and line ranges</h4>
+            </div>
+
+            {uploadState.result.extraction.sections.length > 0 ? (
+              <ul className="detected-section-list">
+                {uploadState.result.extraction.sections.map((section) => (
+                  <li key={`${section.name}-${section.start_line}-${section.end_line}`}>
+                    <div>
+                      <strong>{formatSectionName(section.name)}</strong>
+                      <span>{section.heading}</span>
+                    </div>
+                    <p>{formatLineRange(section.start_line, section.end_line)}</p>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="section-empty-state">No detected section details available.</p>
             )}
           </section>
         </section>
