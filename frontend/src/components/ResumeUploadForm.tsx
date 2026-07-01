@@ -13,6 +13,13 @@ import type {
 
 const MAX_UPLOAD_SIZE_BYTES = 5 * 1024 * 1024;
 const EXTRACTED_TEXT_PREVIEW_LIMIT = 360;
+const PROCESSING_STAGES = [
+  "Uploading resume",
+  "Validating document",
+  "Extracting text",
+  "Preparing analysis metadata",
+  "Rendering results",
+];
 
 type UploadState =
   | { kind: "idle" }
@@ -250,6 +257,7 @@ function getPreviewText(extractedText: string, isExpanded: boolean): string {
 export function ResumeUploadForm() {
   const [uploadState, setUploadState] = useState<UploadState>({ kind: "idle" });
   const [isTextPreviewExpanded, setIsTextPreviewExpanded] = useState(false);
+  const isProcessing = uploadState.kind === "submitting";
 
   const selectedFile =
     uploadState.kind === "selected" || uploadState.kind === "submitting" ? uploadState.file : null;
@@ -275,6 +283,10 @@ export function ResumeUploadForm() {
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (isProcessing) {
+      return;
+    }
 
     if (!selectedFile) {
       setUploadState({ kind: "error", message: "Select a PDF resume before uploading." });
@@ -313,7 +325,12 @@ export function ResumeUploadForm() {
         </p>
       </div>
 
-      <form className="upload-form" onSubmit={handleSubmit}>
+      <form
+        className="upload-form"
+        aria-label="Resume upload form"
+        aria-busy={isProcessing}
+        onSubmit={handleSubmit}
+      >
         <label className="file-label" htmlFor="resume-file">
           Select PDF resume
         </label>
@@ -322,6 +339,7 @@ export function ResumeUploadForm() {
           name="resume-file"
           type="file"
           accept="application/pdf,.pdf"
+          disabled={isProcessing}
           onChange={(event) => handleFileChange(event.target.files?.[0])}
         />
 
@@ -332,9 +350,31 @@ export function ResumeUploadForm() {
         ) : null}
 
         <button type="submit" disabled={uploadState.kind === "submitting"}>
-          {uploadState.kind === "submitting" ? "Uploading..." : "Upload resume"}
+          {isProcessing ? "Processing resume..." : "Upload resume"}
         </button>
       </form>
+
+      {isProcessing ? (
+        <section className="processing-panel" aria-labelledby="processing-title" aria-busy="true">
+          <div className="processing-panel-header">
+            <div className="loading-indicator" aria-hidden="true" />
+            <div>
+              <p className="eyebrow">Processing Resume</p>
+              <h3 id="processing-title">Processing document metadata</h3>
+            </div>
+          </div>
+
+          <p className="processing-live-status" role="status" aria-live="polite">
+            Resume processing is in progress. Keep this page open while the request completes.
+          </p>
+
+          <ol className="processing-stage-list" aria-label="Expected processing workflow">
+            {PROCESSING_STAGES.map((stageName) => (
+              <li key={stageName}>{stageName}</li>
+            ))}
+          </ol>
+        </section>
+      ) : null}
 
       {uploadState.kind === "success" ? (
         <section className="upload-result-panel" aria-labelledby="upload-result-title">
@@ -688,9 +728,10 @@ export function ResumeUploadForm() {
       ) : null}
 
       {uploadState.kind === "error" ? (
-        <p className="upload-message upload-message--error" role="alert">
-          {uploadState.message}
-        </p>
+        <div className="upload-message upload-message--error" role="alert">
+          <p>{uploadState.message}</p>
+          <p>Choose a PDF resume and submit again.</p>
+        </div>
       ) : null}
     </section>
   );

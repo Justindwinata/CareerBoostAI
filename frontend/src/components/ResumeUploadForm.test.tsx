@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 
 import { ResumeUploadForm } from "./ResumeUploadForm";
 
@@ -12,6 +12,26 @@ const LONG_EXTRACTED_TEXT =
 
 function createPdfFile(name = "resume.pdf") {
   return new File(["%PDF-1.7"], name, { type: "application/pdf" });
+}
+
+function createUploadSuccessResponse() {
+  return new Response(JSON.stringify(createSuccessfulUploadResponse()), {
+    headers: { "Content-Type": "application/json" },
+    status: 202,
+  });
+}
+
+function createDeferredResponse() {
+  let resolve!: (response: Response) => void;
+
+  const promise = new Promise<Response>((promiseResolve) => {
+    resolve = promiseResolve;
+  });
+
+  return {
+    promise,
+    resolve,
+  };
 }
 
 function createSuccessfulUploadResponse(
@@ -218,6 +238,107 @@ function createSuccessfulUploadResponse(
 describe("ResumeUploadForm", () => {
   afterEach(() => {
     vi.restoreAllMocks();
+  });
+
+  it("shows an accessible processing state immediately after submit", async () => {
+    const deferredResponse = createDeferredResponse();
+    vi.spyOn(globalThis, "fetch").mockReturnValueOnce(deferredResponse.promise);
+
+    render(<ResumeUploadForm />);
+
+    const fileInput = screen.getByLabelText("Select PDF resume");
+    fireEvent.change(fileInput, {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(screen.getByRole("heading", { name: "Processing document metadata" })).toBeVisible();
+    expect(screen.getByRole("status")).toHaveTextContent(
+      "Resume processing is in progress. Keep this page open while the request completes.",
+    );
+    expect(screen.getByLabelText("Expected processing workflow")).toBeVisible();
+    expect(screen.getByText("Uploading resume")).toBeVisible();
+    expect(screen.getByText("Validating document")).toBeVisible();
+    expect(screen.getByText("Extracting text")).toBeVisible();
+    expect(screen.getByText("Preparing analysis metadata")).toBeVisible();
+    expect(screen.getByText("Rendering results")).toBeVisible();
+    expect(fileInput).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Processing resume..." })).toBeDisabled();
+    expect(screen.getByRole("form", { name: "Resume upload form" })).toHaveAttribute(
+      "aria-busy",
+      "true",
+    );
+
+    deferredResponse.resolve(createUploadSuccessResponse());
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+  });
+
+  it("prevents duplicate submissions while processing", () => {
+    const deferredResponse = createDeferredResponse();
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockReturnValueOnce(deferredResponse.promise);
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    const processingButton = screen.getByRole("button", { name: "Processing resume..." });
+    fireEvent.click(processingButton);
+    fireEvent.submit(processingButton.closest("form") as HTMLFormElement);
+
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it("transitions from processing state to the analysis dashboard after success", async () => {
+    const deferredResponse = createDeferredResponse();
+    vi.spyOn(globalThis, "fetch").mockReturnValueOnce(deferredResponse.promise);
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(screen.getByRole("heading", { name: "Processing document metadata" })).toBeVisible();
+
+    deferredResponse.resolve(createUploadSuccessResponse());
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.queryByRole("heading", { name: "Processing document metadata" })).toBeNull();
+    expect(screen.getByLabelText("Select PDF resume")).not.toBeDisabled();
+    expect(screen.getByRole("button", { name: "Upload resume" })).not.toBeDisabled();
+  });
+
+  it("restores controls and shows retry guidance after upload failure", async () => {
+    const deferredResponse = createDeferredResponse();
+    vi.spyOn(globalThis, "fetch").mockReturnValueOnce(deferredResponse.promise);
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile("invalid.pdf")] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(screen.getByRole("heading", { name: "Processing document metadata" })).toBeVisible();
+
+    deferredResponse.resolve(
+      new Response(JSON.stringify({ detail: "Resume file is not a valid PDF." }), {
+        headers: { "Content-Type": "application/json" },
+        status: 422,
+      }),
+    );
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "This file could not be read as a valid PDF. Export your resume as a new PDF and try again.",
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent("Choose a PDF resume and submit again.");
+    await waitFor(() => expect(screen.getByLabelText("Select PDF resume")).not.toBeDisabled());
+    expect(screen.getByRole("button", { name: "Upload resume" })).not.toBeDisabled();
+    expect(screen.queryByRole("heading", { name: "Processing document metadata" })).toBeNull();
   });
 
   it("renders the upload result panel after a successful upload", async () => {
