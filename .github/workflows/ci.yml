@@ -37,8 +37,8 @@ jobs:
       - name: Lint backend
         run: python -m ruff check backend
 
-      - name: Test backend
-        run: python -m pytest backend
+      - name: Test backend with coverage
+        run: python -m pytest backend --cov=careerboost_api --cov-report=term-missing
 
   frontend:
     name: Frontend
@@ -70,6 +70,10 @@ jobs:
       - name: Test frontend
         working-directory: frontend
         run: npm test
+
+      - name: Test frontend with coverage
+        working-directory: frontend
+        run: npm run test:coverage
 
       - name: Build frontend
         working-directory: frontend

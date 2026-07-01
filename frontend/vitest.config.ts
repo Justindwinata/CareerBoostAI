@@ -4,6 +4,10 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [react()],
   test: {
+    coverage: {
+      reporter: ["text", "lcov"],
+      reportsDirectory: "coverage",
+    },
     environment: "jsdom",
     globals: true,
     setupFiles: "./src/test/setup.ts",
