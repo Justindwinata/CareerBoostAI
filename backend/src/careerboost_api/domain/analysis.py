@@ -4,6 +4,9 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from careerboost_api.domain.ats import AtsFeedbackContract
+from careerboost_api.domain.resume_sections import ResumeSectionName
+
 AnalysisStatus = Literal["intake_completed", "failed"]
 AnalysisErrorCategory = Literal[
     "empty_upload",
@@ -20,7 +23,6 @@ ExtractionConfidence = Literal["medium", "high"]
 ExtractionStatus = Literal["extracted", "failed"]
 FutureStageStatus = Literal["not_started"]
 IntakeStatus = Literal["accepted"]
-ResumeSectionName = Literal["summary", "skills", "experience", "education", "projects"]
 
 
 class AnalysisError(BaseModel):
@@ -186,7 +188,7 @@ class ResumeAnalysisContract(BaseModel):
     intake: ResumeIntakeContract
     extraction: ResumeExtractionContract
     completeness: ResumeCompletenessContract | None = None
-    ats: AnalysisStagePlaceholder = Field(
+    ats: AtsFeedbackContract | AnalysisStagePlaceholder = Field(
         default_factory=lambda: AnalysisStagePlaceholder(name="ats", label="ATS analysis")
     )
     skills: AnalysisStagePlaceholder = Field(

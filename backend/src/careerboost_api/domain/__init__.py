@@ -14,7 +14,6 @@ from careerboost_api.domain.analysis import (
     ResumeCompletenessContract,
     ResumeExtractionContract,
     ResumeIntakeContract,
-    ResumeSectionName,
 )
 from careerboost_api.domain.ats import (
     AtsFeedbackContract,
@@ -26,6 +25,7 @@ from careerboost_api.domain.ats import (
     AtsScorePlaceholder,
     AtsScoreStatus,
 )
+from careerboost_api.domain.resume_sections import ResumeSectionName
 
 __all__ = [
     "AnalysisError",

@@ -7,6 +7,7 @@ from careerboost_api.domain import (
     ResumeExtractionContract,
     ResumeIntakeContract,
 )
+from careerboost_api.services.ats_feedback import AtsFeedbackService
 from careerboost_api.services.resume_completeness import ResumeCompletenessCalculator
 from careerboost_api.services.resume_extraction import (
     ResumeTextExtractionError,
@@ -25,9 +26,11 @@ class ResumeIntakeOrchestrator:
         self,
         text_processor: ResumeTextProcessor | None = None,
         completeness_calculator: ResumeCompletenessCalculator | None = None,
+        ats_feedback_service: AtsFeedbackService | None = None,
     ) -> None:
         self.text_processor = text_processor or ResumeTextProcessor()
         self.completeness_calculator = completeness_calculator or ResumeCompletenessCalculator()
+        self.ats_feedback_service = ats_feedback_service or AtsFeedbackService()
 
     def build_success(
         self,
@@ -38,19 +41,25 @@ class ResumeIntakeOrchestrator:
         processed_text = self.text_processor.process(extraction.extracted_text)
         completeness = self.completeness_calculator.calculate(processed_text.sections)
 
+        extraction_contract = ResumeExtractionContract(
+            status="extracted",
+            confidence=extraction.confidence,
+            character_count=extraction.character_count,
+            page_count=extraction.page_count,
+            extracted_text=extraction.extracted_text,
+            normalized_text=processed_text.normalized_text,
+            sections=processed_text.sections,
+        )
+
         return ResumeAnalysisContract(
             status="intake_completed",
             intake=self._build_intake(upload),
-            extraction=ResumeExtractionContract(
-                status="extracted",
-                confidence=extraction.confidence,
-                character_count=extraction.character_count,
-                page_count=extraction.page_count,
-                extracted_text=extraction.extracted_text,
-                normalized_text=processed_text.normalized_text,
-                sections=processed_text.sections,
-            ),
+            extraction=extraction_contract,
             completeness=completeness,
+            ats=self.ats_feedback_service.generate(
+                extraction=extraction_contract,
+                completeness=completeness,
+            ),
         )
 
     def build_extraction_failure(
@@ -59,15 +68,21 @@ class ResumeIntakeOrchestrator:
         upload: ValidatedResumeUpload,
         error: ResumeTextExtractionError,
     ) -> ResumeAnalysisContract:
+        extraction_contract = ResumeExtractionContract(
+            status="failed",
+            error=AnalysisError(
+                category=self._categorize_extraction_error(error),
+                message=str(error),
+            ),
+        )
+
         return ResumeAnalysisContract(
             status="failed",
             intake=self._build_intake(upload),
-            extraction=ResumeExtractionContract(
-                status="failed",
-                error=AnalysisError(
-                    category=self._categorize_extraction_error(error),
-                    message=str(error),
-                ),
+            extraction=extraction_contract,
+            ats=self.ats_feedback_service.generate(
+                extraction=extraction_contract,
+                completeness=None,
             ),
         )
 

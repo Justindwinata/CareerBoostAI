@@ -49,7 +49,15 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
     assert contract.completeness.present_sections == ["summary", "skills", "projects"]
     assert contract.completeness.missing_sections == ["experience", "education"]
     assert contract.completeness.score == 0.6
-    assert contract.ats.status == "not_started"
+    assert contract.ats.status == "metadata_ready"
+    assert contract.ats.score.status == "not_scored"
+    assert [issue.observed_signal for issue in contract.ats.issues] == [
+        "missing_section:experience",
+        "missing_section:education",
+        "character_count:<600",
+        "extraction_confidence:medium",
+        "keyword_coverage:not_evaluated",
+    ]
     assert contract.skills.status == "not_started"
     assert contract.roles.status == "not_started"
     assert contract.recommendations.status == "not_started"
@@ -76,6 +84,8 @@ def test_orchestrator_builds_low_text_failure_contract() -> None:
     assert contract.extraction.normalized_text is None
     assert contract.extraction.sections == []
     assert contract.completeness is None
+    assert contract.ats.status == "not_evaluated"
+    assert contract.ats.issues[0].observed_signal == "ats_feedback:insufficient_data"
 
 
 def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
@@ -90,3 +100,4 @@ def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
     assert contract.extraction.error is not None
     assert contract.extraction.error.category == "unreadable_pdf"
     assert contract.completeness is None
+    assert contract.ats.status == "not_evaluated"

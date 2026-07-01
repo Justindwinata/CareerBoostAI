@@ -95,9 +95,111 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             "score": 0,
         },
         "ats": {
-            "status": "not_started",
-            "name": "ats",
-            "label": "ATS analysis",
+            "status": "metadata_ready",
+            "source": "deterministic_resume_signals",
+            "issues": [
+                {
+                    "category": "section_presence",
+                    "severity": "warning",
+                    "title": "Expected section not detected",
+                    "description": (
+                        "The Summary section was not detected by deterministic resume headings."
+                    ),
+                    "observed_signal": "missing_section:summary",
+                    "related_sections": ["summary"],
+                },
+                {
+                    "category": "section_presence",
+                    "severity": "warning",
+                    "title": "Expected section not detected",
+                    "description": (
+                        "The Skills section was not detected by deterministic resume headings."
+                    ),
+                    "observed_signal": "missing_section:skills",
+                    "related_sections": ["skills"],
+                },
+                {
+                    "category": "section_presence",
+                    "severity": "warning",
+                    "title": "Expected section not detected",
+                    "description": (
+                        "The Experience section was not detected by deterministic resume headings."
+                    ),
+                    "observed_signal": "missing_section:experience",
+                    "related_sections": ["experience"],
+                },
+                {
+                    "category": "section_presence",
+                    "severity": "warning",
+                    "title": "Expected section not detected",
+                    "description": (
+                        "The Education section was not detected by deterministic resume headings."
+                    ),
+                    "observed_signal": "missing_section:education",
+                    "related_sections": ["education"],
+                },
+                {
+                    "category": "section_presence",
+                    "severity": "warning",
+                    "title": "Expected section not detected",
+                    "description": (
+                        "The Projects section was not detected by deterministic resume headings."
+                    ),
+                    "observed_signal": "missing_section:projects",
+                    "related_sections": ["projects"],
+                },
+                {
+                    "category": "section_structure",
+                    "severity": "warning",
+                    "title": "No resume headings detected",
+                    "description": (
+                        "No expected resume section headings were detected in the extracted text."
+                    ),
+                    "observed_signal": "section_count:0",
+                    "related_sections": [],
+                },
+                {
+                    "category": "formatting_risk",
+                    "severity": "warning",
+                    "title": "Low extracted text volume",
+                    "description": (
+                        "The extracted text length is below the deterministic metadata review "
+                        "threshold."
+                    ),
+                    "observed_signal": "character_count:<600",
+                    "related_sections": [],
+                },
+                {
+                    "category": "readability_structure",
+                    "severity": "info",
+                    "title": "Medium extraction confidence",
+                    "description": (
+                        "Text was extracted, but the extraction confidence was lower than the "
+                        "highest available deterministic confidence level."
+                    ),
+                    "observed_signal": "extraction_confidence:medium",
+                    "related_sections": [],
+                },
+                {
+                    "category": "keyword_coverage_placeholder",
+                    "severity": "info",
+                    "title": "Keyword coverage not evaluated",
+                    "description": (
+                        "Keyword coverage requires a future role-specific keyword source."
+                    ),
+                    "observed_signal": "keyword_coverage:not_evaluated",
+                    "related_sections": [],
+                },
+            ],
+            "keyword_coverage": {
+                "status": "not_evaluated",
+                "matched_keywords": [],
+                "missing_keywords": [],
+            },
+            "score": {
+                "status": "not_scored",
+                "score": None,
+            },
         },
         "skills": {
             "status": "not_started",
@@ -223,7 +325,8 @@ def test_upload_resume_rejects_low_text_pdf() -> None:
         },
     }
     assert response_body["completeness"] is None
-    assert response_body["ats"]["status"] == "not_started"
+    assert response_body["ats"]["status"] == "not_evaluated"
+    assert response_body["ats"]["score"] == {"status": "not_scored", "score": None}
 
 
 def test_upload_resume_returns_structured_unreadable_extraction_failure(

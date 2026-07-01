@@ -4,9 +4,9 @@ from typing import Literal, Self
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from careerboost_api.domain.analysis import ResumeSectionName
+from careerboost_api.domain.resume_sections import ResumeSectionName
 
-AtsFeedbackStatus = Literal["metadata_ready"]
+AtsFeedbackStatus = Literal["metadata_ready", "not_evaluated"]
 AtsIssueCategory = Literal[
     "section_presence",
     "section_structure",

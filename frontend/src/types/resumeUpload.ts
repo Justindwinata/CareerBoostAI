@@ -62,6 +62,37 @@ export type AnalysisStagePlaceholder = {
   label: string;
 };
 
+export type AtsFeedbackIssueCategory =
+  | "section_presence"
+  | "section_structure"
+  | "formatting_risk"
+  | "keyword_coverage_placeholder"
+  | "readability_structure";
+
+export type AtsFeedbackIssue = {
+  category: AtsFeedbackIssueCategory;
+  severity: "info" | "warning";
+  title: string;
+  description: string;
+  observed_signal: string;
+  related_sections: ResumeSectionName[];
+};
+
+export type AtsFeedbackResult = {
+  status: "metadata_ready" | "not_evaluated";
+  source: "deterministic_resume_signals";
+  issues: AtsFeedbackIssue[];
+  keyword_coverage: {
+    status: "not_evaluated";
+    matched_keywords: [];
+    missing_keywords: [];
+  };
+  score: {
+    status: "not_scored";
+    score: null;
+  };
+};
+
 export type ResumeCompletenessResult = {
   expected_sections: ResumeSectionName[];
   present_sections: ResumeSectionName[];
@@ -74,7 +105,7 @@ export type ResumeUploadResponse = {
   intake: ResumeIntakeResult;
   extraction: ResumeExtractionResult;
   completeness: ResumeCompletenessResult | null;
-  ats: AnalysisStagePlaceholder;
+  ats: AnalysisStagePlaceholder | AtsFeedbackResult;
   skills: AnalysisStagePlaceholder;
   roles: AnalysisStagePlaceholder;
   recommendations: AnalysisStagePlaceholder;
