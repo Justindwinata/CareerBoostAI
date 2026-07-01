@@ -11,7 +11,7 @@ export function App() {
         <h1 id="app-title">Engineering foundation is running.</h1>
         <p>
           Upload a PDF resume to start the internship readiness workflow. This release validates the
-          file only; analysis features come later.
+          file and extracts readable text; analysis features come later.
         </p>
         <SystemStatus />
         <ResumeUploadForm />

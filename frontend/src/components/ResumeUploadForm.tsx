@@ -43,6 +43,10 @@ function formatUploadTimestamp(timestamp: string): string {
   }).format(new Date(timestamp));
 }
 
+function formatConfidence(confidence: ResumeUploadResult["extraction"]["confidence"]): string {
+  return confidence === "high" ? "High confidence" : "Medium confidence";
+}
+
 export function ResumeUploadForm() {
   const [uploadState, setUploadState] = useState<UploadState>({ kind: "idle" });
 
@@ -98,8 +102,8 @@ export function ResumeUploadForm() {
         <p className="eyebrow">Resume Upload</p>
         <h2 id="upload-title">Upload a PDF resume</h2>
         <p>
-          This foundation step validates the file only. Resume analysis, ATS scoring, and
-          recommendations are intentionally not started yet.
+          This foundation step validates the file and extracts readable text. Resume analysis, ATS
+          scoring, and recommendations are intentionally not started yet.
         </p>
       </div>
 
@@ -129,7 +133,7 @@ export function ResumeUploadForm() {
       {uploadState.kind === "success" ? (
         <section className="upload-result-panel" aria-labelledby="upload-result-title">
           <div>
-            <p className="eyebrow">Validation Complete</p>
+            <p className="eyebrow">Extraction Complete</p>
             <h3 id="upload-result-title">Resume upload accepted</h3>
           </div>
           <dl className="upload-result-list">
@@ -150,8 +154,24 @@ export function ResumeUploadForm() {
               <dd>Accepted PDF resume</dd>
             </div>
             <div>
+              <dt>Extraction status</dt>
+              <dd>Text extraction complete</dd>
+            </div>
+            <div>
+              <dt>Extraction confidence</dt>
+              <dd>{formatConfidence(uploadState.result.extraction.confidence)}</dd>
+            </div>
+            <div>
+              <dt>Extracted text</dt>
+              <dd>{uploadState.result.extraction.character_count} readable characters</dd>
+            </div>
+            <div>
+              <dt>Pages processed</dt>
+              <dd>{uploadState.result.extraction.page_count}</dd>
+            </div>
+            <div>
               <dt>Next step</dt>
-              <dd>Ready for text extraction</dd>
+              <dd>Ready for analysis workflow</dd>
             </div>
           </dl>
         </section>

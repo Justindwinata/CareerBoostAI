@@ -19,7 +19,15 @@ describe("ResumeUploadForm", () => {
           filename: "resume.pdf",
           content_type: "application/pdf",
           size_bytes: 2048,
-          message: "Resume upload accepted. Analysis is not started in this contract.",
+          message: "Resume upload accepted and text extraction completed.",
+          extraction: {
+            status: "extracted",
+            confidence: "medium",
+            character_count: 148,
+            page_count: 1,
+            extracted_text:
+              "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing",
+          },
         }),
         {
           headers: { "Content-Type": "application/json" },
@@ -39,7 +47,11 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByText("resume.pdf")).toBeVisible();
     expect(screen.getByText("2.0 KB")).toBeVisible();
     expect(screen.getByText("Accepted PDF resume")).toBeVisible();
-    expect(screen.getByText("Ready for text extraction")).toBeVisible();
+    expect(screen.getByText("Text extraction complete")).toBeVisible();
+    expect(screen.getByText("Medium confidence")).toBeVisible();
+    expect(screen.getByText("148 readable characters")).toBeVisible();
+    expect(screen.getByText("1")).toBeVisible();
+    expect(screen.getByText("Ready for analysis workflow")).toBeVisible();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);
   });
 
@@ -130,6 +142,31 @@ describe("ResumeUploadForm", () => {
 
     expect(await screen.findByRole("alert")).toHaveTextContent(
       "This file could not be read as a valid PDF. Export your resume as a new PDF and try again.",
+    );
+  });
+
+  it("shows low-text extraction errors from the backend", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify({
+          detail: "Resume text is too short to analyze. Upload a text-based PDF resume.",
+        }),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 422,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile("blank.pdf")] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "The PDF does not contain enough readable text. Upload a text-based resume PDF instead of a scanned or blank file.",
     );
   });
 });

@@ -14,6 +14,10 @@ const ERROR_MESSAGES: Record<string, string> = {
     "Your resume is larger than 5 MB. Compress the PDF and try again.",
   "Resume file cannot be empty.":
     "The selected file is empty. Choose a PDF resume that contains content.",
+  "Resume text is too short to analyze. Upload a text-based PDF resume.":
+    "The PDF does not contain enough readable text. Upload a text-based resume PDF instead of a scanned or blank file.",
+  "Resume text could not be extracted from this PDF.":
+    "The resume was uploaded, but text could not be extracted. Export a fresh text-based PDF and try again.",
 };
 
 function getUploadErrorMessage(detail: string | undefined): string {
