@@ -61,7 +61,17 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
     assert contract.skills.status == "signals_detected"
     assert [signal.name for signal in contract.skills.signals] == ["Python", "FastAPI", "React"]
     assert contract.skills.signals[0].evidence[0].source_area == "skills"
-    assert contract.roles.status == "not_started"
+    assert contract.roles.status == "metadata_ready"
+    assert [candidate.role_name for candidate in contract.roles.candidates] == [
+        "Backend Developer Intern",
+        "Frontend Developer Intern",
+        "Full Stack Developer Intern",
+        "Data Analyst Intern",
+        "Machine Learning Intern",
+    ]
+    assert contract.roles.candidates[0].match_status == "partial_match"
+    assert contract.roles.candidates[0].matched_skill_signals == ["Python", "FastAPI"]
+    assert contract.roles.candidates[0].missing_required_signals == ["SQL"]
     assert contract.recommendations.status == "not_started"
 
 
@@ -89,6 +99,7 @@ def test_orchestrator_builds_low_text_failure_contract() -> None:
     assert contract.ats.status == "not_evaluated"
     assert contract.ats.issues[0].observed_signal == "ats_feedback:insufficient_data"
     assert contract.skills.status == "not_evaluated"
+    assert contract.roles.status == "not_evaluated"
 
 
 def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
@@ -105,3 +116,4 @@ def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
     assert contract.completeness is None
     assert contract.ats.status == "not_evaluated"
     assert contract.skills.status == "not_evaluated"
+    assert contract.roles.status == "not_evaluated"

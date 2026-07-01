@@ -26,6 +26,14 @@ from careerboost_api.domain.ats import (
     AtsScoreStatus,
 )
 from careerboost_api.domain.resume_sections import ResumeSectionName
+from careerboost_api.domain.roles import (
+    InternshipRoleName,
+    RoleMatchCandidate,
+    RoleMatchConfidenceState,
+    RoleMatchContractStatus,
+    RoleMatchesContract,
+    RoleMatchStatus,
+)
 from careerboost_api.domain.skills import (
     SkillEvidenceLevel,
     SkillSignal,
@@ -54,11 +62,17 @@ __all__ = [
     "ExtractionStatus",
     "FutureStageStatus",
     "IntakeStatus",
+    "InternshipRoleName",
     "ResumeAnalysisContract",
     "ResumeCompletenessContract",
     "ResumeExtractionContract",
     "ResumeIntakeContract",
     "ResumeSectionName",
+    "RoleMatchCandidate",
+    "RoleMatchConfidenceState",
+    "RoleMatchContractStatus",
+    "RoleMatchesContract",
+    "RoleMatchStatus",
     "SkillEvidenceLevel",
     "SkillSignal",
     "SkillSignalCategory",

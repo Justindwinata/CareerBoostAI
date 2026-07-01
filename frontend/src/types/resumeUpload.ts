@@ -118,6 +118,29 @@ export type SkillSignalsResult = {
   signals: SkillSignal[];
 };
 
+export type InternshipRoleName =
+  | "Backend Developer Intern"
+  | "Frontend Developer Intern"
+  | "Full Stack Developer Intern"
+  | "Data Analyst Intern"
+  | "Machine Learning Intern";
+
+export type RoleMatchCandidate = {
+  role_name: InternshipRoleName;
+  match_status: "matched" | "partial_match" | "not_matched" | "insufficient_data";
+  confidence_state: "metadata_ready" | "insufficient_data" | "not_evaluated";
+  deterministic_evidence: string[];
+  matched_skill_signals: string[];
+  missing_required_signals: string[];
+  supporting_sections: ResumeSectionName[];
+};
+
+export type RoleMatchesResult = {
+  status: "metadata_ready" | "insufficient_data" | "not_evaluated";
+  source: "deterministic_resume_metadata";
+  candidates: RoleMatchCandidate[];
+};
+
 export type ResumeCompletenessResult = {
   expected_sections: ResumeSectionName[];
   present_sections: ResumeSectionName[];
@@ -132,7 +155,7 @@ export type ResumeUploadResponse = {
   completeness: ResumeCompletenessResult | null;
   ats: AnalysisStagePlaceholder | AtsFeedbackResult;
   skills: AnalysisStagePlaceholder | SkillSignalsResult;
-  roles: AnalysisStagePlaceholder;
+  roles: AnalysisStagePlaceholder | RoleMatchesResult;
   recommendations: AnalysisStagePlaceholder;
 };
 

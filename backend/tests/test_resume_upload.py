@@ -273,9 +273,69 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             ],
         },
         "roles": {
-            "status": "not_started",
-            "name": "roles",
-            "label": "Role matching",
+            "status": "metadata_ready",
+            "source": "deterministic_resume_metadata",
+            "candidates": [
+                {
+                    "role_name": "Backend Developer Intern",
+                    "match_status": "partial_match",
+                    "confidence_state": "metadata_ready",
+                    "deterministic_evidence": [
+                        "Explicit required skill signal detected: Python",
+                        "Explicit required skill signal detected: FastAPI",
+                    ],
+                    "matched_skill_signals": ["Python", "FastAPI"],
+                    "missing_required_signals": ["SQL"],
+                    "supporting_sections": [],
+                },
+                {
+                    "role_name": "Frontend Developer Intern",
+                    "match_status": "partial_match",
+                    "confidence_state": "metadata_ready",
+                    "deterministic_evidence": [
+                        "Explicit required skill signal detected: React",
+                        "Explicit required skill signal detected: TypeScript",
+                    ],
+                    "matched_skill_signals": ["React", "TypeScript"],
+                    "missing_required_signals": ["CSS"],
+                    "supporting_sections": [],
+                },
+                {
+                    "role_name": "Full Stack Developer Intern",
+                    "match_status": "partial_match",
+                    "confidence_state": "metadata_ready",
+                    "deterministic_evidence": [
+                        "Explicit required skill signal detected: React",
+                        "Explicit required skill signal detected: TypeScript",
+                        "Explicit required skill signal detected: FastAPI",
+                    ],
+                    "matched_skill_signals": ["React", "TypeScript", "FastAPI"],
+                    "missing_required_signals": ["SQL"],
+                    "supporting_sections": [],
+                },
+                {
+                    "role_name": "Data Analyst Intern",
+                    "match_status": "partial_match",
+                    "confidence_state": "metadata_ready",
+                    "deterministic_evidence": [
+                        "Explicit required skill signal detected: Python",
+                    ],
+                    "matched_skill_signals": ["Python"],
+                    "missing_required_signals": ["SQL"],
+                    "supporting_sections": [],
+                },
+                {
+                    "role_name": "Machine Learning Intern",
+                    "match_status": "partial_match",
+                    "confidence_state": "metadata_ready",
+                    "deterministic_evidence": [
+                        "Explicit required skill signal detected: Python",
+                    ],
+                    "matched_skill_signals": ["Python"],
+                    "missing_required_signals": ["SQL"],
+                    "supporting_sections": [],
+                },
+            ],
         },
         "recommendations": {
             "status": "not_started",
@@ -394,6 +454,7 @@ def test_upload_resume_rejects_low_text_pdf() -> None:
     assert response_body["ats"]["status"] == "not_evaluated"
     assert response_body["ats"]["score"] == {"status": "not_scored", "score": None}
     assert response_body["skills"]["status"] == "not_evaluated"
+    assert response_body["roles"]["status"] == "not_evaluated"
 
 
 def test_upload_resume_returns_structured_unreadable_extraction_failure(
