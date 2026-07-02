@@ -10,6 +10,26 @@ Students often apply to internships without knowing whether their resume is ATS-
 
 CareerBoost AI focuses on one core outcome: helping early-career candidates understand where they stand and what action to take next.
 
+## Product Preview
+
+The screenshots below are verified captures from the running local application using the fictional demo resume in [assets/demo/careerboost-demo-resume.pdf](assets/demo/careerboost-demo-resume.pdf). They reflect the current deterministic resume intake pipeline: upload validation, PDF text extraction, metadata preparation, and dashboard rendering. AI scoring, recommendations, persistence, and history are not implemented yet.
+
+### Analysis Dashboard
+
+![CareerBoost AI desktop analysis dashboard](assets/screenshots/dashboard-desktop.png)
+
+### Responsive Experience
+
+![CareerBoost AI mobile analysis dashboard](assets/screenshots/dashboard-mobile.png)
+
+### Resume Analysis Flow
+
+| Upload | Processing | Result | Error Recovery |
+| --- | --- | --- | --- |
+| ![Desktop upload page](assets/screenshots/upload-desktop.png) | ![Desktop processing state](assets/screenshots/processing-desktop.png) | ![Desktop dashboard result](assets/screenshots/dashboard-desktop.png) | ![Desktop structured error state](assets/screenshots/error-desktop.png) |
+
+Flow represented: Upload → Validation → Extraction → Deterministic Analysis Metadata → Dashboard.
+
 ## Key Features Planned for Version 1.0
 
 - Resume PDF upload with validation and safe failure handling.
@@ -66,17 +86,16 @@ Core architectural direction:
 
 ## Repository Structure
 
-The repository is currently in Sprint 0 and contains foundational project files only. Application source code has not been created yet.
+The repository contains the backend, frontend, documentation, and verified demo assets for the current deterministic resume intake workflow.
 
-Planned structure:
+Current structure:
 
 ```text
 .
-├── backend/      Coming in Sprint 1: FastAPI application
-├── frontend/     Coming in Sprint 1: React + Vite + TypeScript application
-├── docs/         Coming in Sprint 0: product and architecture documentation
-├── docker/       Coming in Sprint 1: Docker support files
-├── scripts/      Coming in Sprint 1+: maintained automation scripts
+├── assets/       Verified screenshots and fictional demo resume
+├── backend/      FastAPI application
+├── frontend/     React + Vite + TypeScript application
+├── docs/         Product, architecture, roadmap, and engineering documentation
 ├── .github/      Repository templates and ownership configuration
 └── README.md
 ```
@@ -88,15 +107,15 @@ Planned structure:
 | Sprint 0 | Repository foundation and governance | Completed |
 | Sprint 1 | Backend and frontend engineering foundation | Completed |
 | Sprint 1.5 | Repository quality automation and release engineering | Completed |
-| Sprint 2 | Resume upload and validation workflow | Planned |
-| Sprint 3 | Resume parsing and analysis pipeline | Planned |
-| Sprint 4 | Dashboard, recommendations, history, and release hardening | Planned |
+| Sprint 2 | Resume upload, validation, extraction, and deterministic metadata | Completed |
+| Sprint 3 | Deterministic skill signals and internship role metadata | Completed |
+| Sprint 4 | Dashboard experience, accessibility, visual polish, and demo assets | In progress |
 
 ## Current Project Status
 
-CareerBoost AI is in foundation engineering mode.
+CareerBoost AI currently has a deterministic resume intake and analysis metadata workflow.
 
-Completed foundation work:
+Completed work:
 
 - Open-source license.
 - Git ignore rules for the planned stack.
@@ -109,23 +128,31 @@ Completed foundation work:
 - Dependabot dependency monitoring.
 - Pre-commit quality gate.
 - Backend and frontend coverage reporting.
+- Resume PDF upload validation.
+- PDF text extraction with confidence metadata.
+- Canonical structured analysis contract.
+- Deterministic section detection and completeness baseline.
+- Deterministic ATS feedback metadata without scoring.
+- Deterministic skill signal metadata.
+- Deterministic internship role matching metadata.
+- Accessible, responsive analysis dashboard.
+- Verified demo screenshots using fictional resume data.
 
 Not started yet:
 
 - Database schema.
-- API contracts.
 - Docker Compose runtime.
-- Resume upload.
-- Resume analysis.
 - ATS scoring.
 - AI integration.
-- Screenshots and demo deployment.
+- Recommendations.
+- Persistence and history.
+- Demo deployment.
 
 Blocked:
 
 - Docker Compose runtime, Dockerfiles, and Docker development workflow are blocked until a compatible Docker runtime is available.
 
-Screenshots: Coming in Sprint 4 after the user-facing dashboard exists.
+Screenshots are available in [assets/screenshots](assets/screenshots). Demo asset policy and regeneration notes are documented in [docs/DEMO_ASSETS.md](docs/DEMO_ASSETS.md).
 
 ## Engineering Principles
 
@@ -187,16 +214,15 @@ Existing documentation:
 - [Security Policy](SECURITY.md)
 - [Environment Example](.env.example)
 - [Development Guide](docs/DEVELOPMENT.md)
+- [Demo Assets Guide](docs/DEMO_ASSETS.md)
 - [Sprint 1 Completion Report](docs/SPRINT_1_COMPLETION_REPORT.md)
 - [Sprint 1.5 Completion Report](docs/SPRINT_1_5_COMPLETION_REPORT.md)
 - [Blocked Backlog](docs/BLOCKED_BACKLOG.md)
-
-Planned documentation:
-
-- Product Requirements Document: Coming in Sprint 0.
-- System Architecture Document: Future tracked documentation artifact.
-- API Contract: Future tracked documentation artifact before feature implementation.
-- Database Design: Future tracked documentation artifact before persistence implementation.
+- [Product Requirements Document](docs/PRD.md)
+- [System Architecture](docs/SYSTEM_ARCHITECTURE.md)
+- [Engineering Constitution](docs/ENGINEERING_CONSTITUTION.md)
+- [Roadmap](docs/ROADMAP.md)
+- [Decision Log](docs/DECISION_LOG.md)
 
 ## Versioning Strategy
 
