@@ -25,6 +25,16 @@ from careerboost_api.domain.ats import (
     AtsScorePlaceholder,
     AtsScoreStatus,
 )
+from careerboost_api.domain.recommendations import (
+    RecommendationCategory,
+    RecommendationEvidence,
+    RecommendationEvidenceSourceType,
+    RecommendationItem,
+    RecommendationPriority,
+    RecommendationsContract,
+    RecommendationSourceMetadata,
+    RecommendationStatus,
+)
 from careerboost_api.domain.resume_sections import ResumeSectionName
 from careerboost_api.domain.roles import (
     InternshipRoleName,
@@ -63,6 +73,14 @@ __all__ = [
     "FutureStageStatus",
     "IntakeStatus",
     "InternshipRoleName",
+    "RecommendationCategory",
+    "RecommendationEvidence",
+    "RecommendationEvidenceSourceType",
+    "RecommendationItem",
+    "RecommendationPriority",
+    "RecommendationsContract",
+    "RecommendationSourceMetadata",
+    "RecommendationStatus",
     "ResumeAnalysisContract",
     "ResumeCompletenessContract",
     "ResumeExtractionContract",
