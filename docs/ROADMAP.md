@@ -2,7 +2,7 @@
 
 ## Status
 
-Canonical delivery roadmap toward Version 1.0.
+Canonical delivery roadmap toward Version 1.0. This roadmap records completed sprint outcomes, blocked work, and the next planned delivery direction without expanding the approved product scope.
 
 ## Sprint Map
 
@@ -12,9 +12,10 @@ Canonical delivery roadmap toward Version 1.0.
 | Sprint 1 | Backend and frontend engineering foundation | Completed |
 | Sprint 1.5 | Repository quality automation and release engineering | Completed |
 | Sprint 1.75 | Source-of-truth documentation baseline | Completed |
-| Sprint 2 | Resume intake pipeline, deterministic ATS metadata, and neutral result UX | In progress: intake and ATS metadata slice complete through EC-0123 |
-| Sprint 3 | Skill extraction, role matching, and recommendation foundations | Planned |
-| Sprint 4 | Dashboard, recommendations, history, and release hardening | Planned |
+| Sprint 2 | Resume intake pipeline and deterministic ATS metadata | Completed |
+| Sprint 3 | Deterministic skill signals and internship role metadata | Completed |
+| Sprint 4 | Dashboard experience, accessibility, visual polish, and verified demo assets | Completed |
+| Sprint 5 | Release Readiness and Product Intelligence | Planned |
 
 ## Major Milestones
 
@@ -24,14 +25,47 @@ Canonical delivery roadmap toward Version 1.0.
 | `v0.2.0` | Backend foundation | FastAPI app, config, logging, health, tests |
 | `v0.3.0` | Frontend foundation | React/Vite app, lint, tests, build, health status |
 | `v0.4.0` | Resume upload | Validated PDF upload and user-safe error states |
-| `v0.5.0` | Resume intake pipeline | Text extraction, confidence handling, structured analysis contracts, normalization, section detection, completeness metadata, deterministic ATS metadata, neutral result UX |
-| `v0.6.0` | Dashboard and history | Results dashboard and previous analysis records |
-| `v0.9.0` | Release candidate | Full Version 1.0 scope complete and hardened |
+| `v0.5.0` | Resume intake pipeline | Text extraction, confidence handling, structured analysis contracts, normalization, section detection, completeness metadata, deterministic ATS metadata |
+| `v0.6.0` | Deterministic analysis metadata dashboard | Skill signals, role matching metadata, dashboard UX, accessibility, visual polish, verified demo assets |
+| `v0.7.0` | Product intelligence foundation | Deterministic recommendation contracts and explainable improvement guidance without AI claims |
+| `v0.9.0` | Release candidate | Version 1.0 scope complete enough for release hardening, security review, performance validation, and deployment preparation |
 | `v1.0.0` | Public portfolio release | Approved MVP scope complete, documented, validated, and deployable |
+
+## Completed Product Foundation
+
+The current implementation includes:
+
+- Deterministic PDF validation.
+- PDF text extraction with confidence metadata.
+- Extracted text normalization.
+- Resume section detection for `summary`, `skills`, `experience`, `education`, and `projects`.
+- Completeness baseline based on detected section presence.
+- Deterministic ATS metadata with `not_scored` score placeholder.
+- Deterministic skill signals from explicit text mentions only.
+- Deterministic internship role matching metadata without ranking or recommendations.
+- Analysis dashboard with upload, processing, error recovery, summary, structure, skill, ATS, and role sections.
+- Accessibility remediation for labels, focus management, live regions, navigation, touch targets, and responsive layout.
+- Visual consistency pass for professional SaaS-style dashboard presentation.
+- Verified desktop and mobile screenshots captured from the running application.
+- Fictional reproducible demo resume and demo asset documentation.
+
+## Not Implemented Yet
+
+The current implementation intentionally does not include:
+
+- Numeric ATS scoring.
+- AI or LLM integration.
+- Inferred skill assessment.
+- Ranked role recommendations.
+- Personalized learning recommendations.
+- Authentication.
+- Persistence and analysis history.
+- Production deployment.
+- Docker workflow artifacts.
 
 ## Blocked Items
 
-Docker work is blocked by unavailable runtime validation:
+Docker work remains blocked by unavailable local runtime validation:
 
 | Contract | Status | Resume Condition |
 | --- | --- | --- |
@@ -41,57 +75,45 @@ Docker work is blocked by unavailable runtime validation:
 
 Do not implement Docker artifacts until the blocker is removed.
 
-## Sprint 2 Progress Snapshot
+## Recommended Sprint 5
 
-Sprint 2 has completed the resume intake foundation and the first deterministic ATS feedback slice. The current implementation supports:
+Sprint 5 should be:
 
-- PDF-only resume upload with backend validation for file type, file size, invalid PDFs, empty files, and password-protected PDFs.
-- User-safe upload and extraction error states.
-- PDF text extraction for valid text-based resumes.
-- Extraction confidence metadata.
-- Canonical structured analysis response contract.
-- Backend orchestration service for mapping validated uploads and extraction outcomes into the response contract.
-- Deterministic text normalization for extracted text.
-- Deterministic resume section detection for `summary`, `skills`, `experience`, `education`, and `projects`.
-- Deterministic completeness baseline based only on detected section presence.
-- Deterministic ATS feedback domain contract with explicit issue categories and a `not_scored` score placeholder.
-- Deterministic ATS feedback service that maps existing extraction, section, and completeness metadata into non-scored feedback issues.
-- Neutral upload result UI showing upload metadata, extraction metadata, completeness baseline, detected section details, ATS feedback metadata, and an extracted-text preview toggle.
+```text
+Release Readiness and Product Intelligence
+```
 
-The current ATS feedback slice is metadata only. It can display feedback status, deterministic issue categories, issue severity labels, and the score placeholder state. It does not calculate or display an ATS score.
+Potential contracts:
 
-Sprint 2 has intentionally not implemented:
+- Deterministic recommendation contract.
+- Explainable improvement guidance based on existing deterministic metadata.
+- Dependency warning cleanup.
+- API contract documentation.
+- Security hardening review.
+- Performance validation.
+- Deployment preparation.
+- Docker backlog resumption only after compatible runtime validation is available.
 
-- ATS scoring.
-- Skill extraction.
-- Role matching.
-- Recommendations.
-- Persistence or analysis history.
-- AI integration.
-- Docker artifacts.
-
-The current Sprint 2 result is an intake, preparation, and deterministic metadata pipeline, not a completed resume analysis product.
+Sprint 5 must not claim AI capability unless an AI provider integration is explicitly designed, implemented, validated, and documented.
 
 ## Release Path to `v1.0.0`
 
-1. Complete source-of-truth documentation.
-2. Define API contracts for upload, analysis status, results, and history.
+1. Maintain source-of-truth documentation with every milestone.
+2. Define API contracts for upload, analysis status, results, and future history workflows.
 3. Define database design before persistence implementation.
-4. Implement resume upload with backend validation and frontend error states. Completed in Sprint 2.
-5. Implement PDF parsing with confidence reporting. Completed in Sprint 2.
-6. Implement structured intake and preparation boundaries. Completed in Sprint 2.
-7. Implement deterministic ATS metadata. Completed in Sprint 2 without scoring.
-8. Implement skill extraction, role matching, recommendations, dashboard, and history.
-9. Complete security, accessibility, performance, and release hardening.
-10. Resume Docker work only after runtime validation is available.
-11. Tag `v1.0.0` only after full MVP scope passes validation.
+4. Keep deterministic intake, metadata, dashboard, accessibility, and demo assets validated.
+5. Add product intelligence only through explicit contracts and user-safe wording.
+6. Complete recommendations, persistence, history, security, performance, and deployment preparation.
+7. Resume Docker work only after runtime validation is available.
+8. Tag `v1.0.0` only after full approved scope passes validation.
 
 ## Version 1.0 Guardrails
 
-- No authentication providers.
+- No authentication providers until the core analysis workflow is stable.
 - No payments.
 - No chat system.
 - No live job listings.
 - No admin dashboard.
 - No social features.
 - No unvalidated Docker work.
+- No unsupported AI, ATS accuracy, readiness, or recommendation claims.

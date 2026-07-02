@@ -1,6 +1,6 @@
 # CareerBoost AI
 
-CareerBoost AI is an AI-powered internship readiness platform for university students and fresh graduates. The product is designed to analyze a resume, evaluate internship readiness, identify missing skills, recommend suitable internship roles, and provide a practical improvement plan.
+CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides deterministic resume intake and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, recommendations, persistence, and history after explicit contracts are designed and validated.
 
 This repository is being built as a production-quality engineering portfolio project. The goal is not to ship a quick demo, but to demonstrate architecture, product thinking, maintainability, documentation, and disciplined software delivery.
 
@@ -109,7 +109,8 @@ Current structure:
 | Sprint 1.5 | Repository quality automation and release engineering | Completed |
 | Sprint 2 | Resume upload, validation, extraction, and deterministic metadata | Completed |
 | Sprint 3 | Deterministic skill signals and internship role metadata | Completed |
-| Sprint 4 | Dashboard experience, accessibility, visual polish, and demo assets | In progress |
+| Sprint 4 | Dashboard experience, accessibility, visual polish, and demo assets | Completed |
+| Sprint 5 | Release readiness and product intelligence | Planned |
 
 ## Current Project Status
 
@@ -136,6 +137,8 @@ Completed work:
 - Deterministic skill signal metadata.
 - Deterministic internship role matching metadata.
 - Accessible, responsive analysis dashboard.
+- Processing state and structured upload error recovery.
+- Accessibility remediation and visual consistency polish.
 - Verified demo screenshots using fictional resume data.
 
 Not started yet:
@@ -144,6 +147,8 @@ Not started yet:
 - Docker Compose runtime.
 - ATS scoring.
 - AI integration.
+- Inferred skill assessment.
+- Ranked role recommendations.
 - Recommendations.
 - Persistence and history.
 - Demo deployment.
@@ -167,7 +172,7 @@ Screenshots are available in [assets/screenshots](assets/screenshots). Demo asse
 
 ## Getting Started
 
-At this stage, the repository contains bootstrap artifacts only.
+The repository contains a working backend, frontend, deterministic resume intake workflow, verified demo assets, and documentation. Docker commands remain unavailable until Docker validation is unblocked.
 
 Clone the repository:
 
@@ -217,6 +222,7 @@ Existing documentation:
 - [Demo Assets Guide](docs/DEMO_ASSETS.md)
 - [Sprint 1 Completion Report](docs/SPRINT_1_COMPLETION_REPORT.md)
 - [Sprint 1.5 Completion Report](docs/SPRINT_1_5_COMPLETION_REPORT.md)
+- [Sprint 4 Completion Report](docs/SPRINT_4_COMPLETION_REPORT.md)
 - [Blocked Backlog](docs/BLOCKED_BACKLOG.md)
 - [Product Requirements Document](docs/PRD.md)
 - [System Architecture](docs/SYSTEM_ARCHITECTURE.md)
@@ -236,7 +242,8 @@ CareerBoost AI follows Semantic Versioning.
 | `v0.3.0` | Frontend foundation |
 | `v0.4.0` | Resume upload and validation workflow |
 | `v0.5.0` | Resume parsing and analysis workflow |
-| `v0.6.0` | Dashboard and history workflow |
+| `v0.6.0` | Deterministic dashboard and verified demo assets |
+| `v0.7.0` | Product intelligence foundation |
 | `v0.9.0` | Version 1.0 release candidate |
 | `v1.0.0` | Complete approved Version 1.0 product scope |
 

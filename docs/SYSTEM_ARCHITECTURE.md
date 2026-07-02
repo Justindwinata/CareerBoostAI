@@ -45,9 +45,9 @@ flowchart LR
 | Upload | Handles file selection, client hints, and upload state |
 | Parser | Extracts text and confidence metadata from PDFs |
 | ATS Feedback Metadata | Maps existing deterministic resume metadata into non-scored ATS feedback categories |
-| Skill Extraction | Identifies skills and evidence from resume text |
-| Role Matching | Maps profile signals to suitable internship roles |
-| Recommendation Engine | Produces prioritized resume and learning actions |
+| Skill Signal Extraction | Identifies explicit skill mentions and evidence from resume text without inferring ability |
+| Role Matching Metadata | Maps deterministic resume signals to internship role metadata without ranking or recommendations |
+| Recommendation Engine | Future module for prioritized resume and learning actions |
 | Dashboard | Presents analysis results without recalculating business logic |
 | History | Displays previous analysis records and statuses |
 | Configuration | Loads runtime settings from environment variables |
@@ -71,15 +71,14 @@ sequenceDiagram
   API->>App: Start resume analysis workflow
   App->>Parser: Extract resume text
   Parser-->>App: Text and confidence result
-  App->>Analysis: Generate structured metadata
-  Analysis-->>App: Intake, extraction, completeness, ATS metadata, future-stage placeholders
-  App->>Repo: Persist analysis record
-  Repo->>DB: Write result and status
-  DB-->>Repo: Confirm persistence
+  App->>Analysis: Generate deterministic metadata
+  Analysis-->>App: Intake, extraction, completeness, ATS, skill, and role metadata
   App-->>API: Return response model
   API-->>FE: Return analysis result
   FE-->>User: Render dashboard
 ```
+
+Persistence and history remain planned Version 1.0 capabilities. The current request lifecycle returns the structured analysis result without writing analysis records to PostgreSQL.
 
 ## Validation Strategy
 
@@ -118,19 +117,22 @@ Implemented:
 - Deterministic completeness baseline based only on detected section presence.
 - Deterministic ATS feedback contract with stable issue categories and a `not_scored` score placeholder.
 - Deterministic ATS feedback service based only on extraction, detected-section, and completeness metadata.
-- Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, ATS feedback metadata, and extracted-text preview.
+- Deterministic skill signal extraction from explicit resume text mentions.
+- Deterministic internship role matching metadata without ranking or recommendation claims.
+- Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, extracted-text preview, ATS feedback metadata, skill signal metadata, and role matching metadata.
+- Accessible processing experience, structured upload error recovery, focus management, live regions, and responsive dashboard navigation.
+- Visual consistency pass for dashboard sections, metadata cards, badges, empty states, and mobile layouts.
+- Verified desktop and mobile screenshots generated from the running application using a fictional demo resume.
 
 Not yet implemented:
 
 - ATS scoring.
-- Skill extraction.
-- Role matching.
 - Recommendations.
 - Persistence and analysis history.
 - Database schema.
 - AI integration.
 - Docker runtime artifacts.
 
-The current pipeline prepares resume data and displays deterministic metadata for future analysis. It does not claim internship readiness, ATS compatibility, ATS pass/fail status, role fit, or improvement recommendations.
+The current pipeline prepares resume data and displays deterministic metadata for future analysis. It does not claim internship readiness, ATS compatibility, ATS pass/fail status, ranked role fit, or improvement recommendations.
 
 Docker remains blocked until a compatible runtime is available and validation can run.
