@@ -15,7 +15,7 @@ Canonical delivery roadmap toward Version 1.0. This roadmap records completed sp
 | Sprint 2 | Resume intake pipeline and deterministic ATS metadata | Completed |
 | Sprint 3 | Deterministic skill signals and internship role metadata | Completed |
 | Sprint 4 | Dashboard experience, accessibility, visual polish, and verified demo assets | Completed |
-| Sprint 5 | Release Readiness and Product Intelligence | Planned |
+| Sprint 5 | Product workflow expansion and product intelligence | In progress |
 
 ## Major Milestones
 
@@ -48,6 +48,7 @@ The current implementation includes:
 - Visual consistency pass for professional SaaS-style dashboard presentation.
 - Verified desktop and mobile screenshots captured from the running application.
 - Fictional reproducible demo resume and demo asset documentation.
+- Multi-page frontend application shell with Home, Upload CV, History, Result placeholder, and not-found routes.
 
 ## Not Implemented Yet
 
@@ -58,8 +59,10 @@ The current implementation intentionally does not include:
 - Inferred skill assessment.
 - Ranked role recommendations.
 - Personalized learning recommendations.
+- Target criteria configuration for role-specific review.
 - Authentication.
 - Persistence and analysis history.
+- Downloadable standalone HTML reports.
 - Production deployment.
 - Docker workflow artifacts.
 
@@ -75,18 +78,33 @@ Docker work remains blocked by unavailable local runtime validation:
 
 Do not implement Docker artifacts until the blocker is removed.
 
-## Recommended Sprint 5
+## Sprint 5 Progress
 
-Sprint 5 should be:
+Sprint 5 is:
 
 ```text
-Release Readiness and Product Intelligence
+Product Workflow Expansion
 ```
 
-Potential contracts:
+Completed in Sprint 5:
 
-- Deterministic recommendation contract.
+- EC-0137: Deterministic recommendation contract foundation.
+- EC-0138: Multi-page frontend application foundation and navigation shell.
+
+Current route inventory:
+
+| Route | Status | Purpose |
+| --- | --- | --- |
+| `/` | Implemented foundation | Home dashboard with current deterministic capabilities and recent-activity empty state |
+| `/upload` | Implemented | Existing resume upload and deterministic analysis dashboard workflow |
+| `/history` | Implemented foundation | Honest empty state until persistence is designed and implemented |
+| `/results/:analysisId` | Implemented foundation | Safe unavailable state until persisted result retrieval exists |
+| `*` | Implemented | Accessible not-found page |
+
+Remaining Sprint 5 candidate contracts:
+
 - Explainable improvement guidance based on existing deterministic metadata.
+- Target criteria configuration contract.
 - Dependency warning cleanup.
 - API contract documentation.
 - Security hardening review.
@@ -94,7 +112,7 @@ Potential contracts:
 - Deployment preparation.
 - Docker backlog resumption only after compatible runtime validation is available.
 
-Sprint 5 must not claim AI capability unless an AI provider integration is explicitly designed, implemented, validated, and documented.
+Sprint 5 must not claim AI capability, persistence, report generation, target-criteria processing, or ATS accuracy unless those capabilities are explicitly designed, implemented, validated, and documented.
 
 ## Release Path to `v1.0.0`
 

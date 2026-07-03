@@ -1,6 +1,6 @@
 # CareerBoost AI
 
-CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides deterministic resume intake and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, recommendations, persistence, and history after explicit contracts are designed and validated.
+CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides a routed frontend shell, deterministic resume intake, and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, recommendations, persistence, history, target criteria, and reports after explicit contracts are designed and validated.
 
 This repository is being built as a production-quality engineering portfolio project. The goal is not to ship a quick demo, but to demonstrate architecture, product thinking, maintainability, documentation, and disciplined software delivery.
 
@@ -110,7 +110,7 @@ Current structure:
 | Sprint 2 | Resume upload, validation, extraction, and deterministic metadata | Completed |
 | Sprint 3 | Deterministic skill signals and internship role metadata | Completed |
 | Sprint 4 | Dashboard experience, accessibility, visual polish, and demo assets | Completed |
-| Sprint 5 | Release readiness and product intelligence | Planned |
+| Sprint 5 | Product workflow expansion and product intelligence | In progress |
 
 ## Current Project Status
 
@@ -136,6 +136,7 @@ Completed work:
 - Deterministic ATS feedback metadata without scoring.
 - Deterministic skill signal metadata.
 - Deterministic internship role matching metadata.
+- Multi-page frontend shell with Home, Upload CV, History, Result placeholder, and not-found routes.
 - Accessible, responsive analysis dashboard.
 - Processing state and structured upload error recovery.
 - Accessibility remediation and visual consistency polish.
@@ -151,6 +152,8 @@ Not started yet:
 - Ranked role recommendations.
 - Recommendations.
 - Persistence and history.
+- Target criteria configuration.
+- Downloadable standalone HTML reports.
 - Demo deployment.
 
 Blocked:
