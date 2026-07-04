@@ -31,6 +31,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Local backend analysis history persistence using SQLite, including summary listing, full result retrieval, and delete APIs.
 - Functional frontend History page that lists locally saved analysis summaries, links to result routes, refreshes records, and deletes records safely.
 - Functional frontend Result page that retrieves stored analysis details and renders the shared analysis dashboard without re-uploading.
+- Standalone HTML report generation and download from saved analysis results.
 
 ### Changed
 

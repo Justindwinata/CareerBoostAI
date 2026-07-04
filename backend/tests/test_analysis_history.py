@@ -16,6 +16,7 @@ from careerboost_api.services.analysis_history import (
     AnalysisHistoryRepository,
     AnalysisHistoryService,
 )
+from careerboost_api.services.analysis_report import AnalysisReportService
 
 RESUME_TEXT = (
     "Summary\n"
@@ -165,6 +166,102 @@ def test_get_unknown_analysis_id_returns_404() -> None:
 
     assert response.status_code == 404
     assert response.json()["detail"] == "Analysis record was not found."
+
+
+def test_download_analysis_report_returns_standalone_html() -> None:
+    client = TestClient(create_app())
+    upload_response = upload_resume(
+        client,
+        target_criteria={
+            "target_role": "Frontend Developer Intern",
+            "required_skills": ["React", "Rust"],
+            "preferred_skills": ["Docker"],
+            "required_sections": ["summary", "skills", "certifications"],
+            "analysis_priorities": ["resume_structure", "skill_visibility"],
+        },
+    )
+
+    response = client.get(f"/analyses/{upload_response['analysis_id']}/report.html")
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert (
+        response.headers["content-disposition"]
+        == f'attachment; filename="careerboost-analysis-{upload_response["analysis_id"]}.html"'
+    )
+    assert "CareerBoost AI Resume Analysis Report" in response.text
+    assert "Report metadata" in response.text
+    assert "Application Target" in response.text
+    assert "Target Alignment" in response.text
+    assert "Resume Structure" in response.text
+    assert "ATS Metadata" in response.text
+    assert "Skill Signals" in response.text
+    assert "Role Matching Metadata" in response.text
+    assert "Extracted Text Preview" in response.text
+    assert "Limitations" in response.text
+    assert "Frontend Developer Intern" in response.text
+    assert "not_scored" in response.text
+    assert "does not guarantee hiring outcomes" in response.text
+
+
+def test_download_analysis_report_works_without_target_criteria() -> None:
+    client = TestClient(create_app())
+    upload_response = upload_resume(client)
+
+    response = client.get(f"/analyses/{upload_response['analysis_id']}/report.html")
+
+    assert response.status_code == 200
+    assert "not_provided" in response.text
+    assert "No target criteria were provided" not in response.text
+    assert "Report metadata" in response.text
+
+
+def test_download_unknown_analysis_report_returns_404() -> None:
+    client = TestClient(create_app())
+
+    response = client.get("/analyses/unknown-analysis-id/report.html")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Analysis record was not found."
+
+
+def test_report_service_escapes_unsafe_resume_content() -> None:
+    client = TestClient(create_app())
+    upload_response = upload_resume(client)
+    analysis = ResumeAnalysisContract.model_validate(upload_response)
+    unsafe_analysis = analysis.model_copy(
+        deep=True,
+        update={
+            "intake": analysis.intake.model_copy(
+                update={"filename": '<script>alert("x")</script>.pdf'}
+            ),
+            "extraction": analysis.extraction.model_copy(
+                update={
+                    "extracted_text": '<img src=x onerror="alert(1)">',
+                    "normalized_text": '<img src=x onerror="alert(1)">',
+                }
+            ),
+        },
+    )
+
+    report_html = AnalysisReportService().generate_html_report(unsafe_analysis)
+
+    assert "<script>" not in report_html
+    assert "<img src=x" not in report_html
+    assert "&lt;script&gt;" in report_html
+    assert "&lt;img src=x" in report_html
+
+
+def test_report_omits_private_runtime_artifacts(isolated_history_database: Path) -> None:
+    client = TestClient(create_app())
+    upload_response = upload_resume(client)
+
+    response = client.get(f"/analyses/{upload_response['analysis_id']}/report.html")
+
+    assert "%PDF" not in response.text
+    assert "Traceback" not in response.text
+    assert str(Path.cwd()) not in response.text
+    assert str(isolated_history_database) not in response.text
 
 
 def test_delete_analysis_removes_record() -> None:

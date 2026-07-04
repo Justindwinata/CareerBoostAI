@@ -72,3 +72,17 @@ export async function getAnalysisById(analysisId: string): Promise<ResumeUploadR
 
   return response.json() as Promise<ResumeUploadResponse>;
 }
+
+export function getAnalysisReportUrl(analysisId: string): string {
+  return `${frontendConfig.apiBaseUrl}/analyses/${encodeURIComponent(analysisId)}/report.html`;
+}
+
+export async function downloadAnalysisReport(analysisId: string): Promise<Blob> {
+  const response = await fetch(getAnalysisReportUrl(analysisId));
+
+  if (!response.ok) {
+    await parseErrorResponse(response);
+  }
+
+  return response.blob();
+}

@@ -542,7 +542,7 @@ describe("App", () => {
     ).toBeVisible();
     expect(screen.getAllByText("React").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("GraphQL")).toBeVisible();
-    expect(screen.queryByText("Download report")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Download HTML Report" })).toBeVisible();
     expect(screen.queryByText(/hiring prediction/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/guaranteed/i)).not.toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: "Back to History" })[0]).toHaveAttribute(
@@ -579,6 +579,7 @@ describe("App", () => {
       "/upload",
     );
     expect(screen.queryByText("Analysis Summary")).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Download HTML Report" })).not.toBeInTheDocument();
   });
 
   it("renders a safe result error state and retries loading the saved analysis", async () => {
@@ -604,6 +605,84 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { name: "Stored analysis result" })).toBeVisible();
     expect(fetchSpy).toHaveBeenCalledWith(
       "http://localhost:8000/analyses/11111111-1111-4111-8111-111111111111",
+    );
+  });
+
+  it("downloads a standalone HTML report from a loaded result", async () => {
+    const createObjectUrl = vi.fn(() => "blob:careerboost-report");
+    const revokeObjectUrl = vi.fn();
+    const clickSpy = vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});
+    vi.stubGlobal(
+      "URL",
+      Object.assign(URL, { createObjectURL: createObjectUrl, revokeObjectURL: revokeObjectUrl }),
+    );
+    const fetchSpy = mockHistoryFetch(
+      new Response(JSON.stringify(createStoredAnalysisResponse()), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }),
+      new Response("<!doctype html><html><body>Report</body></html>", {
+        headers: { "Content-Type": "text/html" },
+        status: 200,
+      }),
+    );
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    const downloadButton = await screen.findByRole("button", { name: "Download HTML Report" });
+    fireEvent.click(downloadButton);
+
+    await waitFor(() =>
+      expect(fetchSpy).toHaveBeenLastCalledWith(
+        "http://localhost:8000/analyses/11111111-1111-4111-8111-111111111111/report.html",
+      ),
+    );
+    expect(createObjectUrl).toHaveBeenCalled();
+    expect(clickSpy).toHaveBeenCalled();
+    expect(revokeObjectUrl).toHaveBeenCalledWith("blob:careerboost-report");
+  });
+
+  it("disables the report download action while a download is in progress", async () => {
+    mockHistoryFetch(
+      new Response(JSON.stringify(createStoredAnalysisResponse()), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }),
+      new Promise<Response>(() => {}),
+    );
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    const downloadButton = await screen.findByRole("button", { name: "Download HTML Report" });
+    fireEvent.click(downloadButton);
+
+    expect(
+      await screen.findByText("Preparing standalone HTML report download."),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Downloading HTML Report" })).toBeDisabled();
+  });
+
+  it("renders a safe report download error", async () => {
+    mockHistoryFetch(
+      new Response(JSON.stringify(createStoredAnalysisResponse()), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }),
+      new Response(JSON.stringify({ detail: "Analysis history storage is unavailable." }), {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      }),
+    );
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    fireEvent.click(await screen.findByRole("button", { name: "Download HTML Report" }));
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "HTML report could not be downloaded",
+    );
+    expect(screen.getByRole("alert")).toHaveTextContent(
+      "Check the backend connection and try again from this saved result.",
     );
   });
 

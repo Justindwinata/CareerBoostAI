@@ -2,7 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { AnalysisDashboard } from "../components/AnalysisDashboard";
-import { AnalysisNotFoundError, getAnalysisById } from "../services/analysisHistoryService";
+import {
+  AnalysisNotFoundError,
+  downloadAnalysisReport,
+  getAnalysisById,
+} from "../services/analysisHistoryService";
 import type { ResumeUploadResponse } from "../types/resumeUpload";
 
 type ResultPageState =
@@ -10,6 +14,8 @@ type ResultPageState =
   | { kind: "loaded"; analysisId: string; analysis: ResumeUploadResponse }
   | { kind: "not_found"; analysisId: string | null }
   | { kind: "error"; analysisId: string; message: string };
+
+type ReportDownloadState = { kind: "idle" } | { kind: "downloading" } | { kind: "error" };
 
 function formatCompactAnalysisId(analysisId: string): string {
   return `${analysisId.slice(0, 8)}...${analysisId.slice(-4)}`;
@@ -28,6 +34,9 @@ export function ResultPage() {
   const [resultState, setResultState] = useState<ResultPageState>(() =>
     analysisId ? { kind: "loading", analysisId } : { kind: "not_found", analysisId: null },
   );
+  const [reportDownloadState, setReportDownloadState] = useState<ReportDownloadState>({
+    kind: "idle",
+  });
 
   const loadResult = useCallback(async () => {
     if (!analysisId) {
@@ -91,6 +100,29 @@ export function ResultPage() {
       : resultState;
   const loadedAnalysis = displayState.kind === "loaded" ? displayState.analysis : null;
 
+  const handleDownloadReport = useCallback(async () => {
+    if (!analysisId || reportDownloadState.kind === "downloading") {
+      return;
+    }
+
+    setReportDownloadState({ kind: "downloading" });
+
+    try {
+      const reportBlob = await downloadAnalysisReport(analysisId);
+      const objectUrl = URL.createObjectURL(reportBlob);
+      const downloadLink = document.createElement("a");
+      downloadLink.href = objectUrl;
+      downloadLink.download = `careerboost-analysis-${analysisId}.html`;
+      document.body.append(downloadLink);
+      downloadLink.click();
+      downloadLink.remove();
+      URL.revokeObjectURL(objectUrl);
+      setReportDownloadState({ kind: "idle" });
+    } catch {
+      setReportDownloadState({ kind: "error" });
+    }
+  }, [analysisId, reportDownloadState.kind]);
+
   return (
     <section className="page-shell" aria-labelledby="result-title">
       <header className="page-header">
@@ -108,8 +140,37 @@ export function ResultPage() {
           <Link className="button-link" to="/upload">
             Analyze Another Resume
           </Link>
+          {loadedAnalysis ? (
+            <button
+              className="button-link"
+              type="button"
+              onClick={() => void handleDownloadReport()}
+              disabled={reportDownloadState.kind === "downloading"}
+              aria-busy={reportDownloadState.kind === "downloading"}
+            >
+              {reportDownloadState.kind === "downloading"
+                ? "Downloading HTML Report"
+                : "Download HTML Report"}
+            </button>
+          ) : null}
         </div>
       </header>
+
+      {loadedAnalysis && reportDownloadState.kind === "downloading" ? (
+        <p className="assistive-status" role="status">
+          Preparing standalone HTML report download.
+        </p>
+      ) : null}
+
+      {loadedAnalysis && reportDownloadState.kind === "error" ? (
+        <section className="history-error-panel" role="alert" aria-labelledby="report-error-title">
+          <div>
+            <p className="eyebrow">Report Error</p>
+            <h2 id="report-error-title">HTML report could not be downloaded</h2>
+          </div>
+          <p>Check the backend connection and try again from this saved result.</p>
+        </section>
+      ) : null}
 
       {loadedAnalysis ? (
         <section className="result-metadata-panel" aria-label="Stored result metadata">

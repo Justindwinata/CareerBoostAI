@@ -1,6 +1,6 @@
 """Analysis history routes."""
 
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, Response, status
 
 from careerboost_api.core.config import get_settings
 from careerboost_api.domain import (
@@ -13,6 +13,7 @@ from careerboost_api.services.analysis_history import (
     AnalysisHistoryService,
     AnalysisHistoryStorageError,
 )
+from careerboost_api.services.analysis_report import AnalysisReportService
 
 router = APIRouter(prefix="/analyses", tags=["analyses"])
 
@@ -57,6 +58,29 @@ def get_analysis(analysis_id: str) -> ResumeAnalysisContract:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=NOT_FOUND_DETAIL)
 
     return analysis
+
+
+@router.get("/{analysis_id}/report.html")
+def download_analysis_report(analysis_id: str) -> Response:
+    """Download a standalone HTML report for a stored analysis."""
+    try:
+        analysis = get_analysis_history_service().get_analysis(analysis_id)
+    except AnalysisHistoryStorageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=STORAGE_FAILURE_DETAIL,
+        ) from exc
+
+    if analysis is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=NOT_FOUND_DETAIL)
+
+    report_html = AnalysisReportService().generate_html_report(analysis)
+    filename = f"careerboost-analysis-{analysis_id}.html"
+    return Response(
+        content=report_html,
+        media_type="text/html; charset=utf-8",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )
 
 
 @router.delete("/{analysis_id}", response_model=AnalysisHistoryDeleteResponse)

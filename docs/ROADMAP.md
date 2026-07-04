@@ -47,6 +47,7 @@ The current implementation includes:
 - Local backend SQLite persistence for completed analyses with list, detail, and delete APIs.
 - Functional frontend History page listing saved analysis summaries with delete actions and open-result navigation.
 - Functional frontend Result page that opens stored analyses without requiring a resume re-upload.
+- Standalone HTML report download generated from stored deterministic analysis metadata.
 - Analysis dashboard with upload, processing, error recovery, summary, structure, skill, ATS, and role sections.
 - Accessibility remediation for labels, focus management, live regions, navigation, touch targets, and responsive layout.
 - Visual consistency pass for professional SaaS-style dashboard presentation.
@@ -65,7 +66,7 @@ The current implementation intentionally does not include:
 - Ranked role recommendations.
 - Personalized learning recommendations.
 - Authentication.
-- Downloadable standalone HTML reports.
+- PDF report export.
 - Production deployment.
 - Docker workflow artifacts.
 
@@ -98,6 +99,7 @@ Completed in Sprint 5:
 - EC-0141: Local backend analysis history persistence and retrieval API.
 - EC-0142: Functional frontend History page connected to saved analysis summaries.
 - EC-0143: Functional frontend Result page connected to stored analysis detail retrieval.
+- EC-0144: Standalone downloadable HTML reports for saved analyses.
 
 Current route inventory:
 
@@ -119,7 +121,7 @@ Remaining Sprint 5 candidate contracts:
 - Deployment preparation.
 - Docker backlog resumption only after compatible runtime validation is available.
 
-Sprint 5 must not claim AI capability, production multi-user persistence, report generation, ATS accuracy, scoring, hiring prediction, or recommendation capability unless those capabilities are explicitly designed, implemented, validated, and documented.
+Sprint 5 must not claim AI capability, production multi-user persistence, PDF export, ATS accuracy, scoring, hiring prediction, or recommendation capability unless those capabilities are explicitly designed, implemented, validated, and documented.
 
 ## Release Path to `v1.0.0`
 

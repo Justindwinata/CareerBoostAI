@@ -49,6 +49,7 @@ flowchart LR
 | Role Matching Metadata | Maps deterministic resume signals to internship role metadata without ranking or recommendations |
 | Target Alignment Metadata | Compares submitted target criteria with explicit skills, detected sections, metadata availability, and controlled role names without scoring |
 | Analysis History Persistence | Stores completed canonical analysis responses in local SQLite for demo retrieval without saving PDF binaries |
+| Report Generation | Generates escaped standalone HTML reports from stored canonical analysis responses |
 | Recommendation Engine | Future module for prioritized resume and learning actions |
 | Dashboard | Presents analysis results without recalculating business logic |
 | History | Displays previous analysis records and statuses |
@@ -67,7 +68,7 @@ The frontend is now organized as a routed React application shell. Routes own pa
 | `/results/:analysisId` | Individual Analysis Result | Retrieves a locally stored canonical analysis response and renders the shared analysis dashboard without requiring a resume re-upload |
 | `*` | Not Found | Provides accessible recovery navigation to Home and Upload CV |
 
-The frontend must not fabricate analysis records, persist records in browser storage, generate reports, or turn target alignment metadata into scoring, recommendations, or hiring conclusions.
+The frontend must not fabricate analysis records, persist records in browser storage, generate report content client-side, or turn target alignment metadata into scoring, recommendations, or hiring conclusions.
 
 Target Application Criteria are accepted as optional upload metadata through a multipart `target_criteria` JSON field. The backend validates and normalizes the criteria, compares them against existing deterministic resume evidence, and returns factual Target Alignment metadata in the canonical analysis response. No alignment scoring, fit calculation, acceptance prediction, or recommendation generation is performed from these criteria.
 
@@ -143,8 +144,10 @@ Implemented:
 - Target Application Criteria input, backend validation, and canonical response metadata echo.
 - Deterministic Target Alignment metadata comparing submitted criteria against explicit resume evidence without scoring.
 - Backend local history API with `GET /analyses`, `GET /analyses/{analysis_id}`, and `DELETE /analyses/{analysis_id}`.
+- Backend standalone HTML report endpoint with `GET /analyses/{analysis_id}/report.html`.
 - Frontend History page connected to `GET /analyses` and `DELETE /analyses/{analysis_id}` for local saved-analysis summaries.
 - Frontend Result page connected to `GET /analyses/{analysis_id}` for stored canonical analysis detail retrieval.
+- Frontend Result page HTML report download action backed by stored deterministic metadata.
 - Shared analysis dashboard component reused by upload success and stored result detail views.
 - Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, extracted-text preview, ATS feedback metadata, skill signal metadata, and role matching metadata.
 - Accessible processing experience, structured upload error recovery, focus management, live regions, and responsive dashboard navigation.
@@ -155,7 +158,7 @@ Not yet implemented:
 
 - ATS scoring.
 - Recommendations.
-- Standalone HTML report generation.
+- PDF report generation.
 - Database schema.
 - AI integration.
 - Docker runtime artifacts.
