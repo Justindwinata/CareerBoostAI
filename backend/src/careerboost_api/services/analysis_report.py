@@ -72,7 +72,23 @@ class AnalysisReportService:
             ("Page count", str(analysis.extraction.page_count)),
             ("Character count", str(analysis.extraction.character_count)),
         ]
-        return self._section("Report metadata", self._definition_list(rows))
+        content = [self._definition_list(rows)]
+        if analysis.extraction.quality_warnings:
+            content.append(
+                self._status_list(
+                    "Extraction quality advisories",
+                    [
+                        (
+                            "Advisory",
+                            warning.category,
+                            warning.message,
+                        )
+                        for warning in analysis.extraction.quality_warnings
+                    ],
+                )
+            )
+
+        return self._section("Report metadata", "".join(content))
 
     def _render_application_target(self, analysis: ResumeAnalysisContract) -> str:
         criteria = analysis.target_criteria

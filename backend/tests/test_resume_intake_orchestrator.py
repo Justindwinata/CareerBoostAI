@@ -78,6 +78,40 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
     assert contract.recommendations.status == "not_started"
 
 
+def test_orchestrator_preserves_extraction_quality_warnings_without_blocking_analysis() -> None:
+    orchestrator = ResumeIntakeOrchestrator()
+
+    contract = orchestrator.build_success(
+        upload=build_upload(),
+        extraction=ResumeTextExtractionResult(
+            extracted_text=(
+                "Sertifikasi\n"
+                "Network fundamentals\n"
+                "Profil\n"
+                "Student developer\n"
+                "Alex Morgan\n"
+                "Kemampuan Utama\n"
+                "Python SQL"
+            ),
+            confidence="medium",
+            character_count=96,
+            page_count=1,
+        ),
+    )
+
+    assert contract.status == "intake_completed"
+    assert [section.name for section in contract.extraction.sections] == [
+        "certifications",
+        "summary",
+        "skills",
+    ]
+    assert [warning.category for warning in contract.extraction.quality_warnings] == [
+        "unusual_section_order",
+        "short_section_content",
+    ]
+    assert contract.skills.status == "signals_detected"
+
+
 def test_orchestrator_preserves_target_criteria_metadata() -> None:
     orchestrator = ResumeIntakeOrchestrator()
 

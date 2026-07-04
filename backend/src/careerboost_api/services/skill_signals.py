@@ -36,6 +36,19 @@ CONTROLLED_SKILLS: tuple[ControlledSkill, ...] = (
     ControlledSkill("Pytest", "testing", ("pytest",)),
     ControlledSkill("HTML", "web_technology", ("html",)),
     ControlledSkill("CSS", "web_technology", ("css",)),
+    ControlledSkill("PHP", "programming_language", ("php",)),
+    ControlledSkill("MySQL", "database", ("mysql",)),
+    ControlledSkill("SQLite", "database", ("sqlite", "sqlite3")),
+    ControlledSkill("Excel", "tooling", ("excel", "microsoft excel")),
+    ControlledSkill("Data Visualization", "tooling", ("data visualization", "visualisasi data")),
+    ControlledSkill("Flutter", "framework", ("flutter",)),
+    ControlledSkill("REST API", "web_technology", ("rest api", "restful api")),
+    ControlledSkill("Mikrotik", "tooling", ("mikrotik",)),
+    ControlledSkill("LAN", "tooling", ("lan",)),
+    ControlledSkill("WAN", "tooling", ("wan",)),
+    ControlledSkill("Routing", "tooling", ("routing",)),
+    ControlledSkill("GitHub", "tooling", ("github", "git hub")),
+    ControlledSkill("Power BI", "tooling", ("power bi", "powerbi")),
 )
 
 

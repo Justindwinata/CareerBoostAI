@@ -60,6 +60,7 @@ class ResumeIntakeOrchestrator:
             extracted_text=extraction.extracted_text,
             normalized_text=processed_text.normalized_text,
             sections=processed_text.sections,
+            quality_warnings=processed_text.quality_warnings,
         )
 
         skill_signals = self.skill_signal_extractor.extract(

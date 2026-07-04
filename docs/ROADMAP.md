@@ -38,7 +38,8 @@ The current implementation includes:
 - Deterministic PDF validation.
 - PDF text extraction with confidence metadata.
 - Extracted text normalization.
-- Resume section detection for `summary`, `skills`, `experience`, `education`, and `projects`.
+- Resume section detection for English, Indonesian, and mixed headings covering core CV sections.
+- Advisory extraction-quality warnings for unusual deterministic text order or weak section content.
 - Completeness baseline based on detected section presence.
 - Deterministic ATS metadata with `not_scored` score placeholder.
 - Deterministic skill signals from explicit text mentions only.
@@ -62,6 +63,7 @@ The current implementation intentionally does not include:
 
 - Numeric ATS scoring.
 - AI or LLM integration.
+- OCR for scanned or image-only resumes.
 - Inferred skill assessment.
 - Ranked role recommendations.
 - Personalized learning recommendations.
@@ -100,6 +102,7 @@ Completed in Sprint 5:
 - EC-0142: Functional frontend History page connected to saved analysis summaries.
 - EC-0143: Functional frontend Result page connected to stored analysis detail retrieval.
 - EC-0144: Standalone downloadable HTML reports for saved analyses.
+- EC-0145A: Indonesian and mixed Indonesian-English deterministic parsing improvements.
 
 Current route inventory:
 

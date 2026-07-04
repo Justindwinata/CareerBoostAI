@@ -21,7 +21,15 @@ export type AnalysisError = {
   message: string;
 };
 
-export type ResumeSectionName = "summary" | "skills" | "experience" | "education" | "projects";
+export type ResumeSectionName =
+  | "summary"
+  | "skills"
+  | "experience"
+  | "education"
+  | "projects"
+  | "certifications"
+  | "organizations"
+  | "awards";
 
 export type TargetRequiredSectionName = ResumeSectionName | "certifications";
 
@@ -119,6 +127,11 @@ export type DetectedResumeSection = {
   content: string;
 };
 
+export type ExtractionQualityWarning = {
+  category: "unusual_section_order" | "candidate_name_after_sections" | "short_section_content";
+  message: string;
+};
+
 export type SuccessfulResumeExtractionResult = {
   status: "extracted";
   confidence: "medium" | "high";
@@ -127,6 +140,7 @@ export type SuccessfulResumeExtractionResult = {
   extracted_text: string;
   normalized_text: string;
   sections: DetectedResumeSection[];
+  quality_warnings: ExtractionQualityWarning[];
   error: null;
 };
 
@@ -138,6 +152,7 @@ export type FailedResumeExtractionResult = {
   extracted_text: null;
   normalized_text: null;
   sections: [];
+  quality_warnings: [];
   error: AnalysisError;
 };
 

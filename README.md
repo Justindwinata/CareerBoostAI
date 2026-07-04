@@ -133,6 +133,8 @@ Completed work:
 - PDF text extraction with confidence metadata.
 - Canonical structured analysis contract.
 - Deterministic section detection and completeness baseline.
+- Indonesian and mixed Indonesian-English resume heading aliases for common CV sections.
+- Advisory extraction-quality warnings when deterministic parsing detects unusual text order.
 - Deterministic ATS feedback metadata without scoring.
 - Deterministic skill signal metadata.
 - Deterministic internship role matching metadata.
@@ -154,6 +156,7 @@ Not started yet:
 - Docker Compose runtime.
 - ATS scoring.
 - AI integration.
+- OCR for scanned or image-only resumes.
 - Inferred skill assessment.
 - Ranked role recommendations.
 - Recommendations.

@@ -2,4 +2,13 @@
 
 from typing import Literal
 
-ResumeSectionName = Literal["summary", "skills", "experience", "education", "projects"]
+ResumeSectionName = Literal[
+    "summary",
+    "skills",
+    "experience",
+    "education",
+    "projects",
+    "certifications",
+    "organizations",
+    "awards",
+]

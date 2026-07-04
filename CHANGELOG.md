@@ -38,6 +38,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Established repository standards before application feature development begins.
 - Updated root Makefile commands to match the active backend and frontend workspaces.
 - Improved dashboard accessibility, focus behavior, live regions, responsive behavior, visual consistency, and metadata presentation.
+- Improved deterministic parsing for Indonesian and mixed Indonesian-English resumes with additional section aliases, explicit skill aliases, and extraction-quality advisories.
 - Updated README project status and Product Preview to reflect the completed deterministic dashboard experience.
 - Moved the existing upload-analysis experience into the `/upload` route without changing deterministic analysis behavior.
 - Extended upload requests with optional `target_criteria` multipart JSON while preserving the no-criteria upload path.

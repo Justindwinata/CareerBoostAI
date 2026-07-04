@@ -267,6 +267,7 @@ function createSuccessfulUploadResponse(
       extracted_text: extractedText,
       normalized_text: extractedText,
       sections,
+      quality_warnings: [],
       error: null,
     },
     completeness,
@@ -1004,6 +1005,7 @@ describe("ResumeUploadForm", () => {
             extracted_text: null,
             normalized_text: null,
             sections: [],
+            quality_warnings: [],
             error: {
               category: "low_text",
               message: "Resume text is too short to analyze. Upload a text-based PDF resume.",

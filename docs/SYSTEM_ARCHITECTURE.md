@@ -134,7 +134,8 @@ Implemented:
 - Canonical structured analysis response contract.
 - Backend resume intake orchestration service.
 - Deterministic extracted-text normalization.
-- Deterministic section detection for `summary`, `skills`, `experience`, `education`, and `projects`.
+- Deterministic section detection for English, Indonesian, and mixed headings covering core CV sections.
+- Advisory extraction-quality warnings for unusual section order and weak extracted section content.
 - Deterministic completeness baseline based only on detected section presence.
 - Deterministic ATS feedback contract with stable issue categories and a `not_scored` score placeholder.
 - Deterministic ATS feedback service based only on extraction, detected-section, and completeness metadata.
@@ -159,6 +160,7 @@ Not yet implemented:
 - ATS scoring.
 - Recommendations.
 - PDF report generation.
+- OCR for scanned or image-only resumes.
 - Database schema.
 - AI integration.
 - Docker runtime artifacts.

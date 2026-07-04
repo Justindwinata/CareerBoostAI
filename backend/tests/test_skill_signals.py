@@ -107,3 +107,56 @@ def test_skill_signal_extractor_uses_explicit_word_boundaries() -> None:
 
     assert result.status == "signals_detected"
     assert [signal.name for signal in result.signals] == ["PostgreSQL"]
+
+
+def test_skill_signal_extractor_detects_expanded_explicit_skill_aliases() -> None:
+    extractor = SkillSignalExtractor()
+
+    result = extractor.extract(
+        normalized_text=(
+            "Kemampuan Utama\n"
+            "HTML, CSS, JavaScript, PHP, SQL, MySQL, Python, Excel, Data Visualization, "
+            "Flutter, REST API, Mikrotik, LAN, WAN, Routing, React, TypeScript, FastAPI, "
+            "Git, GitHub, Power BI, PostgreSQL, SQLite"
+        ),
+        sections=[],
+    )
+
+    assert result.status == "signals_detected"
+    assert {signal.name for signal in result.signals} >= {
+        "HTML",
+        "CSS",
+        "JavaScript",
+        "PHP",
+        "SQL",
+        "MySQL",
+        "Python",
+        "Excel",
+        "Data Visualization",
+        "Flutter",
+        "REST API",
+        "Mikrotik",
+        "LAN",
+        "WAN",
+        "Routing",
+        "React",
+        "TypeScript",
+        "FastAPI",
+        "Git",
+        "GitHub",
+        "Power BI",
+        "PostgreSQL",
+        "SQLite",
+    }
+
+
+def test_skill_signal_extractor_does_not_treat_java_as_javascript() -> None:
+    extractor = SkillSignalExtractor()
+
+    result = extractor.extract(
+        normalized_text="Kemampuan Utama\nJava, SQL, HTML",
+        sections=[],
+    )
+
+    assert result.status == "signals_detected"
+    assert [signal.name for signal in result.signals] == ["SQL", "HTML"]

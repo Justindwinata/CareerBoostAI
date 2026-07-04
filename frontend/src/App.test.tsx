@@ -102,6 +102,7 @@ function createStoredAnalysisResponse(overrides: Record<string, unknown> = {}) {
           content: "CareerBoost AI",
         },
       ],
+      quality_warnings: [],
       error: null,
     },
     completeness: {
@@ -542,6 +543,7 @@ describe("App", () => {
     ).toBeVisible();
     expect(screen.getAllByText("React").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("GraphQL")).toBeVisible();
+    expect(screen.queryByText("Extraction quality advisory")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Download HTML Report" })).toBeVisible();
     expect(screen.queryByText(/hiring prediction/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/guaranteed/i)).not.toBeInTheDocument();
@@ -553,6 +555,36 @@ describe("App", () => {
       "href",
       "/upload",
     );
+  });
+
+  it("renders extraction quality advisories without unsafe claims", async () => {
+    const storedAnalysis = createStoredAnalysisResponse();
+    storedAnalysis.extraction = {
+      ...storedAnalysis.extraction,
+      quality_warnings: [
+        {
+          category: "unusual_section_order",
+          message:
+            "Some resume sections may have been extracted in an unusual order. Consider using a simpler single-column ATS-friendly layout if the analysis looks incomplete.",
+        },
+      ],
+    };
+    mockHistoryFetch(
+      new Response(JSON.stringify(storedAnalysis), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }),
+    );
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    expect(await screen.findByRole("heading", { name: "Stored analysis result" })).toBeVisible();
+    expect(screen.getByText("Parsing warnings")).toBeVisible();
+    expect(screen.getByText("1 advisory")).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Extraction quality advisory" })).toBeVisible();
+    expect(screen.getByText(/unusual order/i)).toBeVisible();
+    expect(screen.queryByText(/guaranteed/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/hiring prediction/i)).not.toBeInTheDocument();
   });
 
   it("renders a safe not-found state for unknown analysis results", async () => {

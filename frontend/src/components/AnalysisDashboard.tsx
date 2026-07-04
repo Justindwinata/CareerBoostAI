@@ -53,6 +53,9 @@ function formatSectionName(sectionName: ResumeSectionName): string {
     experience: "Experience",
     education: "Education",
     projects: "Projects",
+    certifications: "Certifications",
+    organizations: "Organizations",
+    awards: "Awards",
   };
 
   return sectionLabels[sectionName];
@@ -252,6 +255,13 @@ function getAnalysisSummaryItems(result: ResumeUploadResponse) {
       value: formatTargetAlignmentStatus(result.target_alignment.status),
     },
     { label: "Detected sections", value: `${result.extraction.sections.length} detected` },
+    {
+      label: "Parsing warnings",
+      value:
+        result.extraction.quality_warnings.length > 0
+          ? `${result.extraction.quality_warnings.length} advisory`
+          : "None",
+    },
     {
       label: "Explicit skill signals",
       value:
@@ -584,6 +594,20 @@ export const AnalysisDashboard = forwardRef<HTMLElement, AnalysisDashboardProps>
             <p className="eyebrow">Resume Intake</p>
             <SectionTitle id="resume-intake-title">Upload and extraction metadata</SectionTitle>
           </div>
+
+          {result.extraction.quality_warnings.length > 0 ? (
+            <section
+              className="extraction-warning-panel"
+              aria-labelledby="extraction-warning-title"
+            >
+              <DetailTitle id="extraction-warning-title">Extraction quality advisory</DetailTitle>
+              <ul>
+                {result.extraction.quality_warnings.map((warning) => (
+                  <li key={`${warning.category}-${warning.message}`}>{warning.message}</li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
 
           <div className="dashboard-two-column">
             <dl className="upload-result-list">

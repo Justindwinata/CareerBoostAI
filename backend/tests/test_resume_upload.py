@@ -104,6 +104,7 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             "extracted_text": RESUME_TEXT,
             "normalized_text": RESUME_TEXT,
             "sections": [],
+            "quality_warnings": [],
             "error": None,
         },
         "completeness": {
@@ -603,6 +604,7 @@ def test_upload_resume_rejects_low_text_pdf() -> None:
         "extracted_text": None,
         "normalized_text": None,
         "sections": [],
+        "quality_warnings": [],
         "error": {
             "category": "low_text",
             "message": "Resume text is too short to analyze. Upload a text-based PDF resume.",

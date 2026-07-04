@@ -55,3 +55,86 @@ def test_text_processor_ignores_non_heading_sentences() -> None:
     normalized_text = "Built projects with Python and documented education history."
 
     assert processor.detect_sections(normalized_text) == []
+
+
+def test_text_processor_detects_indonesian_resume_section_aliases() -> None:
+    processor = ResumeTextProcessor()
+    normalized_text = (
+        "Profil\n"
+        "Mahasiswa teknik informatika.\n"
+        "Kemampuan Utama\n"
+        "Python, SQL, React\n"
+        "Pengalaman Kerja\n"
+        "IT support intern\n"
+        "Pendidikan\n"
+        "S1 Teknik Informatika\n"
+        "Sertifikasi\n"
+        "Database fundamentals"
+    )
+
+    sections = processor.detect_sections(normalized_text)
+
+    assert [section.name for section in sections] == [
+        "summary",
+        "skills",
+        "experience",
+        "education",
+        "certifications",
+    ]
+    assert sections[0].heading == "Profil"
+    assert sections[-1].heading == "Sertifikasi"
+
+
+def test_text_processor_detects_mixed_indonesian_english_project_aliases() -> None:
+    processor = ResumeTextProcessor()
+    normalized_text = (
+        "Tentang Saya\n"
+        "Frontend developer student.\n"
+        "Skill\n"
+        "HTML, CSS, JavaScript\n"
+        "Project\n"
+        "Portfolio website\n"
+        "Portofolio\n"
+        "CareerBoost AI\n"
+        "Organisasi\n"
+        "Student technology club\n"
+        "Penghargaan\n"
+        "Hackathon finalist"
+    )
+
+    sections = processor.detect_sections(normalized_text)
+
+    assert [section.name for section in sections] == [
+        "summary",
+        "skills",
+        "projects",
+        "projects",
+        "organizations",
+        "awards",
+    ]
+
+
+def test_text_processor_warns_without_blocking_suspicious_extraction_order() -> None:
+    processor = ResumeTextProcessor()
+    normalized_text = (
+        "Sertifikasi\n"
+        "Network fundamentals\n"
+        "Profil\n"
+        "Student developer\n"
+        "Alex Morgan\n"
+        "Kemampuan Utama\n"
+        "Python SQL"
+    )
+
+    result = processor.process(normalized_text)
+
+    assert [section.name for section in result.sections] == [
+        "certifications",
+        "summary",
+        "skills",
+    ]
+    assert [warning.category for warning in result.quality_warnings] == [
+        "unusual_section_order",
+        "short_section_content",
+    ]
+    assert "unusual order" in result.quality_warnings[0].message

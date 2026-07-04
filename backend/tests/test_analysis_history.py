@@ -69,6 +69,7 @@ def upload_resume(
     client: TestClient,
     *,
     filename: str = "resume.pdf",
+    resume_text: str = RESUME_TEXT,
     target_criteria: dict[str, object] | None = None,
 ) -> dict[str, object]:
     data = {}
@@ -77,7 +78,7 @@ def upload_resume(
 
     response = client.post(
         "/resumes/upload",
-        files={"file": (filename, create_pdf_bytes(), "application/pdf")},
+        files={"file": (filename, create_pdf_bytes(resume_text), "application/pdf")},
         data=data,
     )
 
@@ -214,6 +215,29 @@ def test_download_analysis_report_works_without_target_criteria() -> None:
     assert "not_provided" in response.text
     assert "No target criteria were provided" not in response.text
     assert "Report metadata" in response.text
+
+
+def test_download_analysis_report_includes_extraction_quality_warnings() -> None:
+    client = TestClient(create_app())
+    upload_response = upload_resume(
+        client,
+        resume_text=(
+            "Sertifikasi\n"
+            "Network fundamentals\n"
+            "Profil\n"
+            "Student developer\n"
+            "Alex Morgan\n"
+            "Kemampuan Utama\n"
+            "Python SQL"
+        ),
+    )
+
+    response = client.get(f"/analyses/{upload_response['analysis_id']}/report.html")
+
+    assert response.status_code == 200
+    assert "Extraction quality advisories" in response.text
+    assert "unusual_section_order" in response.text
+    assert "unusual order" in response.text
 
 
 def test_download_unknown_analysis_report_returns_404() -> None:

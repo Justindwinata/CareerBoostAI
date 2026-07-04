@@ -395,6 +395,28 @@ input:focus-visible,
   font-weight: 700;
 }
 
+.extraction-warning-panel {
+  display: grid;
+  gap: 10px;
+  border: 1px solid #facc15;
+  border-radius: var(--radius-card);
+  background: #fefce8;
+  padding: 16px;
+  color: var(--color-text);
+}
+
+.extraction-warning-panel ul {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.extraction-warning-panel li {
+  color: var(--color-text-muted);
+  font-weight: 700;
+}
+
 .assistive-status {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-card);

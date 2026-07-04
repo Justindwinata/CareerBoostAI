@@ -24,6 +24,11 @@ AnalysisErrorCategory = Literal[
     "validation_error",
 ]
 ExtractionConfidence = Literal["medium", "high"]
+ExtractionQualityWarningCategory = Literal[
+    "unusual_section_order",
+    "candidate_name_after_sections",
+    "short_section_content",
+]
 ExtractionStatus = Literal["extracted", "failed"]
 FutureStageStatus = Literal["not_started"]
 IntakeStatus = Literal["accepted"]
@@ -77,6 +82,7 @@ class ResumeExtractionContract(BaseModel):
     extracted_text: str | None = None
     normalized_text: str | None = None
     sections: list["DetectedResumeSection"] = Field(default_factory=list)
+    quality_warnings: list["ExtractionQualityWarning"] = Field(default_factory=list)
     error: AnalysisError | None = None
 
     @model_validator(mode="after")
@@ -106,8 +112,27 @@ class ResumeExtractionContract(BaseModel):
             raise ValueError("failed extraction must not include normalized text")
         if self.sections:
             raise ValueError("failed extraction must not include detected sections")
+        if self.quality_warnings:
+            raise ValueError("failed extraction must not include quality warnings")
 
         return self
+
+
+class ExtractionQualityWarning(BaseModel):
+    """Advisory warning about deterministic PDF text extraction quality."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    category: ExtractionQualityWarningCategory
+    message: str
+
+    @field_validator("message")
+    @classmethod
+    def require_warning_message(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("extraction quality warning message must not be empty")
+
+        return value
 
 
 class DetectedResumeSection(BaseModel):
