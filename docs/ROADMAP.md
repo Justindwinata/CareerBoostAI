@@ -105,6 +105,7 @@ Completed in Sprint 5:
 - EC-0144: Standalone downloadable HTML reports for saved analyses.
 - EC-0145A: Indonesian and mixed Indonesian-English deterministic parsing improvements.
 - EC-0145: Deterministic improvement guidance exposed in upload results, saved results, and HTML reports.
+- EC-0146: Release-readiness documentation for API contracts, manual testing, local persistence, and known test warnings.
 
 Current route inventory:
 
@@ -118,8 +119,7 @@ Current route inventory:
 
 Remaining Sprint 5 candidate contracts:
 
-- Dependency warning cleanup.
-- API contract documentation.
+- Dedicated dependency-maintenance review for the third-party Starlette/httpx `TestClient` deprecation warning.
 - Security hardening review.
 - Performance validation.
 - Deployment preparation.

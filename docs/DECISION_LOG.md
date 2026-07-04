@@ -27,6 +27,10 @@ Canonical record of important product, architecture, and delivery decisions alre
 | ADR-017 | Represent internship role matching as metadata, not recommendations | Allows role candidates to be displayed from deterministic rules without ranking, suitability claims, or hiring advice | The UI can show role metadata but cannot tell users what role they should pursue |
 | ADR-018 | Prioritize accessible dashboard UX before adding new analysis logic | Makes the current deterministic workflow usable and recruiter-demo-ready before expanding product intelligence | Sprint 4 improves presentation without adding scoring, AI, or recommendations |
 | ADR-019 | Commit only verified demo assets generated from the running app | Ensures repository visuals are honest, reproducible, and portfolio-safe | Requires maintaining a fictional demo resume and regeneration documentation |
+| ADR-020 | Use local SQLite for Sprint 5 saved-analysis history | Enables functional History and Result workflows without unblocking Docker or requiring external services | This is local demo persistence, not authenticated production multi-user storage |
+| ADR-021 | Generate standalone HTML reports from stored canonical responses | Provides a portfolio-ready export workflow without adding PDF tooling, cloud storage, or frontend-side report fabrication | HTML reports must be escaped, static, and limited to deterministic metadata |
+| ADR-022 | Generate improvement guidance only from deterministic evidence | Gives users actionable resume improvement opportunities while avoiding AI claims, scoring, ranking, or hiring predictions | Guidance is bounded to observed metadata and may miss issues that require human or AI interpretation |
+| ADR-023 | Treat API contracts as local release-readiness documentation | Makes frontend-backend behavior reviewable before production API stabilization | Contracts describe current local behavior and must not be oversold as a public production API |
 
 ## Blocked Backlog Notes
 
@@ -78,6 +82,7 @@ The following analysis capabilities remain intentionally out of scope until late
 - Ranked role recommendations.
 - AI-generated recommendations.
 - Production multi-user persistence.
+- PDF report export.
 
 This boundary prevents the UI or backend from overstating the current product state. Completeness and detected-section metadata are preparation signals only, not readiness judgments.
 

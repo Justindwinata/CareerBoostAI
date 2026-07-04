@@ -30,17 +30,17 @@ The screenshots below are verified captures from the running local application u
 
 Flow represented: Upload → Validation → Extraction → Deterministic Analysis Metadata → Dashboard.
 
-## Key Features Planned for Version 1.0
+## Implemented Capabilities and Planned Version 1.0 Work
 
-- Resume PDF upload with validation and safe failure handling.
-- Resume text extraction with confidence-aware processing.
-- ATS-focused resume feedback.
-- Internship readiness scoring with explanations.
-- Technical skill extraction and gap analysis.
-- Internship role matching based on the candidate profile.
-- Prioritized resume and learning recommendations.
-- Analysis dashboard for reviewing results.
-- Analysis history for tracking previous resume checks.
+- Implemented: resume PDF upload with validation and safe failure handling.
+- Implemented: resume text extraction with confidence-aware processing.
+- Implemented: deterministic ATS metadata without scoring.
+- Implemented: explicit skill signal extraction from observed resume text.
+- Implemented: deterministic internship role metadata without ranking.
+- Implemented: target criteria capture and deterministic target alignment metadata.
+- Implemented: deterministic improvement guidance from existing evidence.
+- Implemented: analysis dashboard, local history, saved result pages, and standalone HTML report downloads.
+- Planned: numeric scoring, AI integration, OCR, production persistence, deployment, and additional export formats after explicit contracts are designed and validated.
 
 ## Tech Stack
 
@@ -48,9 +48,10 @@ Flow represented: Upload → Validation → Extraction → Deterministic Analysi
 | --- | --- |
 | Frontend | React, Vite, TypeScript |
 | Backend | FastAPI, Python |
-| Database | PostgreSQL |
-| Containerization | Docker |
-| Local orchestration | Docker Compose |
+| Current local persistence | SQLite via Python standard library |
+| Planned production database boundary | PostgreSQL |
+| Containerization | Docker, blocked until runtime validation is available |
+| Local orchestration | Docker Compose, blocked until runtime validation is available |
 | Version control | Git |
 
 ## High-Level Architecture Overview
@@ -64,8 +65,9 @@ flowchart LR
   Backend[FastAPI Backend]
   Parser[Resume Parser]
   Analysis[Analysis Engine]
-  AI[AI Provider]
-  DB[(PostgreSQL)]
+  AI[Future AI Provider]
+  DB[(Local SQLite)]
+  FutureDB[(Future PostgreSQL)]
 
   User --> Frontend
   Frontend --> Backend
@@ -73,6 +75,7 @@ flowchart LR
   Backend --> Analysis
   Analysis --> AI
   Backend --> DB
+  Backend -. future production boundary .-> FutureDB
   Backend --> Frontend
 ```
 
@@ -80,9 +83,10 @@ Core architectural direction:
 
 - The frontend presents workflows and results, but does not own business logic.
 - The backend owns validation, orchestration, analysis coordination, and persistence.
-- AI provider integration stays behind a backend infrastructure boundary.
-- PostgreSQL stores analysis records and history.
-- Docker Compose will provide a reproducible local development environment.
+- Future AI provider integration stays behind a backend infrastructure boundary.
+- Local SQLite stores completed analysis history for the current demo workflow.
+- PostgreSQL remains the planned production persistence boundary.
+- Docker Compose will provide a reproducible local development environment after Docker validation is unblocked.
 
 ## Repository Structure
 
@@ -211,11 +215,25 @@ Run the standard validation suite:
 make check
 ```
 
+Run the backend locally:
+
+```bash
+backend/.venv/bin/python -m uvicorn careerboost_api.main:app --app-dir backend/src --reload
+```
+
+Run the frontend locally:
+
+```bash
+npm --prefix frontend run dev
+```
+
 Create local runtime configuration when needed:
 
 ```bash
 cp .env.example .env
 ```
+
+See [docs/MANUAL_TESTING.md](docs/MANUAL_TESTING.md) for the full demo validation flow and [docs/API_CONTRACTS.md](docs/API_CONTRACTS.md) for endpoint behavior.
 
 Docker setup commands will be added after Docker validation is unblocked.
 
@@ -229,6 +247,8 @@ Existing documentation:
 - [Code of Conduct](CODE_OF_CONDUCT.md)
 - [Security Policy](SECURITY.md)
 - [Environment Example](.env.example)
+- [API Contracts](docs/API_CONTRACTS.md)
+- [Manual Testing Guide](docs/MANUAL_TESTING.md)
 - [Development Guide](docs/DEVELOPMENT.md)
 - [Demo Assets Guide](docs/DEMO_ASSETS.md)
 - [Sprint 1 Completion Report](docs/SPRINT_1_COMPLETION_REPORT.md)

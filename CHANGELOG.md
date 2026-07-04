@@ -33,6 +33,8 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Functional frontend Result page that retrieves stored analysis details and renders the shared analysis dashboard without re-uploading.
 - Standalone HTML report generation and download from saved analysis results.
 - Deterministic improvement guidance generated from existing resume analysis metadata, exposed in upload results, saved results, and standalone HTML reports.
+- API contract documentation for health, upload, history, result retrieval, delete, and HTML report endpoints.
+- Manual testing guide covering local demo flows, target criteria, history, saved results, report download, invalid uploads, responsive checks, and keyboard smoke testing.
 
 ### Changed
 
@@ -44,6 +46,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Moved the existing upload-analysis experience into the `/upload` route without changing deterministic analysis behavior.
 - Extended upload requests with optional `target_criteria` multipart JSON while preserving the no-criteria upload path.
 - Extracted the analysis dashboard presentation for reuse across upload results and stored result detail pages.
+- Polished release-readiness documentation for current local SQLite persistence, blocked Docker scope, API behavior, manual testing, and known third-party test warnings.
 
 ### Security
 

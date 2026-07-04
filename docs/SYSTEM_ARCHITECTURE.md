@@ -16,8 +16,9 @@ flowchart LR
   App[Application Services]
   Domain[Domain Modules]
   Infra[Infrastructure Integrations]
-  DB[(PostgreSQL)]
-  AI[AI Provider]
+  DB[(Local SQLite)]
+  FutureDB[(Future PostgreSQL)]
+  AI[Future AI Provider]
 
   User --> Frontend
   Frontend --> Backend
@@ -25,6 +26,7 @@ flowchart LR
   App --> Domain
   App --> Infra
   Infra --> DB
+  Infra -. future production boundary .-> FutureDB
   Infra --> AI
 ```
 
@@ -35,7 +37,7 @@ flowchart LR
 | Presentation | React UI, FastAPI route handlers, request/response mapping | Business rules, database queries, AI prompts |
 | Application | Use-case orchestration, validation pipeline, workflow state | Framework-specific request objects, raw SQL, UI logic |
 | Domain | Resume readiness concepts, ATS feedback rules, role matching concepts, recommendation models | FastAPI, React, database drivers, external API clients |
-| Infrastructure | PostgreSQL access, PDF parsing libraries, AI provider clients, logging, configuration | Product workflow decisions hidden inside adapters |
+| Infrastructure | Local SQLite history storage, future PostgreSQL access, PDF parsing libraries, AI provider clients, logging, configuration | Product workflow decisions hidden inside adapters |
 
 ## Module Boundaries
 
@@ -72,6 +74,21 @@ The frontend must not fabricate analysis records, persist records in browser sto
 
 Target Application Criteria are accepted as optional upload metadata through a multipart `target_criteria` JSON field. The backend validates and normalizes the criteria, compares them against existing deterministic resume evidence, and returns factual Target Alignment metadata in the canonical analysis response. Deterministic improvement guidance may reference missing target evidence, but no alignment scoring, fit calculation, acceptance prediction, or AI-generated recommendation is performed from these criteria.
 
+## Backend API Route Inventory
+
+The implemented backend API is documented in [API Contracts](API_CONTRACTS.md). Route handlers remain thin presentation adapters; validation, orchestration, report generation, and persistence live behind service/domain boundaries.
+
+| Route | Method | Boundary |
+| --- | --- | --- |
+| `/health` | `GET` | Process health and environment metadata |
+| `/resumes/upload` | `POST` | Multipart PDF upload, optional target criteria JSON, deterministic analysis orchestration, and successful-analysis persistence |
+| `/analyses` | `GET` | Local saved-analysis summary listing with limit and offset |
+| `/analyses/{analysis_id}` | `GET` | Full canonical stored analysis retrieval |
+| `/analyses/{analysis_id}` | `DELETE` | Local saved-analysis deletion |
+| `/analyses/{analysis_id}/report.html` | `GET` | Standalone escaped HTML report download generated from stored deterministic metadata |
+
+These routes are local portfolio/demo contracts, not an authenticated production public API.
+
 ## Communication Flow
 
 ```mermaid
@@ -83,7 +100,7 @@ sequenceDiagram
   participant Parser as PDF Parser
   participant Analysis as Analysis Engine
   participant Repo as Repository
-  participant DB as PostgreSQL
+  participant DB as Local SQLite
 
   User->>FE: Upload resume PDF
   FE->>API: Send validated upload request
@@ -106,7 +123,7 @@ Completed analyses are stored through a local SQLite repository at `data/careerb
 - Frontend validation gives fast feedback but is never trusted as final.
 - Backend validation is the source of truth for file type, size, readability, and workflow state.
 - PDF parsing must report low-confidence extraction rather than pretending analysis is reliable.
-- AI output must be validated into structured backend-owned response models before persistence or display.
+- Future AI output must be validated into structured backend-owned response models before persistence or display.
 - Tests must cover success states, invalid inputs, and recoverable failure states.
 
 ## Security Boundaries
