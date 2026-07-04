@@ -221,6 +221,37 @@ input:focus-visible,
   color: var(--color-accent-strong);
 }
 
+.secondary-action,
+.danger-action {
+  min-height: 44px;
+  border-radius: var(--radius-card);
+  padding: 10px 16px;
+  font-weight: 800;
+}
+
+.secondary-action {
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.secondary-action:hover:not(:disabled),
+.secondary-action:focus:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent-strong);
+}
+
+.danger-action {
+  border: 1px solid #fecaca;
+  background: #fff7f7;
+  color: #991b1b;
+}
+
+.danger-action:hover:not(:disabled),
+.danger-action:focus:not(:disabled) {
+  border-color: #991b1b;
+}
+
 .capability-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -291,6 +322,145 @@ input:focus-visible,
     linear-gradient(90deg, transparent 18px, rgb(60 110 113 / 14%) 18px 22px, transparent 22px),
     linear-gradient(180deg, transparent 18px, rgb(60 110 113 / 14%) 18px 22px, transparent 22px),
     var(--color-surface-accent);
+}
+
+.history-summary-strip {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 18px;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-accent);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.history-summary-strip div {
+  min-width: 104px;
+  border: 1px solid #b7d6d8;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: 14px;
+  text-align: center;
+}
+
+.history-summary-strip span {
+  display: block;
+  color: var(--color-text);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.history-summary-strip p {
+  max-width: none;
+  margin: 0;
+}
+
+.history-state-panel,
+.history-list-section {
+  display: grid;
+  gap: 18px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: var(--space-panel);
+  box-shadow: var(--shadow-panel);
+}
+
+.history-error-panel {
+  display: grid;
+  gap: 16px;
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-card);
+  background: #fff7f7;
+  padding: var(--space-panel);
+  color: var(--color-text);
+  box-shadow: var(--shadow-card);
+}
+
+.history-inline-error {
+  border: 1px solid #fecaca;
+  border-radius: var(--radius-card);
+  background: #fff7f7;
+  padding: 14px;
+  color: #991b1b;
+  font-weight: 700;
+}
+
+.history-card-list {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-card-list > li {
+  display: grid;
+  gap: 16px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-muted);
+  padding: 18px;
+}
+
+.history-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.history-card-header h3 {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1.125rem;
+}
+
+.history-card-header p {
+  margin: 4px 0 0;
+  color: var(--color-text-muted);
+}
+
+.history-card-header code {
+  overflow-wrap: anywhere;
+}
+
+.history-metadata-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.history-metadata-grid div {
+  min-width: 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  padding: 12px;
+}
+
+.history-metadata-grid dt {
+  color: var(--color-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.history-metadata-grid dd {
+  margin: 4px 0 0;
+  color: var(--color-text);
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.history-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 code {
@@ -1337,8 +1507,15 @@ button:disabled {
     grid-template-columns: 1fr;
   }
 
+  .history-summary-strip,
+  .history-metadata-grid {
+    grid-template-columns: 1fr;
+  }
+
   .button-link,
-  .secondary-link {
+  .secondary-link,
+  .secondary-action,
+  .danger-action {
     width: 100%;
   }
 
@@ -1456,6 +1633,10 @@ button:disabled {
 
   .workflow-list {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .history-metadata-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .target-criteria-grid {

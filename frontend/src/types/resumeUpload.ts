@@ -257,3 +257,15 @@ export type ResumeUploadError = {
 export type ResumeUploadResult = ResumeUploadResponse & {
   uploaded_at: string;
 };
+
+export type AnalysisHistorySummary = {
+  analysis_id: string;
+  created_at: string;
+  filename: string;
+  target_role: string;
+  target_criteria_status: TargetCriteria["status"];
+  target_alignment_status: TargetAlignmentResult["status"];
+  detected_section_count: number;
+  skill_signal_count: number;
+  role_profile_count: number;
+};

@@ -29,6 +29,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Target Application Criteria configuration on Upload CV, submitted as optional validated metadata and echoed in the analysis response.
 - Deterministic Target Alignment metadata comparing target criteria against explicit resume evidence without scoring or hiring prediction.
 - Local backend analysis history persistence using SQLite, including summary listing, full result retrieval, and delete APIs.
+- Functional frontend History page that lists locally saved analysis summaries, links to result routes, refreshes records, and deletes records safely.
 
 ### Changed
 
