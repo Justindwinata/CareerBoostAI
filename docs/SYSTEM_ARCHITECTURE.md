@@ -64,7 +64,7 @@ The frontend is now organized as a routed React application shell. Routes own pa
 | `/` | Home | Presents current deterministic capabilities, workflow overview, and an honest recent-activity empty state |
 | `/upload` | Upload CV | Hosts the existing PDF upload, processing, error recovery, and analysis dashboard workflow |
 | `/history` | Analysis History | Lists locally stored analysis summaries, supports refresh and delete, and links to result routes |
-| `/results/:analysisId` | Individual Analysis Result | Placeholder UI remains until the frontend is wired to stored analysis retrieval |
+| `/results/:analysisId` | Individual Analysis Result | Retrieves a locally stored canonical analysis response and renders the shared analysis dashboard without requiring a resume re-upload |
 | `*` | Not Found | Provides accessible recovery navigation to Home and Upload CV |
 
 The frontend must not fabricate analysis records, persist records in browser storage, generate reports, or turn target alignment metadata into scoring, recommendations, or hiring conclusions.
@@ -144,6 +144,8 @@ Implemented:
 - Deterministic Target Alignment metadata comparing submitted criteria against explicit resume evidence without scoring.
 - Backend local history API with `GET /analyses`, `GET /analyses/{analysis_id}`, and `DELETE /analyses/{analysis_id}`.
 - Frontend History page connected to `GET /analyses` and `DELETE /analyses/{analysis_id}` for local saved-analysis summaries.
+- Frontend Result page connected to `GET /analyses/{analysis_id}` for stored canonical analysis detail retrieval.
+- Shared analysis dashboard component reused by upload success and stored result detail views.
 - Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, extracted-text preview, ATS feedback metadata, skill signal metadata, and role matching metadata.
 - Accessible processing experience, structured upload error recovery, focus management, live regions, and responsive dashboard navigation.
 - Visual consistency pass for dashboard sections, metadata cards, badges, empty states, and mobile layouts.
@@ -153,7 +155,6 @@ Not yet implemented:
 
 - ATS scoring.
 - Recommendations.
-- Functional frontend result retrieval page.
 - Standalone HTML report generation.
 - Database schema.
 - AI integration.

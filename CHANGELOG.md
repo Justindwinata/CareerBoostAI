@@ -30,6 +30,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Deterministic Target Alignment metadata comparing target criteria against explicit resume evidence without scoring or hiring prediction.
 - Local backend analysis history persistence using SQLite, including summary listing, full result retrieval, and delete APIs.
 - Functional frontend History page that lists locally saved analysis summaries, links to result routes, refreshes records, and deletes records safely.
+- Functional frontend Result page that retrieves stored analysis details and renders the shared analysis dashboard without re-uploading.
 
 ### Changed
 
@@ -39,6 +40,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Updated README project status and Product Preview to reflect the completed deterministic dashboard experience.
 - Moved the existing upload-analysis experience into the `/upload` route without changing deterministic analysis behavior.
 - Extended upload requests with optional `target_criteria` multipart JSON while preserving the no-criteria upload path.
+- Extracted the analysis dashboard presentation for reuse across upload results and stored result detail pages.
 
 ### Security
 

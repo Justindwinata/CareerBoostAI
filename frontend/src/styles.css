@@ -359,7 +359,8 @@ input:focus-visible,
 }
 
 .history-state-panel,
-.history-list-section {
+.history-list-section,
+.result-metadata-panel {
   display: grid;
   gap: 18px;
   border: 1px solid var(--color-border);

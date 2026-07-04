@@ -60,6 +60,242 @@ function createHistoryRecord(overrides: Record<string, unknown> = {}) {
   };
 }
 
+function createStoredAnalysisResponse(overrides: Record<string, unknown> = {}) {
+  return {
+    analysis_id: "11111111-1111-4111-8111-111111111111",
+    status: "intake_completed",
+    intake: {
+      status: "accepted",
+      filename: "resume.pdf",
+      content_type: "application/pdf",
+      size_bytes: 2048,
+    },
+    extraction: {
+      status: "extracted",
+      confidence: "high",
+      character_count: 640,
+      page_count: 1,
+      extracted_text:
+        "Alex Morgan\nProfessional Summary\nFrontend developer intern candidate\nTechnical Skills\nReact, TypeScript, Python\nProjects\nCareerBoost AI",
+      normalized_text:
+        "Alex Morgan\nProfessional Summary\nFrontend developer intern candidate\nTechnical Skills\nReact, TypeScript, Python\nProjects\nCareerBoost AI",
+      sections: [
+        {
+          name: "summary",
+          heading: "Professional Summary",
+          start_line: 2,
+          end_line: 3,
+          content: "Frontend developer intern candidate",
+        },
+        {
+          name: "skills",
+          heading: "Technical Skills",
+          start_line: 4,
+          end_line: 5,
+          content: "React, TypeScript, Python",
+        },
+        {
+          name: "projects",
+          heading: "Projects",
+          start_line: 6,
+          end_line: 7,
+          content: "CareerBoost AI",
+        },
+      ],
+      error: null,
+    },
+    completeness: {
+      expected_sections: ["summary", "skills", "experience", "education", "projects"],
+      present_sections: ["summary", "skills", "projects"],
+      missing_sections: ["experience", "education"],
+      score: 0.6,
+    },
+    target_criteria: {
+      status: "provided",
+      target_role: "Frontend Developer Intern",
+      target_description: "Build user-facing React interfaces.",
+      required_skills: ["React", "TypeScript", "GraphQL"],
+      preferred_skills: ["Docker"],
+      required_sections: ["summary", "skills", "projects"],
+      analysis_priorities: ["resume_structure", "skill_visibility", "role_alignment"],
+      experience_expectation: "Internship level",
+      education_expectation: "Computer Science preferred",
+      notes: "",
+    },
+    target_alignment: {
+      status: "evaluated",
+      summary: {
+        required_skills_total: 3,
+        required_skills_found: 2,
+        required_skills_missing: 1,
+        preferred_skills_total: 1,
+        preferred_skills_found: 0,
+        required_sections_total: 3,
+        required_sections_found: 3,
+        required_sections_missing: 0,
+        priorities_total: 3,
+        priorities_evaluated: 3,
+      },
+      required_skills: [
+        {
+          category: "required",
+          submitted_skill: "React",
+          normalized_skill: "react",
+          status: "found",
+          evidence: [
+            {
+              source_type: "explicit_skill_signal",
+              source_label: "React",
+              source_area: "skills",
+              line_number: 5,
+              detail: "React was explicitly detected.",
+            },
+          ],
+        },
+        {
+          category: "required",
+          submitted_skill: "GraphQL",
+          normalized_skill: "graphql",
+          status: "not_found",
+          evidence: [],
+        },
+      ],
+      preferred_skills: [
+        {
+          category: "preferred",
+          submitted_skill: "Docker",
+          normalized_skill: "docker",
+          status: "not_found",
+          evidence: [],
+        },
+      ],
+      required_sections: [
+        {
+          section: "summary",
+          display_label: "Summary",
+          status: "detected",
+          evidence: [
+            {
+              source_type: "detected_resume_section",
+              source_label: "Professional Summary",
+              source_area: "summary",
+              line_number: 2,
+              detail: "Summary section was detected.",
+            },
+          ],
+        },
+      ],
+      analysis_priorities: [
+        {
+          priority: "skill_visibility",
+          display_label: "Skill visibility",
+          status: "evaluated",
+          evidence: [
+            {
+              source_type: "metadata_available",
+              source_label: "Skill Signals",
+              source_area: "skills",
+              line_number: null,
+              detail: "Skill signal metadata was available.",
+            },
+          ],
+        },
+      ],
+      target_role: {
+        status: "mapped_to_controlled_profile",
+        target_role: "Frontend Developer Intern",
+        controlled_profile: "Frontend Developer Intern",
+        evidence: [
+          {
+            source_type: "controlled_role_profile",
+            source_label: "Frontend Developer Intern",
+            source_area: "document",
+            line_number: null,
+            detail: "Target role matched a controlled profile.",
+          },
+        ],
+      },
+      message: "Target alignment metadata was evaluated.",
+    },
+    ats: {
+      status: "metadata_ready",
+      source: "deterministic_resume_signals",
+      issues: [
+        {
+          category: "section_presence",
+          severity: "warning",
+          title: "Education section was not detected",
+          description: "Expected section metadata was missing.",
+          observed_signal: "education_missing",
+          related_sections: ["education"],
+        },
+      ],
+      keyword_coverage: {
+        status: "not_evaluated",
+        matched_keywords: [],
+        missing_keywords: [],
+      },
+      score: {
+        status: "not_scored",
+        score: null,
+      },
+    },
+    skills: {
+      status: "signals_detected",
+      source: "deterministic_normalized_text",
+      signals: [
+        {
+          name: "React",
+          category: "framework",
+          evidence_level: "explicit_mention",
+          evidence: [
+            {
+              matched_text: "React",
+              source_area: "skills",
+              line_number: 5,
+              evidence_text: "React, TypeScript, Python",
+            },
+          ],
+        },
+        {
+          name: "TypeScript",
+          category: "programming_language",
+          evidence_level: "explicit_mention",
+          evidence: [
+            {
+              matched_text: "TypeScript",
+              source_area: "skills",
+              line_number: 5,
+              evidence_text: "React, TypeScript, Python",
+            },
+          ],
+        },
+      ],
+    },
+    roles: {
+      status: "metadata_ready",
+      source: "deterministic_resume_metadata",
+      candidates: [
+        {
+          role_name: "Frontend Developer Intern",
+          match_status: "partial_match",
+          confidence_state: "metadata_ready",
+          deterministic_evidence: ["Explicit React signal found"],
+          matched_skill_signals: ["React", "TypeScript"],
+          missing_required_signals: ["JavaScript"],
+          supporting_sections: ["skills", "projects"],
+        },
+      ],
+    },
+    recommendations: {
+      status: "not_started",
+      name: "recommendations",
+      label: "Recommendations",
+    },
+    ...overrides,
+  };
+}
+
 function getPrimaryNavigation() {
   return screen.getByRole("navigation", { name: "Primary navigation" });
 }
@@ -167,7 +403,7 @@ describe("App", () => {
     expect(await screen.findByRole("heading", { name: "Analysis summaries" })).toBeVisible();
     expect(screen.getByText("resume.pdf")).toBeVisible();
     expect(screen.getByText("backend-resume.pdf")).toBeVisible();
-    expect(screen.getByText("Frontend Developer Intern")).toBeVisible();
+    expect(screen.getAllByText("Frontend Developer Intern").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Not provided")).toBeVisible();
     expect(screen.getByText("11111111...1111")).toBeVisible();
     expect(screen.getAllByRole("link", { name: "Open result" })[0]).toHaveAttribute(
@@ -266,22 +502,109 @@ describe("App", () => {
     expect(screen.getByText("resume.pdf")).toBeVisible();
   });
 
-  it("renders a safe unavailable state for unknown analysis results", () => {
+  it("renders a loading state while a saved analysis result is fetched", () => {
+    mockHistoryFetch(new Promise<Response>(() => {}));
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    expect(screen.getByRole("heading", { level: 1, name: "Analysis Result" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Loading saved analysis" })).toBeVisible();
+    expect(
+      screen.getByText("CareerBoost AI is reading the stored deterministic analysis response."),
+    ).toBeVisible();
+  });
+
+  it("fetches and renders a stored analysis result dashboard", async () => {
+    mockHistoryFetch(
+      new Response(JSON.stringify(createStoredAnalysisResponse()), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }),
+    );
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    expect(await screen.findByRole("heading", { name: "Stored analysis result" })).toBeVisible();
+    expect(screen.getAllByText("resume.pdf").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("11111111...1111")).toBeVisible();
+    expect(screen.getByText("Unavailable in stored detail response")).toBeVisible();
+    expect(screen.getAllByText("Frontend Developer Intern").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByRole("link", { name: "Application Target" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Target Alignment" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Resume Intake" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Resume Structure" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Skill Signals" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "ATS Metadata" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Role Matching" })).toBeVisible();
+    expect(screen.getByRole("heading", { name: "Target criteria metadata" })).toBeVisible();
+    expect(
+      screen.getByRole("heading", { name: "Evidence-backed alignment metadata" }),
+    ).toBeVisible();
+    expect(screen.getAllByText("React").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("GraphQL")).toBeVisible();
+    expect(screen.queryByText("Download report")).not.toBeInTheDocument();
+    expect(screen.queryByText(/hiring prediction/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/guaranteed/i)).not.toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: "Back to History" })[0]).toHaveAttribute(
+      "href",
+      "/history",
+    );
+    expect(screen.getByRole("link", { name: "Analyze Another Resume" })).toHaveAttribute(
+      "href",
+      "/upload",
+    );
+  });
+
+  it("renders a safe not-found state for unknown analysis results", async () => {
+    mockHistoryFetch(
+      new Response(JSON.stringify({ detail: "Analysis record was not found." }), {
+        headers: { "Content-Type": "application/json" },
+        status: 404,
+      }),
+    );
+
     renderRoute("/results/demo-analysis-id");
 
+    expect(await screen.findByRole("heading", { name: "Analysis not found" })).toBeVisible();
     expect(
-      screen.getByRole("heading", { level: 1, name: "Analysis result unavailable." }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        "Backend result retrieval exists, but this frontend route is not connected to stored analysis records yet.",
-      ),
+      screen.getByText("This saved analysis may have been deleted or the ID may be invalid."),
     ).toBeVisible();
     expect(screen.getByText("demo-analysis-id")).toBeVisible();
-    expect(
-      within(screen.getByRole("main")).getByRole("link", { name: "Upload CV" }),
-    ).toHaveAttribute("href", "/upload");
-    expect(screen.getByRole("link", { name: "View History" })).toHaveAttribute("href", "/history");
+    expect(screen.getAllByRole("link", { name: "Back to History" })[0]).toHaveAttribute(
+      "href",
+      "/history",
+    );
+    expect(screen.getAllByRole("link", { name: "Upload CV" })[0]).toHaveAttribute(
+      "href",
+      "/upload",
+    );
+    expect(screen.queryByText("Analysis Summary")).not.toBeInTheDocument();
+  });
+
+  it("renders a safe result error state and retries loading the saved analysis", async () => {
+    const fetchSpy = mockHistoryFetch(
+      new Response(JSON.stringify({ detail: "Analysis history storage is unavailable." }), {
+        headers: { "Content-Type": "application/json" },
+        status: 500,
+      }),
+      new Response(JSON.stringify(createStoredAnalysisResponse()), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }),
+    );
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(
+      "Saved analysis could not be loaded. Check the backend connection and try again.",
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Retry loading result" }));
+
+    expect(await screen.findByRole("heading", { name: "Stored analysis result" })).toBeVisible();
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "http://localhost:8000/analyses/11111111-1111-4111-8111-111111111111",
+    );
   });
 
   it("renders an accessible not-found route", () => {

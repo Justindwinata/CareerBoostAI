@@ -46,6 +46,7 @@ The current implementation includes:
 - Deterministic Target Alignment metadata comparing submitted target criteria against explicit resume evidence without scoring.
 - Local backend SQLite persistence for completed analyses with list, detail, and delete APIs.
 - Functional frontend History page listing saved analysis summaries with delete actions and open-result navigation.
+- Functional frontend Result page that opens stored analyses without requiring a resume re-upload.
 - Analysis dashboard with upload, processing, error recovery, summary, structure, skill, ATS, and role sections.
 - Accessibility remediation for labels, focus management, live regions, navigation, touch targets, and responsive layout.
 - Visual consistency pass for professional SaaS-style dashboard presentation.
@@ -64,7 +65,6 @@ The current implementation intentionally does not include:
 - Ranked role recommendations.
 - Personalized learning recommendations.
 - Authentication.
-- Functional frontend result retrieval page.
 - Downloadable standalone HTML reports.
 - Production deployment.
 - Docker workflow artifacts.
@@ -97,6 +97,7 @@ Completed in Sprint 5:
 - EC-0140: Deterministic Target Alignment metadata from explicit resume evidence.
 - EC-0141: Local backend analysis history persistence and retrieval API.
 - EC-0142: Functional frontend History page connected to saved analysis summaries.
+- EC-0143: Functional frontend Result page connected to stored analysis detail retrieval.
 
 Current route inventory:
 
@@ -105,13 +106,12 @@ Current route inventory:
 | `/` | Implemented foundation | Home dashboard with current deterministic capabilities and recent-activity empty state |
 | `/upload` | Implemented | Existing resume upload and deterministic analysis dashboard workflow |
 | `/history` | Implemented | Lists locally stored analysis summaries, supports refresh and delete, and links to result routes |
-| `/results/:analysisId` | Implemented foundation | Safe unavailable state until persisted result retrieval exists |
+| `/results/:analysisId` | Implemented | Retrieves a locally stored canonical analysis response and renders the analysis dashboard without re-uploading |
 | `*` | Implemented | Accessible not-found page |
 
 Remaining Sprint 5 candidate contracts:
 
 - Explainable improvement guidance based on existing deterministic metadata.
-- Functional frontend Result page using the backend history API.
 - Dependency warning cleanup.
 - API contract documentation.
 - Security hardening review.
