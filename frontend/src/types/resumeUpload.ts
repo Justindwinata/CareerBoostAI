@@ -23,6 +23,31 @@ export type AnalysisError = {
 
 export type ResumeSectionName = "summary" | "skills" | "experience" | "education" | "projects";
 
+export type TargetRequiredSectionName = ResumeSectionName | "certifications";
+
+export type TargetAnalysisPriority =
+  | "resume_structure"
+  | "ats_compatibility"
+  | "skill_visibility"
+  | "role_alignment"
+  | "project_evidence"
+  | "education_fit";
+
+export type TargetCriteria = {
+  status: "not_provided" | "provided";
+  target_role: string;
+  target_description: string;
+  required_skills: string[];
+  preferred_skills: string[];
+  required_sections: TargetRequiredSectionName[];
+  analysis_priorities: TargetAnalysisPriority[];
+  experience_expectation: string;
+  education_expectation: string;
+  notes: string;
+};
+
+export type TargetCriteriaInput = Omit<TargetCriteria, "status">;
+
 export type DetectedResumeSection = {
   name: ResumeSectionName;
   heading: string;
@@ -153,6 +178,7 @@ export type ResumeUploadResponse = {
   intake: ResumeIntakeResult;
   extraction: ResumeExtractionResult;
   completeness: ResumeCompletenessResult | null;
+  target_criteria: TargetCriteria;
   ats: AnalysisStagePlaceholder | AtsFeedbackResult;
   skills: AnalysisStagePlaceholder | SkillSignalsResult;
   roles: AnalysisStagePlaceholder | RoleMatchesResult;

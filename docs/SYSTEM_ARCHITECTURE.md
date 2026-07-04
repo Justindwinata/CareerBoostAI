@@ -65,7 +65,9 @@ The frontend is now organized as a routed React application shell. Routes own pa
 | `/results/:analysisId` | Individual Analysis Result | Shows a safe unavailable state because persisted result retrieval is not implemented |
 | `*` | Not Found | Provides accessible recovery navigation to Home and Upload CV |
 
-The frontend must not fabricate analysis records, persist records in browser storage, generate reports, or process target criteria until those capabilities have approved backend and product contracts.
+The frontend must not fabricate analysis records, persist records in browser storage, generate reports, or turn target criteria into alignment conclusions until those capabilities have approved backend and product contracts.
+
+Target Application Criteria are currently accepted as optional upload metadata through a multipart `target_criteria` JSON field. The backend validates and normalizes the criteria, then returns them in the canonical analysis response. No alignment scoring, fit calculation, acceptance prediction, or recommendation generation is performed from these criteria yet.
 
 ## Communication Flow
 
@@ -134,6 +136,7 @@ Implemented:
 - Deterministic skill signal extraction from explicit resume text mentions.
 - Deterministic internship role matching metadata without ranking or recommendation claims.
 - Multi-page frontend shell with Home, Upload CV, History, Result placeholder, and not-found routes.
+- Target Application Criteria input, backend validation, and canonical response metadata echo.
 - Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, extracted-text preview, ATS feedback metadata, skill signal metadata, and role matching metadata.
 - Accessible processing experience, structured upload error recovery, focus management, live regions, and responsive dashboard navigation.
 - Visual consistency pass for dashboard sections, metadata cards, badges, empty states, and mobile layouts.
@@ -144,7 +147,7 @@ Not yet implemented:
 - ATS scoring.
 - Recommendations.
 - Persistence and analysis history.
-- Target criteria configuration.
+- Target criteria alignment logic.
 - Standalone HTML report generation.
 - Database schema.
 - AI integration.

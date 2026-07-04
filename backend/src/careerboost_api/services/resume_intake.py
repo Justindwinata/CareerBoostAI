@@ -6,6 +6,7 @@ from careerboost_api.domain import (
     ResumeAnalysisContract,
     ResumeExtractionContract,
     ResumeIntakeContract,
+    TargetCriteria,
 )
 from careerboost_api.services.ats_feedback import AtsFeedbackService
 from careerboost_api.services.resume_completeness import ResumeCompletenessCalculator
@@ -43,6 +44,7 @@ class ResumeIntakeOrchestrator:
         *,
         upload: ValidatedResumeUpload,
         extraction: ResumeTextExtractionResult,
+        target_criteria: TargetCriteria | None = None,
     ) -> ResumeAnalysisContract:
         processed_text = self.text_processor.process(extraction.extracted_text)
         completeness = self.completeness_calculator.calculate(processed_text.sections)
@@ -67,6 +69,7 @@ class ResumeIntakeOrchestrator:
             intake=self._build_intake(upload),
             extraction=extraction_contract,
             completeness=completeness,
+            target_criteria=target_criteria or TargetCriteria(),
             ats=self.ats_feedback_service.generate(
                 extraction=extraction_contract,
                 completeness=completeness,
@@ -84,6 +87,7 @@ class ResumeIntakeOrchestrator:
         *,
         upload: ValidatedResumeUpload,
         error: ResumeTextExtractionError,
+        target_criteria: TargetCriteria | None = None,
     ) -> ResumeAnalysisContract:
         extraction_contract = ResumeExtractionContract(
             status="failed",
@@ -102,6 +106,7 @@ class ResumeIntakeOrchestrator:
             status="failed",
             intake=self._build_intake(upload),
             extraction=extraction_contract,
+            target_criteria=target_criteria or TargetCriteria(),
             ats=self.ats_feedback_service.generate(
                 extraction=extraction_contract,
                 completeness=None,

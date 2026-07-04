@@ -1,3 +1,4 @@
+import json
 from io import BytesIO
 
 from fastapi.testclient import TestClient
@@ -10,6 +11,7 @@ from careerboost_api.domain import (
     ResumeCompletenessContract,
     ResumeExtractionContract,
     ResumeIntakeContract,
+    TargetCriteria,
 )
 from careerboost_api.main import create_app
 from careerboost_api.services.resume_extraction import (
@@ -93,6 +95,18 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             "present_sections": [],
             "missing_sections": ["summary", "skills", "experience", "education", "projects"],
             "score": 0,
+        },
+        "target_criteria": {
+            "status": "not_provided",
+            "target_role": "",
+            "target_description": "",
+            "required_skills": [],
+            "preferred_skills": [],
+            "required_sections": [],
+            "analysis_priorities": [],
+            "experience_expectation": "",
+            "education_expectation": "",
+            "notes": "",
         },
         "ats": {
             "status": "metadata_ready",
@@ -357,11 +371,14 @@ def test_upload_resume_delegates_success_mapping_to_orchestrator(
         *,
         upload: ValidatedResumeUpload,
         extraction: ResumeTextExtractionResult,
+        target_criteria: TargetCriteria | None = None,
     ) -> ResumeAnalysisContract:
         nonlocal delegation_calls
         delegation_calls += 1
         assert upload.filename == "resume.pdf"
         assert extraction.extracted_text == RESUME_TEXT
+        assert target_criteria is not None
+        assert target_criteria.status == "not_provided"
         return ResumeAnalysisContract(
             status="intake_completed",
             intake=ResumeIntakeContract(
@@ -397,6 +414,86 @@ def test_upload_resume_delegates_success_mapping_to_orchestrator(
     assert delegation_calls == 1
     assert response.json()["status"] == "intake_completed"
     assert response.json()["completeness"] is not None
+
+
+def test_upload_resume_accepts_target_criteria_metadata() -> None:
+    client = TestClient(create_app())
+    pdf_content = create_pdf_bytes()
+
+    response = client.post(
+        "/resumes/upload",
+        files={"file": ("resume.pdf", pdf_content, "application/pdf")},
+        data={
+            "target_criteria": json.dumps(
+                {
+                    "target_role": "  Frontend Developer Intern  ",
+                    "target_description": "Build accessible React interfaces.",
+                    "required_skills": ["React", "react", "TypeScript", ""],
+                    "preferred_skills": ["Docker", "PostgreSQL"],
+                    "required_sections": ["summary", "skills", "projects"],
+                    "analysis_priorities": ["resume_structure", "skill_visibility"],
+                    "experience_expectation": "Internship level",
+                    "education_expectation": "Computer Science or related field preferred",
+                    "notes": "Review explicit project evidence.",
+                }
+            )
+        },
+    )
+
+    assert response.status_code == 202
+    assert response.json()["target_criteria"] == {
+        "status": "provided",
+        "target_role": "Frontend Developer Intern",
+        "target_description": "Build accessible React interfaces.",
+        "required_skills": ["React", "TypeScript"],
+        "preferred_skills": ["Docker", "PostgreSQL"],
+        "required_sections": ["summary", "skills", "projects"],
+        "analysis_priorities": ["resume_structure", "skill_visibility"],
+        "experience_expectation": "Internship level",
+        "education_expectation": "Computer Science or related field preferred",
+        "notes": "Review explicit project evidence.",
+    }
+
+
+def test_upload_resume_rejects_invalid_target_criteria_json() -> None:
+    client = TestClient(create_app())
+    pdf_content = create_pdf_bytes()
+
+    response = client.post(
+        "/resumes/upload",
+        files={"file": ("resume.pdf", pdf_content, "application/pdf")},
+        data={"target_criteria": "{not-json"},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Target criteria must be valid JSON."
+
+
+def test_upload_resume_rejects_invalid_target_criteria_values() -> None:
+    client = TestClient(create_app())
+    pdf_content = create_pdf_bytes()
+
+    response = client.post(
+        "/resumes/upload",
+        files={"file": ("resume.pdf", pdf_content, "application/pdf")},
+        data={"target_criteria": json.dumps({"target_role": "x" * 121})},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Target criteria contains invalid values."
+
+
+def test_upload_resume_preserves_file_validation_priority_with_invalid_target_criteria() -> None:
+    client = TestClient(create_app())
+
+    response = client.post(
+        "/resumes/upload",
+        files={"file": ("resume.txt", b"not a pdf", "text/plain")},
+        data={"target_criteria": "{not-json"},
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Resume must use a .pdf file extension."
 
 
 def test_upload_resume_rejects_non_pdf_content_type() -> None:

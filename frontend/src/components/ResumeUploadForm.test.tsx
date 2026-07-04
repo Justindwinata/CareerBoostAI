@@ -211,6 +211,18 @@ function createSuccessfulUploadResponse(
       },
     ],
   },
+  targetCriteria: unknown = {
+    status: "not_provided",
+    target_role: "",
+    target_description: "",
+    required_skills: [],
+    preferred_skills: [],
+    required_sections: [],
+    analysis_priorities: [],
+    experience_expectation: "",
+    education_expectation: "",
+    notes: "",
+  },
 ) {
   return {
     status: "intake_completed",
@@ -231,6 +243,7 @@ function createSuccessfulUploadResponse(
       error: null,
     },
     completeness,
+    target_criteria: targetCriteria,
     ats,
     skills,
     roles,
@@ -296,6 +309,88 @@ describe("ResumeUploadForm", () => {
     expect(fileInput).toHaveAttribute("aria-describedby", "resume-file-help");
     expect(screen.getByText("PDF only. Maximum file size is 5 MB.")).toBeVisible();
     expectValidAriaIdReferences();
+  });
+
+  it("renders the target criteria panel with accessible controls", () => {
+    render(<ResumeUploadForm />);
+
+    expect(
+      screen.getByRole("heading", {
+        name: "Define the target role before analyzing a resume.",
+      }),
+    ).toBeVisible();
+    expect(screen.getByLabelText("Target role")).toBeVisible();
+    expect(screen.getByLabelText("Job or internship description")).toBeVisible();
+    expect(screen.getByLabelText("Required skills")).toBeVisible();
+    expect(screen.getByLabelText("Preferred skills")).toBeVisible();
+    expect(screen.getByRole("group", { name: "Required resume sections" })).toBeVisible();
+    expect(screen.getByRole("group", { name: "Analysis priorities" })).toBeVisible();
+    expect(screen.getByLabelText("Experience expectation")).toBeVisible();
+    expect(screen.getByLabelText("Education expectation")).toBeVisible();
+    expect(screen.getByLabelText("Notes")).toBeVisible();
+    expect(screen.queryByText(/guaranteed acceptance/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/guaranteed interview/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/hiring probability/i)).not.toBeInTheDocument();
+  });
+
+  it("normalizes duplicate required and preferred skill entries", () => {
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Required skills"), {
+      target: { value: "React, react, SQL, FastAPI,, " },
+    });
+    fireEvent.change(screen.getByLabelText("Preferred skills"), {
+      target: { value: "Docker\n docker\nPostgreSQL" },
+    });
+
+    const requiredSkillPreview = screen.getByLabelText("Normalized required skills");
+    const preferredSkillPreview = screen.getByLabelText("Normalized preferred skills");
+
+    expect(within(requiredSkillPreview).getByText("3 unique skills listed")).toBeVisible();
+    expect(within(requiredSkillPreview).getByText("React")).toBeVisible();
+    expect(within(requiredSkillPreview).getByText("SQL")).toBeVisible();
+    expect(within(requiredSkillPreview).getByText("FastAPI")).toBeVisible();
+    expect(within(preferredSkillPreview).getByText("2 unique skills listed")).toBeVisible();
+    expect(within(preferredSkillPreview).getByText("Docker")).toBeVisible();
+    expect(within(preferredSkillPreview).getByText("PostgreSQL")).toBeVisible();
+  });
+
+  it("allows required sections and analysis priorities to be changed", () => {
+    render(<ResumeUploadForm />);
+
+    const certificationsCheckbox = screen.getByLabelText("Certifications");
+    const roleAlignmentCheckbox = screen.getByLabelText("Role alignment");
+    const summaryCheckbox = screen.getByLabelText("Summary");
+
+    expect(certificationsCheckbox).not.toBeChecked();
+    expect(roleAlignmentCheckbox).not.toBeChecked();
+    expect(summaryCheckbox).toBeChecked();
+
+    fireEvent.click(certificationsCheckbox);
+    fireEvent.click(roleAlignmentCheckbox);
+    fireEvent.click(summaryCheckbox);
+
+    expect(certificationsCheckbox).toBeChecked();
+    expect(roleAlignmentCheckbox).toBeChecked();
+    expect(summaryCheckbox).not.toBeChecked();
+  });
+
+  it("shows inline validation when target criteria limits are exceeded", () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch");
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Target role"), {
+      target: { value: "x".repeat(121) },
+    });
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(screen.getByText("Target role must be 120 characters or fewer.")).toBeVisible();
+    expect(screen.getByLabelText("Target role")).toHaveAttribute("aria-invalid", "true");
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it("focuses a clear empty-upload error when submitting without a selected file", async () => {
@@ -388,6 +483,147 @@ describe("ResumeUploadForm", () => {
     await waitFor(() =>
       expect(screen.getByLabelText("Deterministic pipeline overview")).toHaveFocus(),
     );
+  });
+
+  it("uploads without target criteria when the panel is untouched", async () => {
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(createUploadSuccessResponse());
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    const requestBody = fetchSpy.mock.calls[0]?.[1]?.body as FormData;
+
+    expect(requestBody.get("file")).toBeInstanceOf(File);
+    expect(requestBody.get("target_criteria")).toBeNull();
+    expect(screen.getByText("No target criteria were provided for this analysis.")).toBeVisible();
+  });
+
+  it("uploads normalized target criteria and displays a factual target summary", async () => {
+    const targetCriteriaResponse = {
+      status: "provided",
+      target_role: "Frontend Developer Intern",
+      target_description: "Build accessible React interfaces.",
+      required_skills: ["React", "SQL"],
+      preferred_skills: ["Docker"],
+      required_sections: [
+        "summary",
+        "skills",
+        "experience",
+        "education",
+        "projects",
+        "certifications",
+      ],
+      analysis_priorities: [
+        "resume_structure",
+        "ats_compatibility",
+        "skill_visibility",
+        "role_alignment",
+      ],
+      experience_expectation: "Internship level",
+      education_expectation: "Computer Science or related field preferred",
+      notes: "Review explicit project evidence.",
+    };
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify(
+          createSuccessfulUploadResponse(
+            undefined,
+            undefined,
+            LONG_EXTRACTED_TEXT,
+            undefined,
+            undefined,
+            undefined,
+            targetCriteriaResponse,
+          ),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 202,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Target role"), {
+      target: { value: "  Frontend Developer Intern  " },
+    });
+    fireEvent.change(screen.getByLabelText("Job or internship description"), {
+      target: { value: "Build accessible React interfaces." },
+    });
+    fireEvent.change(screen.getByLabelText("Required skills"), {
+      target: { value: "React, react, SQL" },
+    });
+    fireEvent.change(screen.getByLabelText("Preferred skills"), {
+      target: { value: "Docker" },
+    });
+    fireEvent.click(screen.getByLabelText("Certifications"));
+    fireEvent.click(screen.getByLabelText("Role alignment"));
+    fireEvent.change(screen.getByLabelText("Experience expectation"), {
+      target: { value: "Internship level" },
+    });
+    fireEvent.change(screen.getByLabelText("Education expectation"), {
+      target: { value: "Computer Science or related field preferred" },
+    });
+    fireEvent.change(screen.getByLabelText("Notes"), {
+      target: { value: "Review explicit project evidence." },
+    });
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    const requestBody = fetchSpy.mock.calls[0]?.[1]?.body as FormData;
+    const submittedCriteria = JSON.parse(requestBody.get("target_criteria") as string);
+
+    expect(submittedCriteria).toEqual({
+      target_role: "Frontend Developer Intern",
+      target_description: "Build accessible React interfaces.",
+      required_skills: ["React", "SQL"],
+      preferred_skills: ["Docker"],
+      required_sections: [
+        "summary",
+        "skills",
+        "experience",
+        "education",
+        "projects",
+        "certifications",
+      ],
+      analysis_priorities: [
+        "resume_structure",
+        "ats_compatibility",
+        "skill_visibility",
+        "role_alignment",
+      ],
+      experience_expectation: "Internship level",
+      education_expectation: "Computer Science or related field preferred",
+      notes: "Review explicit project evidence.",
+    });
+
+    const targetSummary = screen
+      .getByRole("heading", { name: "Target criteria metadata" })
+      .closest("section") as HTMLElement;
+
+    expect(screen.getAllByText("Application Target").length).toBeGreaterThanOrEqual(2);
+    expect(
+      within(targetSummary).getByRole("heading", { name: "Target criteria metadata" }),
+    ).toBeVisible();
+    expect(within(targetSummary).getByText("Frontend Developer Intern")).toBeVisible();
+    expect(within(targetSummary).getByText("Required skills")).toBeVisible();
+    expect(within(targetSummary).getByText("Preferred skills")).toBeVisible();
+    expect(within(targetSummary).getByText("Certifications")).toBeVisible();
+    expect(within(targetSummary).getByText("Role alignment")).toBeVisible();
+    expect(screen.queryByText(/fit percentage/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/acceptance likelihood/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/guaranteed/i)).not.toBeInTheDocument();
   });
 
   it("restores controls and shows retry guidance after upload failure", async () => {
@@ -528,6 +764,18 @@ describe("ResumeUploadForm", () => {
             },
           },
           completeness: null,
+          target_criteria: {
+            status: "not_provided",
+            target_role: "",
+            target_description: "",
+            required_skills: [],
+            preferred_skills: [],
+            required_sections: [],
+            analysis_priorities: [],
+            experience_expectation: "",
+            education_expectation: "",
+            notes: "",
+          },
           ats: {
             status: "not_started",
             name: "ats",
@@ -788,8 +1036,8 @@ describe("ResumeUploadForm", () => {
     expect(screen.getAllByText("Summary").length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByText("Skills").length).toBeGreaterThanOrEqual(2);
     expect(screen.getAllByText("Projects").length).toBeGreaterThanOrEqual(2);
-    expect(screen.getByText("Experience")).toBeVisible();
-    expect(screen.getByText("Education")).toBeVisible();
+    expect(screen.getAllByText("Experience").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Education").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Detected Sections")).toBeVisible();
     expect(
       screen.getByRole("heading", { name: "Detected headings and line ranges" }),
@@ -846,9 +1094,13 @@ describe("ResumeUploadForm", () => {
     expect(screen.getAllByText("Missing required signals")).toHaveLength(5);
     expect(screen.getAllByText("SQL").length).toBeGreaterThanOrEqual(4);
     expect(screen.getByText("CSS")).toBeVisible();
-    expect(screen.queryByText(/recommended/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/best match/i)).not.toBeInTheDocument();
-    expect(screen.queryByText(/you should become/i)).not.toBeInTheDocument();
+    const roleMatchingSection = screen
+      .getByRole("heading", { name: "Deterministic internship role candidates" })
+      .closest("section") as HTMLElement;
+
+    expect(within(roleMatchingSection).queryByText(/recommended/i)).not.toBeInTheDocument();
+    expect(within(roleMatchingSection).queryByText(/best match/i)).not.toBeInTheDocument();
+    expect(within(roleMatchingSection).queryByText(/you should become/i)).not.toBeInTheDocument();
     expect(screen.getByText("Analysis workflow metadata available")).toBeVisible();
     expectValidAriaIdReferences();
     expect(globalThis.fetch).toHaveBeenCalledTimes(1);

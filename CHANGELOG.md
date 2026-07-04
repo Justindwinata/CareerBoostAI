@@ -26,6 +26,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Verified desktop and mobile screenshots generated from the running application using a fictional demo resume.
 - Demo asset documentation for privacy policy, capture states, viewport sizes, and regeneration.
 - Multi-page frontend application shell with Home, Upload CV, History, Result placeholder, and not-found routes.
+- Target Application Criteria configuration on Upload CV, submitted as optional validated metadata and echoed in the analysis response.
 
 ### Changed
 
@@ -34,6 +35,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Improved dashboard accessibility, focus behavior, live regions, responsive behavior, visual consistency, and metadata presentation.
 - Updated README project status and Product Preview to reflect the completed deterministic dashboard experience.
 - Moved the existing upload-analysis experience into the `/upload` route without changing deterministic analysis behavior.
+- Extended upload requests with optional `target_criteria` multipart JSON while preserving the no-criteria upload path.
 
 ### Security
 

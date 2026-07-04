@@ -1,5 +1,9 @@
 import { frontendConfig } from "../config/environment";
-import type { ResumeUploadError, ResumeUploadResponse } from "../types/resumeUpload";
+import type {
+  ResumeUploadError,
+  ResumeUploadResponse,
+  TargetCriteriaInput,
+} from "../types/resumeUpload";
 
 export type ResumeUploadFailureCategory =
   | "unsupported_file_type"
@@ -51,9 +55,16 @@ function isStructuredAnalysisResponse(value: unknown): value is ResumeUploadResp
   );
 }
 
-export async function uploadResume(file: File): Promise<ResumeUploadResponse> {
+export async function uploadResume(
+  file: File,
+  targetCriteria?: TargetCriteriaInput | null,
+): Promise<ResumeUploadResponse> {
   const formData = new FormData();
   formData.append("file", file);
+
+  if (targetCriteria) {
+    formData.append("target_criteria", JSON.stringify(targetCriteria));
+  }
 
   const response = await fetch(`${frontendConfig.apiBaseUrl}/resumes/upload`, {
     method: "POST",

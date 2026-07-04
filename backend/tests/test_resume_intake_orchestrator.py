@@ -1,3 +1,4 @@
+from careerboost_api.domain import TargetCriteria
 from careerboost_api.services.resume_extraction import (
     ResumeTextExtractionError,
     ResumeTextExtractionResult,
@@ -46,6 +47,7 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
         "projects",
     ]
     assert contract.completeness is not None
+    assert contract.target_criteria.status == "not_provided"
     assert contract.completeness.present_sections == ["summary", "skills", "projects"]
     assert contract.completeness.missing_sections == ["experience", "education"]
     assert contract.completeness.score == 0.6
@@ -73,6 +75,36 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
     assert contract.roles.candidates[0].matched_skill_signals == ["Python", "FastAPI"]
     assert contract.roles.candidates[0].missing_required_signals == ["SQL"]
     assert contract.recommendations.status == "not_started"
+
+
+def test_orchestrator_preserves_target_criteria_metadata() -> None:
+    orchestrator = ResumeIntakeOrchestrator()
+
+    contract = orchestrator.build_success(
+        upload=build_upload(),
+        extraction=ResumeTextExtractionResult(
+            extracted_text=(
+                "Summary\n"
+                "Backend-focused student developer.\n\n"
+                "Technical Skills\n"
+                "Python, FastAPI, React\n\n"
+                "Projects\n"
+                "CareerBoost AI"
+            ),
+            confidence="medium",
+            character_count=118,
+            page_count=1,
+        ),
+        target_criteria=TargetCriteria(
+            target_role="Backend Developer Intern",
+            required_skills=["Python", "FastAPI"],
+            analysis_priorities=["skill_visibility"],
+        ),
+    )
+
+    assert contract.target_criteria.status == "provided"
+    assert contract.target_criteria.target_role == "Backend Developer Intern"
+    assert contract.target_criteria.required_skills == ["Python", "FastAPI"]
 
 
 def test_orchestrator_builds_low_text_failure_contract() -> None:

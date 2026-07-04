@@ -51,6 +51,11 @@ describe("App", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", {
+        name: "Define the target role before analyzing a resume.",
+      }),
+    ).toBeVisible();
     expect(screen.getByRole("heading", { name: "Upload a PDF resume" })).toBeVisible();
     expect(screen.getByRole("form", { name: "Resume upload form" })).toBeVisible();
     expect(screen.getByLabelText("Select PDF resume")).toBeVisible();

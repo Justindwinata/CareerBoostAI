@@ -8,6 +8,7 @@ from careerboost_api.domain.ats import AtsFeedbackContract
 from careerboost_api.domain.resume_sections import ResumeSectionName
 from careerboost_api.domain.roles import RoleMatchesContract
 from careerboost_api.domain.skills import SkillSignalsContract
+from careerboost_api.domain.target_criteria import TargetCriteria
 
 AnalysisStatus = Literal["intake_completed", "failed"]
 AnalysisErrorCategory = Literal[
@@ -190,6 +191,7 @@ class ResumeAnalysisContract(BaseModel):
     intake: ResumeIntakeContract
     extraction: ResumeExtractionContract
     completeness: ResumeCompletenessContract | None = None
+    target_criteria: TargetCriteria = Field(default_factory=TargetCriteria)
     ats: AtsFeedbackContract | AnalysisStagePlaceholder = Field(
         default_factory=lambda: AnalysisStagePlaceholder(name="ats", label="ATS analysis")
     )

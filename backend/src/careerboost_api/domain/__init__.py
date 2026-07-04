@@ -53,6 +53,12 @@ from careerboost_api.domain.skills import (
     SkillSignalStatus,
     SkillSourceArea,
 )
+from careerboost_api.domain.target_criteria import (
+    TargetAnalysisPriority,
+    TargetCriteria,
+    TargetCriteriaStatus,
+    TargetRequiredSection,
+)
 
 __all__ = [
     "AnalysisError",
@@ -98,4 +104,8 @@ __all__ = [
     "SkillSignalsContract",
     "SkillSignalStatus",
     "SkillSourceArea",
+    "TargetAnalysisPriority",
+    "TargetCriteria",
+    "TargetCriteriaStatus",
+    "TargetRequiredSection",
 ]

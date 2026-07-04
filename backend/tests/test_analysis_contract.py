@@ -8,6 +8,7 @@ from careerboost_api.domain import (
     ResumeCompletenessContract,
     ResumeExtractionContract,
     ResumeIntakeContract,
+    TargetCriteria,
 )
 
 
@@ -57,6 +58,7 @@ def test_analysis_contract_represents_successful_resume_intake() -> None:
     assert contract.extraction.sections[0].name == "projects"
     assert contract.completeness is not None
     assert contract.completeness.score == 0.2
+    assert contract.target_criteria.status == "not_provided"
     assert contract.ats.status == "not_started"
     assert contract.skills.status == "not_started"
     assert contract.roles.status == "not_started"
@@ -85,6 +87,38 @@ def test_analysis_contract_represents_low_text_extraction_failure() -> None:
     assert contract.extraction.extracted_text is None
     assert contract.extraction.normalized_text is None
     assert contract.extraction.sections == []
+    assert contract.target_criteria.status == "not_provided"
+
+
+def test_analysis_contract_can_include_target_criteria_metadata() -> None:
+    contract = ResumeAnalysisContract(
+        status="intake_completed",
+        intake=build_intake(),
+        extraction=ResumeExtractionContract(
+            status="extracted",
+            confidence="high",
+            character_count=850,
+            page_count=2,
+            extracted_text="Software engineering resume with project evidence.",
+            normalized_text="Software engineering resume with project evidence.",
+        ),
+        completeness=ResumeCompletenessContract(
+            expected_sections=["summary", "skills", "experience", "education", "projects"],
+            present_sections=["projects"],
+            missing_sections=["summary", "skills", "experience", "education"],
+            score=0.2,
+        ),
+        target_criteria=TargetCriteria(
+            target_role="Backend Developer Intern",
+            required_skills=["Python", "FastAPI"],
+            required_sections=["summary", "skills", "projects"],
+            analysis_priorities=["resume_structure", "skill_visibility"],
+        ),
+    )
+
+    assert contract.target_criteria.status == "provided"
+    assert contract.target_criteria.target_role == "Backend Developer Intern"
+    assert contract.target_criteria.required_skills == ["Python", "FastAPI"]
 
 
 def test_analysis_contract_represents_unreadable_pdf_failure() -> None:

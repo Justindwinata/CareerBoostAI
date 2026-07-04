@@ -49,6 +49,7 @@ The current implementation includes:
 - Verified desktop and mobile screenshots captured from the running application.
 - Fictional reproducible demo resume and demo asset documentation.
 - Multi-page frontend application shell with Home, Upload CV, History, Result placeholder, and not-found routes.
+- Target Application Criteria input captured as normalized metadata on upload.
 
 ## Not Implemented Yet
 
@@ -59,7 +60,7 @@ The current implementation intentionally does not include:
 - Inferred skill assessment.
 - Ranked role recommendations.
 - Personalized learning recommendations.
-- Target criteria configuration for role-specific review.
+- Target criteria alignment engine for role-specific review.
 - Authentication.
 - Persistence and analysis history.
 - Downloadable standalone HTML reports.
@@ -90,6 +91,7 @@ Completed in Sprint 5:
 
 - EC-0137: Deterministic recommendation contract foundation.
 - EC-0138: Multi-page frontend application foundation and navigation shell.
+- EC-0139: Target Application Criteria input and validated metadata echo.
 
 Current route inventory:
 
@@ -104,7 +106,7 @@ Current route inventory:
 Remaining Sprint 5 candidate contracts:
 
 - Explainable improvement guidance based on existing deterministic metadata.
-- Target criteria configuration contract.
+- Target criteria alignment contract.
 - Dependency warning cleanup.
 - API contract documentation.
 - Security hardening review.
