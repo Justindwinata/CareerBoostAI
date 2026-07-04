@@ -85,7 +85,13 @@ def test_upload_resume_accepts_valid_pdf() -> None:
     response_body = response.json()
     analysis_id = response_body["analysis_id"]
     UUID(analysis_id)
+    recommendations = response_body["recommendations"]
+    assert recommendations["status"] == "recommendations_ready"
+    assert "resume-structure-missing-summary" in [
+        item["identifier"] for item in recommendations["items"]
+    ]
     response_body["analysis_id"] = "<analysis-id>"
+    response_body["recommendations"] = "<recommendations>"
 
     assert response_body == {
         "analysis_id": "<analysis-id>",
@@ -394,11 +400,7 @@ def test_upload_resume_accepts_valid_pdf() -> None:
                 },
             ],
         },
-        "recommendations": {
-            "status": "not_started",
-            "name": "recommendations",
-            "label": "Learning recommendations",
-        },
+        "recommendations": "<recommendations>",
     }
 
 

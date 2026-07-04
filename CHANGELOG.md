@@ -32,6 +32,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Functional frontend History page that lists locally saved analysis summaries, links to result routes, refreshes records, and deletes records safely.
 - Functional frontend Result page that retrieves stored analysis details and renders the shared analysis dashboard without re-uploading.
 - Standalone HTML report generation and download from saved analysis results.
+- Deterministic improvement guidance generated from existing resume analysis metadata, exposed in upload results, saved results, and standalone HTML reports.
 
 ### Changed
 

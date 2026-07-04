@@ -26,15 +26,28 @@ RecommendationEvidenceSourceType = Literal[
     "explicit_skill_signal",
     "missing_role_signal",
     "extraction_quality_metadata",
+    "target_alignment_metadata",
 ]
 
 UNSUPPORTED_GUIDANCE_PHRASES = (
     "guaranteed",
+    "guaranteed acceptance",
+    "guaranteed interview",
+    "guaranteed ats pass",
     "will pass ats",
     "best role",
+    "best candidate",
     "ideal candidate",
     "highly suitable",
+    "definitely qualified",
     "definitely improve hiring chances",
+    "will be accepted",
+    "hiring probability",
+    "candidate quality score",
+    "fit score",
+    "pass/fail decision",
+    "your resume is bad",
+    "you are not qualified",
 )
 
 
@@ -68,6 +81,7 @@ class RecommendationSourceMetadata(BaseModel):
         "ats_feedback",
         "skill_signals",
         "role_matching",
+        "target_alignment",
     ]
     signal: str
 

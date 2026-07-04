@@ -194,6 +194,7 @@ def test_download_analysis_report_returns_standalone_html() -> None:
     assert "Report metadata" in response.text
     assert "Application Target" in response.text
     assert "Target Alignment" in response.text
+    assert "Improvement Guidance" in response.text
     assert "Resume Structure" in response.text
     assert "ATS Metadata" in response.text
     assert "Skill Signals" in response.text
@@ -276,6 +277,34 @@ def test_report_service_escapes_unsafe_resume_content() -> None:
     assert "&lt;img src=x" in report_html
 
 
+def test_report_service_escapes_unsafe_recommendation_content() -> None:
+    client = TestClient(create_app())
+    upload_response = upload_resume(client)
+    analysis = ResumeAnalysisContract.model_validate(upload_response)
+    assert analysis.recommendations.status == "recommendations_ready"
+    unsafe_recommendations = analysis.recommendations.model_copy(
+        deep=True,
+        update={
+            "items": [
+                analysis.recommendations.items[0].model_copy(
+                    update={
+                        "title": 'Review <script>alert("x")</script>',
+                        "actionable_next_step": '<img src=x onerror="alert(1)">',
+                    }
+                )
+            ]
+        },
+    )
+    unsafe_analysis = analysis.model_copy(update={"recommendations": unsafe_recommendations})
+
+    report_html = AnalysisReportService().generate_html_report(unsafe_analysis)
+
+    assert "<script>" not in report_html
+    assert "<img src=x" not in report_html
+    assert "&lt;script&gt;" in report_html
+    assert "&lt;img src=x" in report_html
+
+
 def test_report_omits_private_runtime_artifacts(isolated_history_database: Path) -> None:
     client = TestClient(create_app())
     upload_response = upload_resume(client)
@@ -330,6 +359,8 @@ def test_stored_response_includes_target_criteria_and_alignment() -> None:
         "found",
         "not_found",
     ]
+    assert stored_response["recommendations"]["status"] == "recommendations_ready"
+    assert stored_response["recommendations"]["items"]
 
 
 def test_stored_response_works_without_target_criteria() -> None:
@@ -340,6 +371,18 @@ def test_stored_response_works_without_target_criteria() -> None:
 
     assert stored_response["target_criteria"]["status"] == "not_provided"
     assert stored_response["target_alignment"]["status"] == "not_provided"
+    assert stored_response["recommendations"]["status"] == "recommendations_ready"
+
+
+def test_old_stored_response_without_recommendations_remains_compatible() -> None:
+    client = TestClient(create_app())
+    upload_response = upload_resume(client)
+    payload_without_recommendations = dict(upload_response)
+    payload_without_recommendations.pop("recommendations")
+
+    analysis = ResumeAnalysisContract.model_validate(payload_without_recommendations)
+
+    assert analysis.recommendations.status == "not_started"
 
 
 def test_repository_stores_no_pdf_binary_or_absolute_paths(isolated_history_database: Path) -> None:

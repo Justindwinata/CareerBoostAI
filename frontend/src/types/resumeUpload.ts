@@ -244,6 +244,57 @@ export type RoleMatchesResult = {
   candidates: RoleMatchCandidate[];
 };
 
+export type RecommendationCategory =
+  | "resume_structure"
+  | "resume_content"
+  | "ats_compatibility"
+  | "skill_visibility"
+  | "role_signal_gap"
+  | "document_quality";
+
+export type RecommendationPriority = "high" | "medium" | "low";
+
+export type RecommendationEvidence = {
+  source_type:
+    | "missing_expected_section"
+    | "detected_section_structure"
+    | "deterministic_ats_issue"
+    | "explicit_skill_signal"
+    | "missing_role_signal"
+    | "extraction_quality_metadata"
+    | "target_alignment_metadata";
+  source_id: string;
+  summary: string;
+};
+
+export type RecommendationItem = {
+  identifier: string;
+  category: RecommendationCategory;
+  title: string;
+  description: string;
+  priority: RecommendationPriority;
+  evidence: RecommendationEvidence[];
+  source_metadata: {
+    pipeline_stage:
+      | "extraction"
+      | "section_detection"
+      | "completeness"
+      | "ats_feedback"
+      | "skill_signals"
+      | "role_matching"
+      | "target_alignment";
+    signal: string;
+  };
+  actionable_next_step: string;
+  boundary_note: string | null;
+};
+
+export type RecommendationsResult = {
+  status: "recommendations_ready" | "no_recommendations" | "insufficient_data" | "not_evaluated";
+  source: "deterministic_analysis_metadata";
+  items: RecommendationItem[];
+};
+
 export type ResumeCompletenessResult = {
   expected_sections: ResumeSectionName[];
   present_sections: ResumeSectionName[];
@@ -262,7 +313,7 @@ export type ResumeUploadResponse = {
   ats: AnalysisStagePlaceholder | AtsFeedbackResult;
   skills: AnalysisStagePlaceholder | SkillSignalsResult;
   roles: AnalysisStagePlaceholder | RoleMatchesResult;
-  recommendations: AnalysisStagePlaceholder;
+  recommendations?: AnalysisStagePlaceholder | RecommendationsResult;
 };
 
 export type ResumeUploadError = {

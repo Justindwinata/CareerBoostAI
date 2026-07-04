@@ -289,9 +289,75 @@ function createStoredAnalysisResponse(overrides: Record<string, unknown> = {}) {
       ],
     },
     recommendations: {
-      status: "not_started",
-      name: "recommendations",
-      label: "Recommendations",
+      status: "recommendations_ready",
+      source: "deterministic_analysis_metadata",
+      items: [
+        {
+          identifier: "target-required-skill-missing-graphql",
+          category: "skill_visibility",
+          title: "Explicitly mention GraphQL if it is relevant",
+          description:
+            "The submitted target criteria include GraphQL, but the extracted resume evidence does not explicitly show that skill.",
+          priority: "high",
+          evidence: [
+            {
+              source_type: "target_alignment_metadata",
+              source_id: "required_skill:graphql",
+              summary: "Required target skill not found: GraphQL.",
+            },
+          ],
+          source_metadata: {
+            pipeline_stage: "target_alignment",
+            signal: "required_skill:not_found:graphql",
+          },
+          actionable_next_step:
+            "If accurate, explicitly mention GraphQL in a skills, project, or experience bullet.",
+          boundary_note: "This guidance does not infer whether the candidate has the skill.",
+        },
+        {
+          identifier: "role-signal-gap-frontend-developer-intern-javascript",
+          category: "role_signal_gap",
+          title: "Clarify role signal for Frontend Developer Intern",
+          description:
+            "This resume does not explicitly show evidence for this role signal: JavaScript.",
+          priority: "medium",
+          evidence: [
+            {
+              source_type: "missing_role_signal",
+              source_id: "Frontend Developer Intern:JavaScript",
+              summary: "Missing required signal for Frontend Developer Intern: JavaScript.",
+            },
+          ],
+          source_metadata: {
+            pipeline_stage: "role_matching",
+            signal: "missing_role_signal:Frontend Developer Intern:JavaScript",
+          },
+          actionable_next_step:
+            "If accurate, explicitly mention JavaScript in relevant skills, project, or experience evidence.",
+          boundary_note: "Role metadata is deterministic and does not rank candidate fit.",
+        },
+        {
+          identifier: "target-preferred-skill-missing-docker",
+          category: "skill_visibility",
+          title: "Clarify optional evidence for Docker",
+          description:
+            "The preferred target criteria include Docker, but the extracted resume evidence does not explicitly show it.",
+          priority: "low",
+          evidence: [
+            {
+              source_type: "target_alignment_metadata",
+              source_id: "preferred_skill:docker",
+              summary: "Preferred target skill not found: Docker.",
+            },
+          ],
+          source_metadata: {
+            pipeline_stage: "target_alignment",
+            signal: "preferred_skill:not_found:docker",
+          },
+          actionable_next_step: "If relevant, consider adding explicit evidence for Docker.",
+          boundary_note: "Preferred criteria are optional context, not required gaps.",
+        },
+      ],
     },
     ...overrides,
   };
@@ -534,6 +600,7 @@ describe("App", () => {
     expect(screen.getByRole("link", { name: "Target Alignment" })).toBeVisible();
     expect(screen.getByRole("link", { name: "Resume Intake" })).toBeVisible();
     expect(screen.getByRole("link", { name: "Resume Structure" })).toBeVisible();
+    expect(screen.getByRole("link", { name: "Improvement Guidance" })).toBeVisible();
     expect(screen.getByRole("link", { name: "Skill Signals" })).toBeVisible();
     expect(screen.getByRole("link", { name: "ATS Metadata" })).toBeVisible();
     expect(screen.getByRole("link", { name: "Role Matching" })).toBeVisible();
@@ -544,6 +611,20 @@ describe("App", () => {
     expect(screen.getAllByText("React").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("GraphQL")).toBeVisible();
     expect(screen.queryByText("Extraction quality advisory")).not.toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "Evidence-backed improvement opportunities" }),
+    ).toBeVisible();
+    expect(screen.getAllByText("Guidance available").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("High priority").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Medium priority").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText("Low priority").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Explicitly mention GraphQL if it is relevant")).toBeVisible();
+    expect(screen.getByText("Required target skill not found: GraphQL.")).toBeVisible();
+    expect(
+      screen.getByText(
+        "If accurate, explicitly mention GraphQL in a skills, project, or experience bullet.",
+      ),
+    ).toBeVisible();
     expect(screen.getByRole("button", { name: "Download HTML Report" })).toBeVisible();
     expect(screen.queryByText(/hiring prediction/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/guaranteed/i)).not.toBeInTheDocument();
@@ -557,6 +638,51 @@ describe("App", () => {
     );
   });
 
+  it("renders recommendation fallback states for saved analyses", async () => {
+    mockHistoryFetch(
+      new Response(
+        JSON.stringify(
+          createStoredAnalysisResponse({
+            recommendations: {
+              status: "no_recommendations",
+              source: "deterministic_analysis_metadata",
+              items: [],
+            },
+          }),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 200,
+        },
+      ),
+    );
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    expect(await screen.findByRole("heading", { name: "Stored analysis result" })).toBeVisible();
+    expect(
+      screen.getByText("No deterministic improvement guidance was generated for this analysis."),
+    ).toBeVisible();
+  });
+
+  it("renders a missing recommendation field fallback for older saved analyses", async () => {
+    const storedAnalysis: Record<string, unknown> = createStoredAnalysisResponse();
+    delete storedAnalysis.recommendations;
+    mockHistoryFetch(
+      new Response(JSON.stringify(storedAnalysis), {
+        headers: { "Content-Type": "application/json" },
+        status: 200,
+      }),
+    );
+
+    renderRoute("/results/11111111-1111-4111-8111-111111111111");
+
+    expect(await screen.findByRole("heading", { name: "Stored analysis result" })).toBeVisible();
+    expect(
+      screen.getByText("Improvement guidance was not available for this saved analysis."),
+    ).toBeVisible();
+  });
+
   it("renders extraction quality advisories without unsafe claims", async () => {
     const storedAnalysis = createStoredAnalysisResponse();
     storedAnalysis.extraction = {
@@ -566,6 +692,34 @@ describe("App", () => {
           category: "unusual_section_order",
           message:
             "Some resume sections may have been extracted in an unusual order. Consider using a simpler single-column ATS-friendly layout if the analysis looks incomplete.",
+        },
+      ],
+    };
+    storedAnalysis.recommendations = {
+      status: "recommendations_ready",
+      source: "deterministic_analysis_metadata",
+      items: [
+        {
+          identifier: "document-quality-unusual_section_order",
+          category: "document_quality",
+          title: "Review extraction quality advisory",
+          description:
+            "Some resume sections may have been extracted in an unusual order. Consider using a simpler single-column ATS-friendly layout if the analysis looks incomplete.",
+          priority: "medium",
+          evidence: [
+            {
+              source_type: "extraction_quality_metadata",
+              source_id: "warning:unusual_section_order",
+              summary: "Extraction warning: unusual_section_order.",
+            },
+          ],
+          source_metadata: {
+            pipeline_stage: "extraction",
+            signal: "quality_warning:unusual_section_order",
+          },
+          actionable_next_step:
+            "Consider using a simpler single-column ATS-friendly layout if the analysis output looks incomplete.",
+          boundary_note: "This warning does not block analysis or invalidate the resume.",
         },
       ],
     };
@@ -582,7 +736,9 @@ describe("App", () => {
     expect(screen.getByText("Parsing warnings")).toBeVisible();
     expect(screen.getByText("1 advisory")).toBeVisible();
     expect(screen.getByRole("heading", { name: "Extraction quality advisory" })).toBeVisible();
-    expect(screen.getByText(/unusual order/i)).toBeVisible();
+    expect(screen.getAllByText(/unusual order/i).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Review extraction quality advisory")).toBeVisible();
+    expect(screen.getByText("Extraction warning: unusual_section_order.")).toBeVisible();
     expect(screen.queryByText(/guaranteed/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/hiring prediction/i)).not.toBeInTheDocument();
   });

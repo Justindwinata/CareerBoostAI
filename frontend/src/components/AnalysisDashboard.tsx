@@ -2,6 +2,10 @@ import { forwardRef, useState } from "react";
 
 import type {
   AtsFeedbackResult,
+  RecommendationCategory,
+  RecommendationItem,
+  RecommendationPriority,
+  RecommendationsResult,
   ResumeSectionName,
   ResumeUploadResponse,
   RoleMatchesResult,
@@ -182,6 +186,59 @@ function isRoleMatchesResult(roles: ResumeUploadResponse["roles"]): roles is Rol
   );
 }
 
+function isRecommendationsResult(
+  recommendations: ResumeUploadResponse["recommendations"],
+): recommendations is RecommendationsResult {
+  return (
+    recommendations !== undefined &&
+    (recommendations.status === "recommendations_ready" ||
+      recommendations.status === "no_recommendations" ||
+      recommendations.status === "insufficient_data" ||
+      recommendations.status === "not_evaluated")
+  );
+}
+
+function formatRecommendationStatus(status: RecommendationsResult["status"]): string {
+  const statusLabels: Record<RecommendationsResult["status"], string> = {
+    recommendations_ready: "Guidance available",
+    no_recommendations: "No guidance generated",
+    insufficient_data: "Insufficient data",
+    not_evaluated: "Not evaluated",
+  };
+
+  return statusLabels[status];
+}
+
+function formatRecommendationCategory(category: RecommendationCategory): string {
+  const categoryLabels: Record<RecommendationCategory, string> = {
+    resume_structure: "Resume structure",
+    resume_content: "Resume content",
+    ats_compatibility: "ATS compatibility",
+    skill_visibility: "Skill visibility",
+    role_signal_gap: "Role signal gap",
+    document_quality: "Document quality",
+  };
+
+  return categoryLabels[category];
+}
+
+function formatRecommendationPriority(priority: RecommendationPriority): string {
+  const priorityLabels: Record<RecommendationPriority, string> = {
+    high: "High priority",
+    medium: "Medium priority",
+    low: "Low priority",
+  };
+
+  return priorityLabels[priority];
+}
+
+function getRecommendationItemsByPriority(
+  recommendations: RecommendationsResult,
+  priority: RecommendationPriority,
+): RecommendationItem[] {
+  return recommendations.items.filter((item) => item.priority === priority);
+}
+
 function formatTargetAlignmentStatus(status: TargetAlignmentResult["status"]): string {
   const statusLabels: Record<TargetAlignmentResult["status"], string> = {
     not_provided: "Not provided",
@@ -225,6 +282,9 @@ function getAnalysisSummaryItems(result: ResumeUploadResponse) {
   const hasAtsMetadata = isAtsFeedbackResult(result.ats);
   const hasSkillMetadata = isSkillSignalsResult(result.skills);
   const hasRoleMetadata = isRoleMatchesResult(result.roles);
+  const recommendations = isRecommendationsResult(result.recommendations)
+    ? result.recommendations
+    : null;
   const explicitSkillSignalCount = isSkillSignalsResult(result.skills)
     ? result.skills.signals.length
     : null;
@@ -274,6 +334,10 @@ function getAnalysisSummaryItems(result: ResumeUploadResponse) {
     {
       label: "Role matching status",
       value: hasRoleMetadata ? formatMetadataAvailability(result.roles.status) : "Unavailable",
+    },
+    {
+      label: "Improvement guidance",
+      value: recommendations ? formatRecommendationStatus(recommendations.status) : "Unavailable",
     },
     {
       label: "Overall pipeline status",
@@ -344,6 +408,7 @@ export const AnalysisDashboard = forwardRef<HTMLElement, AnalysisDashboardProps>
           <a href="#target-alignment-title">Target Alignment</a>
           <a href="#resume-intake-title">Resume Intake</a>
           <a href="#resume-structure-title">Resume Structure</a>
+          <a href="#improvement-guidance-title">Improvement Guidance</a>
           <a href="#skill-signals-title">Skill Signals</a>
           <a href="#ats-feedback-title">ATS Metadata</a>
           <a href="#role-matches-title">Role Matching</a>
@@ -767,6 +832,112 @@ export const AnalysisDashboard = forwardRef<HTMLElement, AnalysisDashboardProps>
               )}
             </section>
           </div>
+        </section>
+
+        <section className="dashboard-section" aria-labelledby="improvement-guidance-title">
+          <div className="dashboard-section-header">
+            <p className="eyebrow">Improvement Guidance</p>
+            <SectionTitle id="improvement-guidance-title">
+              Evidence-backed improvement opportunities
+            </SectionTitle>
+          </div>
+
+          {isRecommendationsResult(result.recommendations) ? (
+            <>
+              <dl className="metadata-summary-list">
+                <div>
+                  <dt>Guidance status</dt>
+                  <dd>{formatRecommendationStatus(result.recommendations.status)}</dd>
+                </div>
+                <div>
+                  <dt>Generated items</dt>
+                  <dd>{result.recommendations.items.length}</dd>
+                </div>
+              </dl>
+
+              {result.recommendations.status === "recommendations_ready" ? (
+                <div className="recommendation-priority-groups">
+                  {(["high", "medium", "low"] as const).map((priority) => {
+                    const items = getRecommendationItemsByPriority(
+                      result.recommendations as RecommendationsResult,
+                      priority,
+                    );
+
+                    return (
+                      <section
+                        key={priority}
+                        className="recommendation-group"
+                        aria-labelledby={`recommendation-${priority}-title`}
+                      >
+                        <DetailTitle id={`recommendation-${priority}-title`}>
+                          {formatRecommendationPriority(priority)}
+                        </DetailTitle>
+                        {items.length > 0 ? (
+                          <ul className="recommendation-list">
+                            {items.map((item) => (
+                              <li key={item.identifier}>
+                                <div className="recommendation-card-header">
+                                  <div>
+                                    <strong>{item.title}</strong>
+                                    <span>{formatRecommendationCategory(item.category)}</span>
+                                  </div>
+                                  <span>{formatRecommendationPriority(item.priority)}</span>
+                                </div>
+                                <p>{item.description}</p>
+                                <dl className="recommendation-detail-list">
+                                  <div>
+                                    <dt>Evidence</dt>
+                                    <dd>
+                                      {item.evidence.length > 0
+                                        ? item.evidence
+                                            .map((evidence) => evidence.summary)
+                                            .join("; ")
+                                        : "No evidence summary available."}
+                                    </dd>
+                                  </div>
+                                  <div>
+                                    <dt>Action step</dt>
+                                    <dd>{item.actionable_next_step}</dd>
+                                  </div>
+                                  {item.boundary_note ? (
+                                    <div>
+                                      <dt>Boundary</dt>
+                                      <dd>{item.boundary_note}</dd>
+                                    </div>
+                                  ) : null}
+                                </dl>
+                              </li>
+                            ))}
+                          </ul>
+                        ) : (
+                          <p className="section-empty-state">
+                            No {priority} priority guidance items.
+                          </p>
+                        )}
+                      </section>
+                    );
+                  })}
+                </div>
+              ) : result.recommendations.status === "insufficient_data" ? (
+                <p className="section-empty-state">
+                  Improvement guidance could not be generated because there was not enough readable
+                  resume evidence.
+                </p>
+              ) : result.recommendations.status === "no_recommendations" ? (
+                <p className="section-empty-state">
+                  No deterministic improvement guidance was generated for this analysis.
+                </p>
+              ) : (
+                <p className="section-empty-state">
+                  Improvement guidance was not evaluated for this analysis.
+                </p>
+              )}
+            </>
+          ) : (
+            <p className="section-empty-state">
+              Improvement guidance was not available for this saved analysis.
+            </p>
+          )}
         </section>
 
         <section className="dashboard-section" aria-labelledby="skill-signals-title">

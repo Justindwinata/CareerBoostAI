@@ -9,6 +9,7 @@ from careerboost_api.domain import (
     TargetCriteria,
 )
 from careerboost_api.services.ats_feedback import AtsFeedbackService
+from careerboost_api.services.recommendations import RecommendationService
 from careerboost_api.services.resume_completeness import ResumeCompletenessCalculator
 from careerboost_api.services.resume_extraction import (
     ResumeTextExtractionError,
@@ -34,6 +35,7 @@ class ResumeIntakeOrchestrator:
         skill_signal_extractor: SkillSignalExtractor | None = None,
         role_matching_service: RoleMatchingService | None = None,
         target_alignment_service: TargetAlignmentService | None = None,
+        recommendation_service: RecommendationService | None = None,
     ) -> None:
         self.text_processor = text_processor or ResumeTextProcessor()
         self.completeness_calculator = completeness_calculator or ResumeCompletenessCalculator()
@@ -41,6 +43,7 @@ class ResumeIntakeOrchestrator:
         self.skill_signal_extractor = skill_signal_extractor or SkillSignalExtractor()
         self.role_matching_service = role_matching_service or RoleMatchingService()
         self.target_alignment_service = target_alignment_service or TargetAlignmentService()
+        self.recommendation_service = recommendation_service or RecommendationService()
 
     def build_success(
         self,
@@ -85,6 +88,15 @@ class ResumeIntakeOrchestrator:
             skills=skill_signals,
             roles=role_matches,
         )
+        recommendations = self.recommendation_service.generate(
+            extraction=extraction_contract,
+            completeness=completeness,
+            target_criteria=target_criteria_contract,
+            target_alignment=target_alignment,
+            ats=ats_feedback,
+            skills=skill_signals,
+            roles=role_matches,
+        )
 
         return ResumeAnalysisContract(
             status="intake_completed",
@@ -96,6 +108,7 @@ class ResumeIntakeOrchestrator:
             ats=ats_feedback,
             skills=skill_signals,
             roles=role_matches,
+            recommendations=recommendations,
         )
 
     def build_extraction_failure(
@@ -135,6 +148,15 @@ class ResumeIntakeOrchestrator:
             skills=skill_signals,
             roles=role_matches,
         )
+        recommendations = self.recommendation_service.generate(
+            extraction=extraction_contract,
+            completeness=None,
+            target_criteria=target_criteria_contract,
+            target_alignment=target_alignment,
+            ats=ats_feedback,
+            skills=skill_signals,
+            roles=role_matches,
+        )
 
         return ResumeAnalysisContract(
             status="failed",
@@ -145,6 +167,7 @@ class ResumeIntakeOrchestrator:
             ats=ats_feedback,
             skills=skill_signals,
             roles=role_matches,
+            recommendations=recommendations,
         )
 
     def _build_intake(self, upload: ValidatedResumeUpload) -> ResumeIntakeContract:

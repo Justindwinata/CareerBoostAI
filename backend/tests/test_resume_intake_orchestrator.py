@@ -75,7 +75,10 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
     assert contract.roles.candidates[0].match_status == "partial_match"
     assert contract.roles.candidates[0].matched_skill_signals == ["Python", "FastAPI"]
     assert contract.roles.candidates[0].missing_required_signals == ["SQL"]
-    assert contract.recommendations.status == "not_started"
+    assert contract.recommendations.status == "recommendations_ready"
+    assert "resume-structure-missing-experience" in [
+        item.identifier for item in contract.recommendations.items
+    ]
 
 
 def test_orchestrator_preserves_extraction_quality_warnings_without_blocking_analysis() -> None:
@@ -174,6 +177,7 @@ def test_orchestrator_builds_low_text_failure_contract() -> None:
     assert contract.ats.issues[0].observed_signal == "ats_feedback:insufficient_data"
     assert contract.skills.status == "not_evaluated"
     assert contract.roles.status == "not_evaluated"
+    assert contract.recommendations.status == "insufficient_data"
 
 
 def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
@@ -192,3 +196,4 @@ def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
     assert contract.ats.status == "not_evaluated"
     assert contract.skills.status == "not_evaluated"
     assert contract.roles.status == "not_evaluated"
+    assert contract.recommendations.status == "insufficient_data"

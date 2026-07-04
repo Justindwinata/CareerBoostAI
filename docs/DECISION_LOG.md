@@ -76,8 +76,8 @@ The following analysis capabilities remain intentionally out of scope until late
 - AI or LLM integration.
 - Inferred skill assessment.
 - Ranked role recommendations.
-- Recommendations.
-- Persistence and history.
+- AI-generated recommendations.
+- Production multi-user persistence.
 
 This boundary prevents the UI or backend from overstating the current product state. Completeness and detected-section metadata are preparation signals only, not readiness judgments.
 

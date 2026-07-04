@@ -6,6 +6,7 @@ from html import escape
 
 from careerboost_api.domain import (
     AtsFeedbackContract,
+    RecommendationsContract,
     ResumeAnalysisContract,
     RoleMatchesContract,
     SkillSignalsContract,
@@ -24,6 +25,7 @@ class AnalysisReportService:
             self._render_report_metadata(analysis, generated_at),
             self._render_application_target(analysis),
             self._render_target_alignment(analysis),
+            self._render_improvement_guidance(analysis),
             self._render_resume_structure(analysis),
             self._render_ats_metadata(analysis),
             self._render_skill_signals(analysis),
@@ -170,6 +172,66 @@ class AnalysisReportService:
             )
         )
         return self._section("Target Alignment", "".join(content))
+
+    def _render_improvement_guidance(self, analysis: ResumeAnalysisContract) -> str:
+        if not isinstance(analysis.recommendations, RecommendationsContract):
+            return self._section(
+                "Improvement Guidance",
+                self._empty_state("Improvement guidance was not available for this analysis."),
+            )
+
+        recommendations = analysis.recommendations
+        content = [
+            self._definition_list(
+                [
+                    ("Guidance status", recommendations.status),
+                    ("Generated items", str(len(recommendations.items))),
+                ]
+            )
+        ]
+
+        if recommendations.status == "recommendations_ready":
+            for priority in ("high", "medium", "low"):
+                priority_items = [
+                    item for item in recommendations.items if item.priority == priority
+                ]
+                content.append(
+                    self._status_list(
+                        f"{priority.title()} priority guidance",
+                        [
+                            (
+                                item.title,
+                                item.category,
+                                "Evidence: "
+                                f"{self._recommendation_evidence_summary(item.evidence)} "
+                                "Action: "
+                                f"{item.actionable_next_step} "
+                                "Boundary: "
+                                f"{item.boundary_note or 'None'}",
+                            )
+                            for item in priority_items
+                        ],
+                    )
+                )
+        elif recommendations.status == "insufficient_data":
+            content.append(
+                self._empty_state(
+                    "Improvement guidance could not be generated because there was not enough "
+                    "readable resume evidence."
+                )
+            )
+        elif recommendations.status == "no_recommendations":
+            content.append(
+                self._empty_state(
+                    "No deterministic improvement guidance was generated for this analysis."
+                )
+            )
+        else:
+            content.append(
+                self._empty_state("Improvement guidance was not evaluated for this analysis.")
+            )
+
+        return self._section("Improvement Guidance", "".join(content))
 
     def _render_resume_structure(self, analysis: ResumeAnalysisContract) -> str:
         content = [
@@ -341,6 +403,10 @@ class AnalysisReportService:
     def _evidence_summary(self, evidence_items: Iterable[object]) -> str:
         details = [getattr(item, "detail", "") for item in evidence_items]
         return self._join_or_empty([detail for detail in details if detail])
+
+    def _recommendation_evidence_summary(self, evidence_items: Iterable[object]) -> str:
+        summaries = [getattr(item, "summary", "") for item in evidence_items]
+        return self._join_or_empty([summary for summary in summaries if summary])
 
     def _join_or_empty(self, values: Iterable[str]) -> str:
         normalized = [str(value).strip() for value in values if str(value).strip()]

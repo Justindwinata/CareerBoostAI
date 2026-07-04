@@ -277,9 +277,74 @@ function createSuccessfulUploadResponse(
     skills,
     roles,
     recommendations: {
-      status: "not_started",
-      name: "recommendations",
-      label: "Learning recommendations",
+      status: "recommendations_ready",
+      source: "deterministic_analysis_metadata",
+      items: [
+        {
+          identifier: "resume-structure-missing-experience",
+          category: "resume_structure",
+          title: "Make the Experience section easier to identify",
+          description:
+            "The deterministic section detector did not identify an Experience section in the extracted resume text.",
+          priority: "high",
+          evidence: [
+            {
+              source_type: "missing_expected_section",
+              source_id: "section:experience",
+              summary: "The completeness baseline marks Experience as missing.",
+            },
+          ],
+          source_metadata: {
+            pipeline_stage: "completeness",
+            signal: "missing_section:experience",
+          },
+          actionable_next_step: "Consider adding a clearly labeled Experience section.",
+          boundary_note: "This guidance is based only on deterministic section metadata.",
+        },
+        {
+          identifier: "document-quality-medium-extraction-confidence",
+          category: "document_quality",
+          title: "Review the extracted text for completeness",
+          description:
+            "Text was extracted, but extraction confidence was not at the highest available deterministic level.",
+          priority: "medium",
+          evidence: [
+            {
+              source_type: "extraction_quality_metadata",
+              source_id: "extraction_confidence:medium",
+              summary: "Extraction confidence is medium.",
+            },
+          ],
+          source_metadata: {
+            pipeline_stage: "extraction",
+            signal: "extraction_confidence:medium",
+          },
+          actionable_next_step:
+            "Review the extracted text preview and simplify the PDF layout if important content appears missing.",
+          boundary_note: "This is an advisory extraction-quality signal.",
+        },
+        {
+          identifier: "target-preferred-skill-missing-docker",
+          category: "skill_visibility",
+          title: "Clarify optional evidence for Docker",
+          description:
+            "The preferred target criteria include Docker, but the extracted resume evidence does not explicitly show it.",
+          priority: "low",
+          evidence: [
+            {
+              source_type: "target_alignment_metadata",
+              source_id: "preferred_skill:docker",
+              summary: "Preferred target skill not found: Docker.",
+            },
+          ],
+          source_metadata: {
+            pipeline_stage: "target_alignment",
+            signal: "preferred_skill:not_found:docker",
+          },
+          actionable_next_step: "If relevant, consider adding explicit evidence for Docker.",
+          boundary_note: "Preferred criteria are optional context, not required gaps.",
+        },
+      ],
     },
   };
 }
@@ -1231,6 +1296,10 @@ describe("ResumeUploadForm", () => {
       "href",
       "#resume-structure-title",
     );
+    expect(screen.getByRole("link", { name: "Improvement Guidance" })).toHaveAttribute(
+      "href",
+      "#improvement-guidance-title",
+    );
     expect(screen.getByRole("link", { name: "Skill Signals" })).toHaveAttribute(
       "href",
       "#skill-signals-title",
@@ -1264,6 +1333,8 @@ describe("ResumeUploadForm", () => {
     expect(within(summaryPanel).getByText("Explicit skill signals")).toBeVisible();
     expect(within(summaryPanel).getByText("ATS metadata status")).toBeVisible();
     expect(within(summaryPanel).getByText("Role matching status")).toBeVisible();
+    expect(within(summaryPanel).getByText("Improvement guidance")).toBeVisible();
+    expect(within(summaryPanel).getByText("Guidance available")).toBeVisible();
     expect(within(summaryPanel).getByText("Overall pipeline status")).toBeVisible();
     expect(within(summaryPanel).getByText("Deterministic pipeline complete")).toBeVisible();
     expect(summaryPanel).not.toHaveTextContent(/recommended/i);
@@ -1299,6 +1370,17 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByRole("heading", { name: "Extracted resume text" })).toBeVisible();
     expect(screen.getAllByText(/Professional Summary/).length).toBeGreaterThanOrEqual(2);
     expect(screen.getByRole("button", { name: "Expand preview" })).toBeVisible();
+    expect(screen.getAllByText("Improvement Guidance").length).toBeGreaterThanOrEqual(2);
+    expect(
+      screen.getByRole("heading", { name: "Evidence-backed improvement opportunities" }),
+    ).toBeVisible();
+    expect(screen.getByText("Make the Experience section easier to identify")).toBeVisible();
+    expect(screen.getByText("Review the extracted text for completeness")).toBeVisible();
+    expect(screen.getByText("Clarify optional evidence for Docker")).toBeVisible();
+    expect(
+      screen.getByText("The completeness baseline marks Experience as missing."),
+    ).toBeVisible();
+    expect(screen.getByText("Consider adding a clearly labeled Experience section.")).toBeVisible();
     expect(screen.getAllByText("ATS Metadata").length).toBeGreaterThanOrEqual(2);
     expect(screen.getByRole("heading", { name: "Deterministic resume signals" })).toBeVisible();
     expect(screen.getAllByText("Metadata ready").length).toBeGreaterThanOrEqual(1);
@@ -1314,7 +1396,7 @@ describe("ResumeUploadForm", () => {
     expect(screen.getByRole("heading", { name: "Explicit skill mentions" })).toBeVisible();
     expect(screen.getByText("Signals detected")).toBeVisible();
     expect(screen.getByText("Explicit signals")).toBeVisible();
-    expect(screen.getByText("3")).toBeVisible();
+    expect(screen.getAllByText("3").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Python").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("FastAPI").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("PostgreSQL").length).toBeGreaterThanOrEqual(1);
@@ -1381,6 +1463,7 @@ describe("ResumeUploadForm", () => {
     [
       ["Resume Intake", "resume-intake-title"],
       ["Resume Structure", "resume-structure-title"],
+      ["Improvement Guidance", "improvement-guidance-title"],
       ["Skill Signals", "skill-signals-title"],
       ["ATS Metadata", "ats-feedback-title"],
       ["Role Matching", "role-matches-title"],

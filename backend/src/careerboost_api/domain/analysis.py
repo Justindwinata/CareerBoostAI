@@ -5,6 +5,7 @@ from typing import Literal, Self
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from careerboost_api.domain.ats import AtsFeedbackContract
+from careerboost_api.domain.recommendations import RecommendationsContract
 from careerboost_api.domain.resume_sections import ResumeSectionName
 from careerboost_api.domain.roles import RoleMatchesContract
 from careerboost_api.domain.skills import SkillSignalsContract
@@ -229,7 +230,7 @@ class ResumeAnalysisContract(BaseModel):
     roles: RoleMatchesContract | AnalysisStagePlaceholder = Field(
         default_factory=lambda: AnalysisStagePlaceholder(name="roles", label="Role matching")
     )
-    recommendations: AnalysisStagePlaceholder = Field(
+    recommendations: RecommendationsContract | AnalysisStagePlaceholder = Field(
         default_factory=lambda: AnalysisStagePlaceholder(
             name="recommendations",
             label="Learning recommendations",

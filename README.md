@@ -1,6 +1,6 @@
 # CareerBoost AI
 
-CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides a routed frontend shell, deterministic resume intake, target criteria configuration, evidence-backed target alignment metadata, local backend analysis persistence, a functional History page for saved analyses, saved result detail pages, downloadable standalone HTML reports, and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, recommendations, and additional export formats after explicit contracts are designed and validated.
+CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides a routed frontend shell, deterministic resume intake, target criteria configuration, evidence-backed target alignment metadata, deterministic improvement guidance, local backend analysis persistence, a functional History page for saved analyses, saved result detail pages, downloadable standalone HTML reports, and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, and additional export formats after explicit contracts are designed and validated.
 
 This repository is being built as a production-quality engineering portfolio project. The goal is not to ship a quick demo, but to demonstrate architecture, product thinking, maintainability, documentation, and disciplined software delivery.
 
@@ -12,7 +12,7 @@ CareerBoost AI focuses on one core outcome: helping early-career candidates unde
 
 ## Product Preview
 
-The screenshots below are verified captures from the running local application using the fictional demo resume in [assets/demo/careerboost-demo-resume.pdf](assets/demo/careerboost-demo-resume.pdf). They reflect the current deterministic resume intake pipeline: upload validation, PDF text extraction, metadata preparation, and dashboard rendering. Saved analyses can be downloaded as standalone HTML reports; AI scoring, recommendations, and PDF export are not implemented yet.
+The screenshots below are verified captures from the running local application using the fictional demo resume in [assets/demo/careerboost-demo-resume.pdf](assets/demo/careerboost-demo-resume.pdf). They reflect the current deterministic resume intake pipeline: upload validation, PDF text extraction, metadata preparation, and dashboard rendering. Saved analyses can be downloaded as standalone HTML reports; AI scoring, AI-generated recommendations, and PDF export are not implemented yet.
 
 ### Analysis Dashboard
 
@@ -138,9 +138,10 @@ Completed work:
 - Deterministic ATS feedback metadata without scoring.
 - Deterministic skill signal metadata.
 - Deterministic internship role matching metadata.
-- Multi-page frontend shell with Home, Upload CV, History, Result placeholder, and not-found routes.
+- Multi-page frontend shell with Home, Upload CV, History, Result, and not-found routes.
 - Target Application Criteria input on Upload CV, captured as validated metadata.
 - Deterministic Target Alignment metadata comparing criteria against explicit resume evidence without scoring or hiring prediction.
+- Deterministic improvement guidance generated from existing analysis metadata without AI, scoring, ranking, or hiring prediction.
 - Local backend SQLite persistence for completed analyses, including history list, detail retrieval, and delete APIs.
 - Functional frontend History page listing locally stored analysis summaries with open-result links and delete actions.
 - Functional frontend Result page for opening stored analyses without re-uploading.
@@ -159,7 +160,7 @@ Not started yet:
 - OCR for scanned or image-only resumes.
 - Inferred skill assessment.
 - Ranked role recommendations.
-- Recommendations.
+- AI-generated recommendations.
 - PDF report export.
 - Demo deployment.
 

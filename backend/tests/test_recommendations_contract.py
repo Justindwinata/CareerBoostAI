@@ -122,6 +122,7 @@ def test_recommendation_item_requires_evidence() -> None:
         "explicit_skill_signal",
         "missing_role_signal",
         "extraction_quality_metadata",
+        "target_alignment_metadata",
     ],
 )
 def test_recommendation_evidence_supports_allowed_source_types(source_type: str) -> None:

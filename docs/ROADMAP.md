@@ -45,6 +45,7 @@ The current implementation includes:
 - Deterministic skill signals from explicit text mentions only.
 - Deterministic internship role matching metadata without ranking or recommendations.
 - Deterministic Target Alignment metadata comparing submitted target criteria against explicit resume evidence without scoring.
+- Deterministic improvement guidance generated from existing metadata without AI, scoring, ranking, or hiring prediction.
 - Local backend SQLite persistence for completed analyses with list, detail, and delete APIs.
 - Functional frontend History page listing saved analysis summaries with delete actions and open-result navigation.
 - Functional frontend Result page that opens stored analyses without requiring a resume re-upload.
@@ -54,7 +55,7 @@ The current implementation includes:
 - Visual consistency pass for professional SaaS-style dashboard presentation.
 - Verified desktop and mobile screenshots captured from the running application.
 - Fictional reproducible demo resume and demo asset documentation.
-- Multi-page frontend application shell with Home, Upload CV, History, Result placeholder, and not-found routes.
+- Multi-page frontend application shell with Home, Upload CV, History, Result, and not-found routes.
 - Target Application Criteria input captured as normalized metadata on upload.
 
 ## Not Implemented Yet
@@ -66,7 +67,7 @@ The current implementation intentionally does not include:
 - OCR for scanned or image-only resumes.
 - Inferred skill assessment.
 - Ranked role recommendations.
-- Personalized learning recommendations.
+- AI-generated or personalized learning recommendations.
 - Authentication.
 - PDF report export.
 - Production deployment.
@@ -103,6 +104,7 @@ Completed in Sprint 5:
 - EC-0143: Functional frontend Result page connected to stored analysis detail retrieval.
 - EC-0144: Standalone downloadable HTML reports for saved analyses.
 - EC-0145A: Indonesian and mixed Indonesian-English deterministic parsing improvements.
+- EC-0145: Deterministic improvement guidance exposed in upload results, saved results, and HTML reports.
 
 Current route inventory:
 
@@ -116,7 +118,6 @@ Current route inventory:
 
 Remaining Sprint 5 candidate contracts:
 
-- Explainable improvement guidance based on existing deterministic metadata.
 - Dependency warning cleanup.
 - API contract documentation.
 - Security hardening review.
@@ -124,7 +125,7 @@ Remaining Sprint 5 candidate contracts:
 - Deployment preparation.
 - Docker backlog resumption only after compatible runtime validation is available.
 
-Sprint 5 must not claim AI capability, production multi-user persistence, PDF export, ATS accuracy, scoring, hiring prediction, or recommendation capability unless those capabilities are explicitly designed, implemented, validated, and documented.
+Sprint 5 must not claim AI capability, production multi-user persistence, PDF export, ATS accuracy, scoring, hiring prediction, or AI-generated recommendation capability unless those capabilities are explicitly designed, implemented, validated, and documented.
 
 ## Release Path to `v1.0.0`
 
