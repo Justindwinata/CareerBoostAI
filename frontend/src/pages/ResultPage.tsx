@@ -9,8 +9,8 @@ export function ResultPage() {
         <p className="eyebrow">Analysis Result</p>
         <h1 id="result-title">Analysis result unavailable.</h1>
         <p>
-          Persisted result retrieval is not implemented yet, so CareerBoost AI cannot load saved
-          analysis records from this route.
+          Backend result retrieval exists, but this frontend route is not connected to stored
+          analysis records yet.
         </p>
       </header>
 

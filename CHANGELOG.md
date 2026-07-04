@@ -28,6 +28,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Multi-page frontend application shell with Home, Upload CV, History, Result placeholder, and not-found routes.
 - Target Application Criteria configuration on Upload CV, submitted as optional validated metadata and echoed in the analysis response.
 - Deterministic Target Alignment metadata comparing target criteria against explicit resume evidence without scoring or hiring prediction.
+- Local backend analysis history persistence using SQLite, including summary listing, full result retrieval, and delete APIs.
 
 ### Changed
 

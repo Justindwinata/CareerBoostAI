@@ -7,8 +7,10 @@ from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 
+from careerboost_api.api.analysis_history import get_analysis_history_service
 from careerboost_api.core.config import get_settings
 from careerboost_api.domain import ResumeAnalysisContract, TargetCriteria
+from careerboost_api.services.analysis_history import AnalysisHistoryStorageError
 from careerboost_api.services.resume_extraction import (
     ResumeTextExtractionError,
     ResumeTextExtractor,
@@ -93,8 +95,16 @@ async def upload_resume(
             content=analysis.model_dump(mode="json"),
         )
 
-    return orchestrator.build_success(
+    analysis = orchestrator.build_success(
         upload=validated_upload,
         extraction=extraction,
         target_criteria=validated_target_criteria,
     )
+
+    try:
+        return get_analysis_history_service().store_completed_analysis(analysis)
+    except AnalysisHistoryStorageError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Analysis could not be saved.",
+        ) from exc

@@ -25,6 +25,7 @@ from careerboost_api.domain.ats import (
     AtsScorePlaceholder,
     AtsScoreStatus,
 )
+from careerboost_api.domain.history import AnalysisHistoryDeleteResponse, AnalysisHistorySummary
 from careerboost_api.domain.recommendations import (
     RecommendationCategory,
     RecommendationEvidence,
@@ -79,6 +80,8 @@ from careerboost_api.domain.target_criteria import (
 __all__ = [
     "AnalysisError",
     "AnalysisErrorCategory",
+    "AnalysisHistoryDeleteResponse",
+    "AnalysisHistorySummary",
     "AnalysisStagePlaceholder",
     "AnalysisStatus",
     "AtsFeedbackContract",

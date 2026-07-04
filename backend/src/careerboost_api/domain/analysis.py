@@ -188,6 +188,7 @@ class ResumeAnalysisContract(BaseModel):
 
     model_config = ConfigDict(extra="forbid")
 
+    analysis_id: str | None = None
     status: AnalysisStatus
     intake: ResumeIntakeContract
     extraction: ResumeExtractionContract

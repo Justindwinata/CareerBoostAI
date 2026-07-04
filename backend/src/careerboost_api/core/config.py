@@ -28,6 +28,10 @@ class Settings(BaseSettings):
         default=5 * 1024 * 1024,
         validation_alias="UPLOAD_MAX_FILE_SIZE_BYTES",
     )
+    analysis_history_database_path: str = Field(
+        default="data/careerboost_history.sqlite3",
+        validation_alias="ANALYSIS_HISTORY_DATABASE_PATH",
+    )
 
     @property
     def cors_origins(self) -> list[str]:

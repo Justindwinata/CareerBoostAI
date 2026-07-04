@@ -5,10 +5,10 @@ export function HistoryPage() {
     <section className="page-shell" aria-labelledby="history-title">
       <header className="page-header">
         <p className="eyebrow">Analysis History</p>
-        <h1 id="history-title">Saved analysis history is not available yet.</h1>
+        <h1 id="history-title">Saved analysis history UI is not available yet.</h1>
         <p>
-          CareerBoost AI currently returns analysis metadata for the active upload session only.
-          Persistence, searchable records, report downloads, reanalysis, and deletion workflows are
+          CareerBoost AI now stores completed analyses locally through the backend history API.
+          Searchable frontend records, report downloads, reanalysis, and deletion workflows are
           planned for future contracts.
         </p>
       </header>
@@ -17,7 +17,7 @@ export function HistoryPage() {
         <div className="empty-state-illustration" aria-hidden="true" />
         <div>
           <h2 id="history-empty-title">No saved analyses yet</h2>
-          <p>Analyses are not currently persisted in this local version.</p>
+          <p>The frontend is not connected to local analysis history yet.</p>
           <div className="page-actions">
             <Link className="button-link" to="/upload">
               Upload CV

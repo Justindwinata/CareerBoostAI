@@ -48,6 +48,7 @@ flowchart LR
 | Skill Signal Extraction | Identifies explicit skill mentions and evidence from resume text without inferring ability |
 | Role Matching Metadata | Maps deterministic resume signals to internship role metadata without ranking or recommendations |
 | Target Alignment Metadata | Compares submitted target criteria with explicit skills, detected sections, metadata availability, and controlled role names without scoring |
+| Analysis History Persistence | Stores completed canonical analysis responses in local SQLite for demo retrieval without saving PDF binaries |
 | Recommendation Engine | Future module for prioritized resume and learning actions |
 | Dashboard | Presents analysis results without recalculating business logic |
 | History | Displays previous analysis records and statuses |
@@ -62,8 +63,8 @@ The frontend is now organized as a routed React application shell. Routes own pa
 | --- | --- | --- |
 | `/` | Home | Presents current deterministic capabilities, workflow overview, and an honest recent-activity empty state |
 | `/upload` | Upload CV | Hosts the existing PDF upload, processing, error recovery, and analysis dashboard workflow |
-| `/history` | Analysis History | Shows that saved analysis history is unavailable until persistence is implemented |
-| `/results/:analysisId` | Individual Analysis Result | Shows a safe unavailable state because persisted result retrieval is not implemented |
+| `/history` | Analysis History | Placeholder UI remains until the frontend is wired to the backend history API |
+| `/results/:analysisId` | Individual Analysis Result | Placeholder UI remains until the frontend is wired to stored analysis retrieval |
 | `*` | Not Found | Provides accessible recovery navigation to Home and Upload CV |
 
 The frontend must not fabricate analysis records, persist records in browser storage, generate reports, or turn target alignment metadata into scoring, recommendations, or hiring conclusions.
@@ -89,13 +90,15 @@ sequenceDiagram
   App->>Parser: Extract resume text
   Parser-->>App: Text and confidence result
   App->>Analysis: Generate deterministic metadata
-  Analysis-->>App: Intake, extraction, completeness, ATS, skill, and role metadata
-  App-->>API: Return response model
+  Analysis-->>App: Intake, extraction, completeness, ATS, skill, role, and target alignment metadata
+  App->>Repo: Store completed analysis metadata
+  Repo-->>App: Public analysis ID
+  App-->>API: Return saved response model
   API-->>FE: Return analysis result
   FE-->>User: Render dashboard
 ```
 
-Persistence and history remain planned Version 1.0 capabilities. The current request lifecycle returns the structured analysis result without writing analysis records to PostgreSQL.
+Completed analyses are stored through a local SQLite repository at `data/careerboost_history.sqlite3` by default. This is local demo persistence only: it is not authenticated multi-user storage and does not replace the planned PostgreSQL production boundary.
 
 ## Validation Strategy
 
@@ -138,6 +141,7 @@ Implemented:
 - Deterministic internship role matching metadata without ranking or recommendation claims.
 - Multi-page frontend shell with Home, Upload CV, History, Result placeholder, and not-found routes.
 - Target Application Criteria input, backend validation, and canonical response metadata echo.
+- Backend local history API with `GET /analyses`, `GET /analyses/{analysis_id}`, and `DELETE /analyses/{analysis_id}`.
 - Upload result UI showing intake metadata, extraction metadata, completeness baseline, detected section details, extracted-text preview, ATS feedback metadata, skill signal metadata, and role matching metadata.
 - Accessible processing experience, structured upload error recovery, focus management, live regions, and responsive dashboard navigation.
 - Visual consistency pass for dashboard sections, metadata cards, badges, empty states, and mobile layouts.
@@ -147,7 +151,7 @@ Not yet implemented:
 
 - ATS scoring.
 - Recommendations.
-- Persistence and analysis history.
+- Functional frontend history and result retrieval pages.
 - Target criteria alignment logic.
 - Standalone HTML report generation.
 - Database schema.

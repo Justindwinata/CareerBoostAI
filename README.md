@@ -1,6 +1,6 @@
 # CareerBoost AI
 
-CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides a routed frontend shell, deterministic resume intake, target criteria configuration, evidence-backed target alignment metadata, and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, recommendations, persistence, history, and reports after explicit contracts are designed and validated.
+CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides a routed frontend shell, deterministic resume intake, target criteria configuration, evidence-backed target alignment metadata, local backend analysis persistence, and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, recommendations, functional frontend history, and reports after explicit contracts are designed and validated.
 
 This repository is being built as a production-quality engineering portfolio project. The goal is not to ship a quick demo, but to demonstrate architecture, product thinking, maintainability, documentation, and disciplined software delivery.
 
@@ -12,7 +12,7 @@ CareerBoost AI focuses on one core outcome: helping early-career candidates unde
 
 ## Product Preview
 
-The screenshots below are verified captures from the running local application using the fictional demo resume in [assets/demo/careerboost-demo-resume.pdf](assets/demo/careerboost-demo-resume.pdf). They reflect the current deterministic resume intake pipeline: upload validation, PDF text extraction, metadata preparation, and dashboard rendering. AI scoring, recommendations, persistence, and history are not implemented yet.
+The screenshots below are verified captures from the running local application using the fictional demo resume in [assets/demo/careerboost-demo-resume.pdf](assets/demo/careerboost-demo-resume.pdf). They reflect the current deterministic resume intake pipeline: upload validation, PDF text extraction, metadata preparation, and dashboard rendering. AI scoring, recommendations, frontend history, and report downloads are not implemented yet.
 
 ### Analysis Dashboard
 
@@ -139,6 +139,7 @@ Completed work:
 - Multi-page frontend shell with Home, Upload CV, History, Result placeholder, and not-found routes.
 - Target Application Criteria input on Upload CV, captured as validated metadata.
 - Deterministic Target Alignment metadata comparing criteria against explicit resume evidence without scoring or hiring prediction.
+- Local backend SQLite persistence for completed analyses, including history list, detail retrieval, and delete APIs.
 - Accessible, responsive analysis dashboard.
 - Processing state and structured upload error recovery.
 - Accessibility remediation and visual consistency polish.
@@ -153,7 +154,8 @@ Not started yet:
 - Inferred skill assessment.
 - Ranked role recommendations.
 - Recommendations.
-- Persistence and history.
+- Functional frontend History page.
+- Functional frontend Result retrieval page.
 - Downloadable standalone HTML reports.
 - Demo deployment.
 

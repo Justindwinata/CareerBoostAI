@@ -966,6 +966,10 @@ export function ResumeUploadForm() {
                     <dd>{uploadState.result.intake.filename}</dd>
                   </div>
                   <div>
+                    <dt>Analysis ID</dt>
+                    <dd>{uploadState.result.analysis_id ?? "Not stored"}</dd>
+                  </div>
+                  <div>
                     <dt>File size</dt>
                     <dd>{formatFileSize(uploadState.result.intake.size_bytes)}</dd>
                   </div>

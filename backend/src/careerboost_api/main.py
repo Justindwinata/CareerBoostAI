@@ -3,6 +3,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from careerboost_api.api.analysis_history import router as analysis_history_router
 from careerboost_api.api.health import router as health_router
 from careerboost_api.api.upload import router as upload_router
 from careerboost_api.core.config import get_settings
@@ -25,10 +26,11 @@ def create_app() -> FastAPI:
         CORSMiddleware,
         allow_origins=settings.cors_origins,
         allow_credentials=False,
-        allow_methods=["GET", "POST"],
+        allow_methods=["GET", "POST", "DELETE"],
         allow_headers=["*"],
     )
 
+    app.include_router(analysis_history_router)
     app.include_router(health_router)
     app.include_router(upload_router)
 

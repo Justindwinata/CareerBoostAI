@@ -67,11 +67,11 @@ describe("App", () => {
     expect(
       screen.getByRole("heading", {
         level: 1,
-        name: "Saved analysis history is not available yet.",
+        name: "Saved analysis history UI is not available yet.",
       }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText("Analyses are not currently persisted in this local version."),
+      screen.getByText("The frontend is not connected to local analysis history yet."),
     ).toBeVisible();
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
     expect(screen.queryByText("Sample analysis")).not.toBeInTheDocument();
@@ -88,7 +88,7 @@ describe("App", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "Persisted result retrieval is not implemented yet, so CareerBoost AI cannot load saved analysis records from this route.",
+        "Backend result retrieval exists, but this frontend route is not connected to stored analysis records yet.",
       ),
     ).toBeVisible();
     expect(screen.getByText("demo-analysis-id")).toBeVisible();

@@ -1,11 +1,15 @@
 import json
 from io import BytesIO
+from pathlib import Path
+from uuid import UUID
 
+import pytest
 from fastapi.testclient import TestClient
 from pypdf import PdfWriter
 from pypdf.generic import DecodedStreamObject, DictionaryObject, NameObject
 from pytest import MonkeyPatch
 
+from careerboost_api.core.config import get_settings
 from careerboost_api.domain import (
     ResumeAnalysisContract,
     ResumeCompletenessContract,
@@ -26,6 +30,14 @@ RESUME_TEXT = (
     "Justin Dwinata Software Engineer Internship Resume Python React FastAPI TypeScript "
     "PostgreSQL Projects Education Experience Skills Portfolio Backend Frontend Testing"
 )
+
+
+@pytest.fixture(autouse=True)
+def isolated_history_database(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.setenv("ANALYSIS_HISTORY_DATABASE_PATH", str(tmp_path / "history.sqlite3"))
+    get_settings.cache_clear()
+    yield
+    get_settings.cache_clear()
 
 
 def create_pdf_bytes(*, encrypted: bool = False, text: str | None = RESUME_TEXT) -> bytes:
@@ -71,8 +83,12 @@ def test_upload_resume_accepts_valid_pdf() -> None:
 
     assert response.status_code == 202
     response_body = response.json()
+    analysis_id = response_body["analysis_id"]
+    UUID(analysis_id)
+    response_body["analysis_id"] = "<analysis-id>"
 
     assert response_body == {
+        "analysis_id": "<analysis-id>",
         "status": "intake_completed",
         "intake": {
             "status": "accepted",

@@ -251,6 +251,7 @@ function createSuccessfulUploadResponse(
   },
 ) {
   return {
+    analysis_id: "11111111-1111-4111-8111-111111111111",
     status: "intake_completed",
     intake: {
       status: "accepted",
@@ -504,6 +505,7 @@ describe("ResumeUploadForm", () => {
     deferredResponse.resolve(createUploadSuccessResponse());
 
     expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(screen.getByText("11111111-1111-4111-8111-111111111111")).toBeVisible();
     expect(screen.queryByRole("heading", { name: "Processing document metadata" })).toBeNull();
     expect(screen.getByLabelText("Select PDF resume")).not.toBeDisabled();
     expect(screen.getByRole("button", { name: "Upload resume" })).not.toBeDisabled();

@@ -44,6 +44,7 @@ The current implementation includes:
 - Deterministic skill signals from explicit text mentions only.
 - Deterministic internship role matching metadata without ranking or recommendations.
 - Deterministic Target Alignment metadata comparing submitted target criteria against explicit resume evidence without scoring.
+- Local backend SQLite persistence for completed analyses with list, detail, and delete APIs.
 - Analysis dashboard with upload, processing, error recovery, summary, structure, skill, ATS, and role sections.
 - Accessibility remediation for labels, focus management, live regions, navigation, touch targets, and responsive layout.
 - Visual consistency pass for professional SaaS-style dashboard presentation.
@@ -62,7 +63,7 @@ The current implementation intentionally does not include:
 - Ranked role recommendations.
 - Personalized learning recommendations.
 - Authentication.
-- Persistence and analysis history.
+- Functional frontend analysis history and result retrieval pages.
 - Downloadable standalone HTML reports.
 - Production deployment.
 - Docker workflow artifacts.
@@ -93,6 +94,7 @@ Completed in Sprint 5:
 - EC-0138: Multi-page frontend application foundation and navigation shell.
 - EC-0139: Target Application Criteria input and validated metadata echo.
 - EC-0140: Deterministic Target Alignment metadata from explicit resume evidence.
+- EC-0141: Local backend analysis history persistence and retrieval API.
 
 Current route inventory:
 
@@ -107,6 +109,7 @@ Current route inventory:
 Remaining Sprint 5 candidate contracts:
 
 - Explainable improvement guidance based on existing deterministic metadata.
+- Functional frontend History and Result pages using the backend history API.
 - Dependency warning cleanup.
 - API contract documentation.
 - Security hardening review.

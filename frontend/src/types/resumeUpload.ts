@@ -237,6 +237,7 @@ export type ResumeCompletenessResult = {
 };
 
 export type ResumeUploadResponse = {
+  analysis_id: string | null;
   status: "intake_completed" | "failed";
   intake: ResumeIntakeResult;
   extraction: ResumeExtractionResult;
