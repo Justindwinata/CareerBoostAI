@@ -223,6 +223,32 @@ function createSuccessfulUploadResponse(
     education_expectation: "",
     notes: "",
   },
+  targetAlignment: unknown = {
+    status: "not_provided",
+    summary: {
+      required_skills_total: 0,
+      required_skills_found: 0,
+      required_skills_missing: 0,
+      preferred_skills_total: 0,
+      preferred_skills_found: 0,
+      required_sections_total: 0,
+      required_sections_found: 0,
+      required_sections_missing: 0,
+      priorities_total: 0,
+      priorities_evaluated: 0,
+    },
+    required_skills: [],
+    preferred_skills: [],
+    required_sections: [],
+    analysis_priorities: [],
+    target_role: {
+      status: "not_provided",
+      target_role: "",
+      controlled_profile: null,
+      evidence: [],
+    },
+    message: "No target criteria were provided for this analysis.",
+  },
 ) {
   return {
     status: "intake_completed",
@@ -244,6 +270,7 @@ function createSuccessfulUploadResponse(
     },
     completeness,
     target_criteria: targetCriteria,
+    target_alignment: targetAlignment,
     ats,
     skills,
     roles,
@@ -502,7 +529,9 @@ describe("ResumeUploadForm", () => {
 
     expect(requestBody.get("file")).toBeInstanceOf(File);
     expect(requestBody.get("target_criteria")).toBeNull();
-    expect(screen.getByText("No target criteria were provided for this analysis.")).toBeVisible();
+    expect(screen.getAllByText("No target criteria were provided for this analysis.").length).toBe(
+      2,
+    );
   });
 
   it("uploads normalized target criteria and displays a factual target summary", async () => {
@@ -530,6 +559,122 @@ describe("ResumeUploadForm", () => {
       education_expectation: "Computer Science or related field preferred",
       notes: "Review explicit project evidence.",
     };
+    const targetAlignmentResponse = {
+      status: "evaluated",
+      summary: {
+        required_skills_total: 2,
+        required_skills_found: 1,
+        required_skills_missing: 1,
+        preferred_skills_total: 1,
+        preferred_skills_found: 0,
+        required_sections_total: 6,
+        required_sections_found: 3,
+        required_sections_missing: 3,
+        priorities_total: 4,
+        priorities_evaluated: 4,
+      },
+      required_skills: [
+        {
+          category: "required",
+          submitted_skill: "React",
+          normalized_skill: "react",
+          status: "found",
+          evidence: [
+            {
+              source_type: "explicit_skill_signal",
+              source_label: "React",
+              source_area: "skills",
+              line_number: 4,
+              detail:
+                "Python, FastAPI, TypeScript, React, PostgreSQL, testing, linting, CI, Git, and API design.",
+            },
+          ],
+        },
+        {
+          category: "required",
+          submitted_skill: "SQL",
+          normalized_skill: "sql",
+          status: "not_found",
+          evidence: [],
+        },
+      ],
+      preferred_skills: [
+        {
+          category: "preferred",
+          submitted_skill: "Docker",
+          normalized_skill: "docker",
+          status: "not_found",
+          evidence: [],
+        },
+      ],
+      required_sections: [
+        {
+          section: "summary",
+          display_label: "Summary",
+          status: "detected",
+          evidence: [
+            {
+              source_type: "detected_resume_section",
+              source_label: "Professional Summary",
+              source_area: "summary",
+              line_number: 1,
+              detail: "Detected heading on lines 1-3.",
+            },
+          ],
+        },
+        {
+          section: "certifications",
+          display_label: "Certifications",
+          status: "missing",
+          evidence: [],
+        },
+      ],
+      analysis_priorities: [
+        {
+          priority: "resume_structure",
+          display_label: "Resume structure",
+          status: "evaluated",
+          evidence: [
+            {
+              source_type: "metadata_available",
+              source_label: "Completeness metadata",
+              source_area: "",
+              line_number: null,
+              detail: "3 detected expected sections and 2 missing expected sections.",
+            },
+          ],
+        },
+        {
+          priority: "role_alignment",
+          display_label: "Role alignment",
+          status: "evaluated",
+          evidence: [
+            {
+              source_type: "metadata_available",
+              source_label: "Role matching metadata",
+              source_area: "",
+              line_number: null,
+              detail: "Role matching state: metadata_ready.",
+            },
+          ],
+        },
+      ],
+      target_role: {
+        status: "mapped_to_controlled_profile",
+        target_role: "Frontend Developer Intern",
+        controlled_profile: "Frontend Developer Intern",
+        evidence: [
+          {
+            source_type: "controlled_role_profile",
+            source_label: "Frontend Developer Intern",
+            source_area: "",
+            line_number: null,
+            detail: "Target role matched a controlled internship role profile by exact name.",
+          },
+        ],
+      },
+      message: "Target alignment metadata was evaluated from deterministic resume evidence.",
+    };
     const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
       new Response(
         JSON.stringify(
@@ -541,6 +686,7 @@ describe("ResumeUploadForm", () => {
             undefined,
             undefined,
             targetCriteriaResponse,
+            targetAlignmentResponse,
           ),
         ),
         {
@@ -621,9 +767,107 @@ describe("ResumeUploadForm", () => {
     expect(within(targetSummary).getByText("Preferred skills")).toBeVisible();
     expect(within(targetSummary).getByText("Certifications")).toBeVisible();
     expect(within(targetSummary).getByText("Role alignment")).toBeVisible();
+
+    const targetAlignment = screen
+      .getByRole("heading", { name: "Evidence-backed alignment metadata" })
+      .closest("section") as HTMLElement;
+
+    expect(within(targetAlignment).getByText("Required Skills")).toBeVisible();
+    expect(within(targetAlignment).getByText("React")).toBeVisible();
+    expect(within(targetAlignment).getByText("Found")).toBeVisible();
+    expect(within(targetAlignment).getByText("SQL")).toBeVisible();
+    expect(within(targetAlignment).getAllByText("Not found").length).toBeGreaterThanOrEqual(2);
+    expect(within(targetAlignment).getByText("Required Sections")).toBeVisible();
+    expect(within(targetAlignment).getByText("Detected")).toBeVisible();
+    expect(within(targetAlignment).getByText("Missing")).toBeVisible();
+    expect(within(targetAlignment).getByText("Analysis Priorities")).toBeVisible();
+    expect(within(targetAlignment).getAllByText("Evaluated").length).toBeGreaterThanOrEqual(1);
+    expect(
+      within(targetAlignment).getAllByText("Mapped to controlled profile").length,
+    ).toBeGreaterThanOrEqual(2);
     expect(screen.queryByText(/fit percentage/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/acceptance likelihood/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/guaranteed/i)).not.toBeInTheDocument();
+  });
+
+  it("shows a safe target alignment insufficient-data state", async () => {
+    vi.spyOn(globalThis, "fetch").mockResolvedValueOnce(
+      new Response(
+        JSON.stringify(
+          createSuccessfulUploadResponse(
+            undefined,
+            undefined,
+            LONG_EXTRACTED_TEXT,
+            undefined,
+            undefined,
+            undefined,
+            {
+              status: "provided",
+              target_role: "Frontend Developer Intern",
+              target_description: "",
+              required_skills: ["React"],
+              preferred_skills: [],
+              required_sections: [],
+              analysis_priorities: [],
+              experience_expectation: "",
+              education_expectation: "",
+              notes: "",
+            },
+            {
+              status: "insufficient_data",
+              summary: {
+                required_skills_total: 0,
+                required_skills_found: 0,
+                required_skills_missing: 0,
+                preferred_skills_total: 0,
+                preferred_skills_found: 0,
+                required_sections_total: 0,
+                required_sections_found: 0,
+                required_sections_missing: 0,
+                priorities_total: 0,
+                priorities_evaluated: 0,
+              },
+              required_skills: [],
+              preferred_skills: [],
+              required_sections: [],
+              analysis_priorities: [],
+              target_role: {
+                status: "not_provided",
+                target_role: "",
+                controlled_profile: null,
+                evidence: [],
+              },
+              message:
+                "Target alignment could not be evaluated because there was not enough readable resume evidence.",
+            },
+          ),
+        ),
+        {
+          headers: { "Content-Type": "application/json" },
+          status: 202,
+        },
+      ),
+    );
+
+    render(<ResumeUploadForm />);
+
+    fireEvent.change(screen.getByLabelText("Target role"), {
+      target: { value: "Frontend Developer Intern" },
+    });
+    fireEvent.change(screen.getByLabelText("Required skills"), {
+      target: { value: "React" },
+    });
+    fireEvent.change(screen.getByLabelText("Select PDF resume"), {
+      target: { files: [createPdfFile()] },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Upload resume" }));
+
+    expect(await screen.findByRole("heading", { name: "Resume upload accepted" })).toBeVisible();
+    expect(
+      screen.getByText(
+        "Target alignment could not be evaluated because there was not enough readable resume evidence.",
+      ),
+    ).toBeVisible();
   });
 
   it("restores controls and shows retry guidance after upload failure", async () => {

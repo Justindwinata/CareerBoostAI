@@ -48,6 +48,7 @@ def test_orchestrator_builds_successful_analysis_contract() -> None:
     ]
     assert contract.completeness is not None
     assert contract.target_criteria.status == "not_provided"
+    assert contract.target_alignment.status == "not_provided"
     assert contract.completeness.present_sections == ["summary", "skills", "projects"]
     assert contract.completeness.missing_sections == ["experience", "education"]
     assert contract.completeness.score == 0.6
@@ -105,6 +106,12 @@ def test_orchestrator_preserves_target_criteria_metadata() -> None:
     assert contract.target_criteria.status == "provided"
     assert contract.target_criteria.target_role == "Backend Developer Intern"
     assert contract.target_criteria.required_skills == ["Python", "FastAPI"]
+    assert contract.target_alignment.status == "evaluated"
+    assert [item.status for item in contract.target_alignment.required_skills] == [
+        "found",
+        "found",
+    ]
+    assert contract.target_alignment.target_role.status == "mapped_to_controlled_profile"
 
 
 def test_orchestrator_builds_low_text_failure_contract() -> None:
@@ -128,6 +135,7 @@ def test_orchestrator_builds_low_text_failure_contract() -> None:
     assert contract.extraction.normalized_text is None
     assert contract.extraction.sections == []
     assert contract.completeness is None
+    assert contract.target_alignment.status == "not_provided"
     assert contract.ats.status == "not_evaluated"
     assert contract.ats.issues[0].observed_signal == "ats_feedback:insufficient_data"
     assert contract.skills.status == "not_evaluated"
@@ -146,6 +154,7 @@ def test_orchestrator_builds_unreadable_pdf_failure_contract() -> None:
     assert contract.extraction.error is not None
     assert contract.extraction.error.category == "unreadable_pdf"
     assert contract.completeness is None
+    assert contract.target_alignment.status == "not_provided"
     assert contract.ats.status == "not_evaluated"
     assert contract.skills.status == "not_evaluated"
     assert contract.roles.status == "not_evaluated"

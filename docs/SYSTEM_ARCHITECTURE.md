@@ -47,6 +47,7 @@ flowchart LR
 | ATS Feedback Metadata | Maps existing deterministic resume metadata into non-scored ATS feedback categories |
 | Skill Signal Extraction | Identifies explicit skill mentions and evidence from resume text without inferring ability |
 | Role Matching Metadata | Maps deterministic resume signals to internship role metadata without ranking or recommendations |
+| Target Alignment Metadata | Compares submitted target criteria with explicit skills, detected sections, metadata availability, and controlled role names without scoring |
 | Recommendation Engine | Future module for prioritized resume and learning actions |
 | Dashboard | Presents analysis results without recalculating business logic |
 | History | Displays previous analysis records and statuses |
@@ -65,9 +66,9 @@ The frontend is now organized as a routed React application shell. Routes own pa
 | `/results/:analysisId` | Individual Analysis Result | Shows a safe unavailable state because persisted result retrieval is not implemented |
 | `*` | Not Found | Provides accessible recovery navigation to Home and Upload CV |
 
-The frontend must not fabricate analysis records, persist records in browser storage, generate reports, or turn target criteria into alignment conclusions until those capabilities have approved backend and product contracts.
+The frontend must not fabricate analysis records, persist records in browser storage, generate reports, or turn target alignment metadata into scoring, recommendations, or hiring conclusions.
 
-Target Application Criteria are currently accepted as optional upload metadata through a multipart `target_criteria` JSON field. The backend validates and normalizes the criteria, then returns them in the canonical analysis response. No alignment scoring, fit calculation, acceptance prediction, or recommendation generation is performed from these criteria yet.
+Target Application Criteria are accepted as optional upload metadata through a multipart `target_criteria` JSON field. The backend validates and normalizes the criteria, compares them against existing deterministic resume evidence, and returns factual Target Alignment metadata in the canonical analysis response. No alignment scoring, fit calculation, acceptance prediction, or recommendation generation is performed from these criteria.
 
 ## Communication Flow
 

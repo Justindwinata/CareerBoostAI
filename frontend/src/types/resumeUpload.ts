@@ -48,6 +48,69 @@ export type TargetCriteria = {
 
 export type TargetCriteriaInput = Omit<TargetCriteria, "status">;
 
+export type TargetAlignmentEvidence = {
+  source_type:
+    | "explicit_skill_signal"
+    | "detected_resume_section"
+    | "metadata_available"
+    | "controlled_role_profile";
+  source_label: string;
+  source_area: string;
+  line_number: number | null;
+  detail: string;
+};
+
+export type TargetSkillAlignmentItem = {
+  category: "required" | "preferred";
+  submitted_skill: string;
+  normalized_skill: string;
+  status: "found" | "not_found";
+  evidence: TargetAlignmentEvidence[];
+};
+
+export type TargetSectionAlignmentItem = {
+  section: TargetRequiredSectionName;
+  display_label: string;
+  status: "detected" | "missing";
+  evidence: TargetAlignmentEvidence[];
+};
+
+export type TargetPriorityAlignmentItem = {
+  priority: TargetAnalysisPriority;
+  display_label: string;
+  status: "evaluated" | "not_evaluated";
+  evidence: TargetAlignmentEvidence[];
+};
+
+export type TargetRoleContext = {
+  status: "not_provided" | "mapped_to_controlled_profile" | "not_mapped_to_controlled_profile";
+  target_role: string;
+  controlled_profile: InternshipRoleName | null;
+  evidence: TargetAlignmentEvidence[];
+};
+
+export type TargetAlignmentResult = {
+  status: "not_provided" | "evaluated" | "insufficient_data";
+  summary: {
+    required_skills_total: number;
+    required_skills_found: number;
+    required_skills_missing: number;
+    preferred_skills_total: number;
+    preferred_skills_found: number;
+    required_sections_total: number;
+    required_sections_found: number;
+    required_sections_missing: number;
+    priorities_total: number;
+    priorities_evaluated: number;
+  };
+  required_skills: TargetSkillAlignmentItem[];
+  preferred_skills: TargetSkillAlignmentItem[];
+  required_sections: TargetSectionAlignmentItem[];
+  analysis_priorities: TargetPriorityAlignmentItem[];
+  target_role: TargetRoleContext;
+  message: string;
+};
+
 export type DetectedResumeSection = {
   name: ResumeSectionName;
   heading: string;
@@ -179,6 +242,7 @@ export type ResumeUploadResponse = {
   extraction: ResumeExtractionResult;
   completeness: ResumeCompletenessResult | null;
   target_criteria: TargetCriteria;
+  target_alignment: TargetAlignmentResult;
   ats: AnalysisStagePlaceholder | AtsFeedbackResult;
   skills: AnalysisStagePlaceholder | SkillSignalsResult;
   roles: AnalysisStagePlaceholder | RoleMatchesResult;

@@ -108,6 +108,32 @@ def test_upload_resume_accepts_valid_pdf() -> None:
             "education_expectation": "",
             "notes": "",
         },
+        "target_alignment": {
+            "status": "not_provided",
+            "summary": {
+                "required_skills_total": 0,
+                "required_skills_found": 0,
+                "required_skills_missing": 0,
+                "preferred_skills_total": 0,
+                "preferred_skills_found": 0,
+                "required_sections_total": 0,
+                "required_sections_found": 0,
+                "required_sections_missing": 0,
+                "priorities_total": 0,
+                "priorities_evaluated": 0,
+            },
+            "required_skills": [],
+            "preferred_skills": [],
+            "required_sections": [],
+            "analysis_priorities": [],
+            "target_role": {
+                "status": "not_provided",
+                "target_role": "",
+                "controlled_profile": None,
+                "evidence": [],
+            },
+            "message": "No target criteria were provided for this analysis.",
+        },
         "ats": {
             "status": "metadata_ready",
             "source": "deterministic_resume_signals",
@@ -452,6 +478,25 @@ def test_upload_resume_accepts_target_criteria_metadata() -> None:
         "experience_expectation": "Internship level",
         "education_expectation": "Computer Science or related field preferred",
         "notes": "Review explicit project evidence.",
+    }
+    assert response.json()["target_alignment"]["status"] == "evaluated"
+    assert [item["status"] for item in response.json()["target_alignment"]["required_skills"]] == [
+        "found",
+        "found",
+    ]
+    assert response.json()["target_alignment"]["target_role"] == {
+        "status": "mapped_to_controlled_profile",
+        "target_role": "Frontend Developer Intern",
+        "controlled_profile": "Frontend Developer Intern",
+        "evidence": [
+            {
+                "source_type": "controlled_role_profile",
+                "source_label": "Frontend Developer Intern",
+                "source_area": "",
+                "line_number": None,
+                "detail": "Target role matched a controlled internship role profile by exact name.",
+            }
+        ],
     }
 
 

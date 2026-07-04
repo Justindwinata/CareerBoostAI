@@ -59,6 +59,7 @@ def test_analysis_contract_represents_successful_resume_intake() -> None:
     assert contract.completeness is not None
     assert contract.completeness.score == 0.2
     assert contract.target_criteria.status == "not_provided"
+    assert contract.target_alignment.status == "not_provided"
     assert contract.ats.status == "not_started"
     assert contract.skills.status == "not_started"
     assert contract.roles.status == "not_started"
@@ -88,6 +89,7 @@ def test_analysis_contract_represents_low_text_extraction_failure() -> None:
     assert contract.extraction.normalized_text is None
     assert contract.extraction.sections == []
     assert contract.target_criteria.status == "not_provided"
+    assert contract.target_alignment.status == "not_provided"
 
 
 def test_analysis_contract_can_include_target_criteria_metadata() -> None:
@@ -119,6 +121,7 @@ def test_analysis_contract_can_include_target_criteria_metadata() -> None:
     assert contract.target_criteria.status == "provided"
     assert contract.target_criteria.target_role == "Backend Developer Intern"
     assert contract.target_criteria.required_skills == ["Python", "FastAPI"]
+    assert contract.target_alignment.status == "not_provided"
 
 
 def test_analysis_contract_represents_unreadable_pdf_failure() -> None:

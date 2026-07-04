@@ -1,6 +1,6 @@
 # CareerBoost AI
 
-CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides a routed frontend shell, deterministic resume intake, target criteria metadata capture, and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, recommendations, persistence, history, alignment logic, and reports after explicit contracts are designed and validated.
+CareerBoost AI is an internship readiness platform for university students and fresh graduates. The current implementation provides a routed frontend shell, deterministic resume intake, target criteria configuration, evidence-backed target alignment metadata, and analysis metadata; future releases are planned to add AI-assisted guidance, scoring, recommendations, persistence, history, and reports after explicit contracts are designed and validated.
 
 This repository is being built as a production-quality engineering portfolio project. The goal is not to ship a quick demo, but to demonstrate architecture, product thinking, maintainability, documentation, and disciplined software delivery.
 
@@ -137,7 +137,8 @@ Completed work:
 - Deterministic skill signal metadata.
 - Deterministic internship role matching metadata.
 - Multi-page frontend shell with Home, Upload CV, History, Result placeholder, and not-found routes.
-- Target Application Criteria input on Upload CV, captured and echoed as validated metadata only.
+- Target Application Criteria input on Upload CV, captured as validated metadata.
+- Deterministic Target Alignment metadata comparing criteria against explicit resume evidence without scoring or hiring prediction.
 - Accessible, responsive analysis dashboard.
 - Processing state and structured upload error recovery.
 - Accessibility remediation and visual consistency polish.
@@ -153,7 +154,6 @@ Not started yet:
 - Ranked role recommendations.
 - Recommendations.
 - Persistence and history.
-- Target criteria alignment engine.
 - Downloadable standalone HTML reports.
 - Demo deployment.
 

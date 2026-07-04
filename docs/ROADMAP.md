@@ -43,6 +43,7 @@ The current implementation includes:
 - Deterministic ATS metadata with `not_scored` score placeholder.
 - Deterministic skill signals from explicit text mentions only.
 - Deterministic internship role matching metadata without ranking or recommendations.
+- Deterministic Target Alignment metadata comparing submitted target criteria against explicit resume evidence without scoring.
 - Analysis dashboard with upload, processing, error recovery, summary, structure, skill, ATS, and role sections.
 - Accessibility remediation for labels, focus management, live regions, navigation, touch targets, and responsive layout.
 - Visual consistency pass for professional SaaS-style dashboard presentation.
@@ -60,7 +61,6 @@ The current implementation intentionally does not include:
 - Inferred skill assessment.
 - Ranked role recommendations.
 - Personalized learning recommendations.
-- Target criteria alignment engine for role-specific review.
 - Authentication.
 - Persistence and analysis history.
 - Downloadable standalone HTML reports.
@@ -92,6 +92,7 @@ Completed in Sprint 5:
 - EC-0137: Deterministic recommendation contract foundation.
 - EC-0138: Multi-page frontend application foundation and navigation shell.
 - EC-0139: Target Application Criteria input and validated metadata echo.
+- EC-0140: Deterministic Target Alignment metadata from explicit resume evidence.
 
 Current route inventory:
 
@@ -106,7 +107,6 @@ Current route inventory:
 Remaining Sprint 5 candidate contracts:
 
 - Explainable improvement guidance based on existing deterministic metadata.
-- Target criteria alignment contract.
 - Dependency warning cleanup.
 - API contract documentation.
 - Security hardening review.
@@ -114,7 +114,7 @@ Remaining Sprint 5 candidate contracts:
 - Deployment preparation.
 - Docker backlog resumption only after compatible runtime validation is available.
 
-Sprint 5 must not claim AI capability, persistence, report generation, target-criteria processing, or ATS accuracy unless those capabilities are explicitly designed, implemented, validated, and documented.
+Sprint 5 must not claim AI capability, persistence, report generation, ATS accuracy, scoring, hiring prediction, or recommendation capability unless those capabilities are explicitly designed, implemented, validated, and documented.
 
 ## Release Path to `v1.0.0`
 

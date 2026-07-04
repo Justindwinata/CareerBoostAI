@@ -27,6 +27,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Demo asset documentation for privacy policy, capture states, viewport sizes, and regeneration.
 - Multi-page frontend application shell with Home, Upload CV, History, Result placeholder, and not-found routes.
 - Target Application Criteria configuration on Upload CV, submitted as optional validated metadata and echoed in the analysis response.
+- Deterministic Target Alignment metadata comparing target criteria against explicit resume evidence without scoring or hiring prediction.
 
 ### Changed
 

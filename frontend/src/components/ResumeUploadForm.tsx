@@ -21,6 +21,7 @@ import type {
   SkillSignalCategory,
   SkillSignalsResult,
   SkillSourceArea,
+  TargetAlignmentResult,
   TargetAnalysisPriority,
   TargetCriteriaInput,
   TargetRequiredSectionName,
@@ -333,6 +334,41 @@ function isRoleMatchesResult(roles: ResumeUploadResult["roles"]): roles is RoleM
   );
 }
 
+function formatTargetAlignmentStatus(status: TargetAlignmentResult["status"]): string {
+  const statusLabels: Record<TargetAlignmentResult["status"], string> = {
+    not_provided: "Not provided",
+    evaluated: "Evaluated",
+    insufficient_data: "Insufficient data",
+  };
+
+  return statusLabels[status];
+}
+
+function formatAlignmentItemStatus(status: string): string {
+  const statusLabels: Record<string, string> = {
+    found: "Found",
+    not_found: "Not found",
+    detected: "Detected",
+    missing: "Missing",
+    evaluated: "Evaluated",
+    not_evaluated: "Not evaluated",
+  };
+
+  return statusLabels[status] ?? status;
+}
+
+function formatTargetRoleMappingStatus(
+  status: TargetAlignmentResult["target_role"]["status"],
+): string {
+  const statusLabels: Record<TargetAlignmentResult["target_role"]["status"], string> = {
+    not_provided: "Not provided",
+    mapped_to_controlled_profile: "Mapped to controlled profile",
+    not_mapped_to_controlled_profile: "Not mapped to controlled profile",
+  };
+
+  return statusLabels[status];
+}
+
 function formatMetadataAvailability(status: string): string {
   return status === "metadata_ready" || status === "signals_detected" ? "Available" : "Unavailable";
 }
@@ -371,6 +407,10 @@ function getAnalysisSummaryItems(result: ResumeUploadResult) {
     {
       label: "Application target",
       value: result.target_criteria.status === "provided" ? "Provided" : "Not provided",
+    },
+    {
+      label: "Target alignment",
+      value: formatTargetAlignmentStatus(result.target_alignment.status),
     },
     {
       label: "Detected sections",
@@ -661,6 +701,7 @@ export function ResumeUploadForm() {
 
             <nav className="analysis-dashboard-nav" aria-label="Analysis dashboard sections">
               <a href="#application-target-title">Application Target</a>
+              <a href="#target-alignment-title">Target Alignment</a>
               <a href="#resume-intake-title">Resume Intake</a>
               <a href="#resume-structure-title">Resume Structure</a>
               <a href="#skill-signals-title">Skill Signals</a>
@@ -725,6 +766,190 @@ export function ResumeUploadForm() {
                 <p className="section-empty-state">
                   No target criteria were provided for this analysis.
                 </p>
+              )}
+            </section>
+
+            <section className="dashboard-section" aria-labelledby="target-alignment-title">
+              <div className="dashboard-section-header">
+                <p className="eyebrow">Target Alignment</p>
+                <h4 id="target-alignment-title">Evidence-backed alignment metadata</h4>
+              </div>
+
+              {uploadState.result.target_alignment.status === "not_provided" ? (
+                <p className="section-empty-state">
+                  No target criteria were provided for this analysis.
+                </p>
+              ) : uploadState.result.target_alignment.status === "insufficient_data" ? (
+                <p className="section-empty-state">{uploadState.result.target_alignment.message}</p>
+              ) : (
+                <div className="target-alignment-layout">
+                  <dl className="metadata-summary-list">
+                    <div>
+                      <dt>Alignment status</dt>
+                      <dd>
+                        {formatTargetAlignmentStatus(uploadState.result.target_alignment.status)}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Required skills found</dt>
+                      <dd>
+                        {uploadState.result.target_alignment.summary.required_skills_found} of{" "}
+                        {uploadState.result.target_alignment.summary.required_skills_total}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Preferred skills found</dt>
+                      <dd>
+                        {uploadState.result.target_alignment.summary.preferred_skills_found} of{" "}
+                        {uploadState.result.target_alignment.summary.preferred_skills_total}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Required sections detected</dt>
+                      <dd>
+                        {uploadState.result.target_alignment.summary.required_sections_found} of{" "}
+                        {uploadState.result.target_alignment.summary.required_sections_total}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Priorities evaluated</dt>
+                      <dd>
+                        {uploadState.result.target_alignment.summary.priorities_evaluated} of{" "}
+                        {uploadState.result.target_alignment.summary.priorities_total}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Target role context</dt>
+                      <dd>
+                        {formatTargetRoleMappingStatus(
+                          uploadState.result.target_alignment.target_role.status,
+                        )}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <div className="target-alignment-grid">
+                    <section aria-labelledby="required-skills-alignment-title">
+                      <h5 id="required-skills-alignment-title">Required Skills</h5>
+                      {uploadState.result.target_alignment.required_skills.length > 0 ? (
+                        <ul className="alignment-list">
+                          {uploadState.result.target_alignment.required_skills.map((item) => (
+                            <li key={`required-${item.normalized_skill}`}>
+                              <div className="alignment-item-header">
+                                <strong>{item.submitted_skill}</strong>
+                                <span>{formatAlignmentItemStatus(item.status)}</span>
+                              </div>
+                              {item.evidence[0] ? (
+                                <p>{item.evidence[0].source_label} explicit evidence found.</p>
+                              ) : (
+                                <p>Explicit evidence not found in detected skill signals.</p>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="section-empty-state">No required skills provided.</p>
+                      )}
+                    </section>
+
+                    <section aria-labelledby="preferred-skills-alignment-title">
+                      <h5 id="preferred-skills-alignment-title">Preferred Skills</h5>
+                      {uploadState.result.target_alignment.preferred_skills.length > 0 ? (
+                        <ul className="alignment-list">
+                          {uploadState.result.target_alignment.preferred_skills.map((item) => (
+                            <li key={`preferred-${item.normalized_skill}`}>
+                              <div className="alignment-item-header">
+                                <strong>{item.submitted_skill}</strong>
+                                <span>{formatAlignmentItemStatus(item.status)}</span>
+                              </div>
+                              {item.evidence[0] ? (
+                                <p>{item.evidence[0].source_label} explicit evidence found.</p>
+                              ) : (
+                                <p>Explicit evidence not found in detected skill signals.</p>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="section-empty-state">No preferred skills provided.</p>
+                      )}
+                    </section>
+
+                    <section aria-labelledby="required-sections-alignment-title">
+                      <h5 id="required-sections-alignment-title">Required Sections</h5>
+                      {uploadState.result.target_alignment.required_sections.length > 0 ? (
+                        <ul className="alignment-list">
+                          {uploadState.result.target_alignment.required_sections.map((item) => (
+                            <li key={item.section}>
+                              <div className="alignment-item-header">
+                                <strong>{item.display_label}</strong>
+                                <span>{formatAlignmentItemStatus(item.status)}</span>
+                              </div>
+                              {item.evidence[0] ? (
+                                <p>{item.evidence[0].detail}</p>
+                              ) : (
+                                <p>Section heading was not detected.</p>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="section-empty-state">No required sections provided.</p>
+                      )}
+                    </section>
+
+                    <section aria-labelledby="priorities-alignment-title">
+                      <h5 id="priorities-alignment-title">Analysis Priorities</h5>
+                      {uploadState.result.target_alignment.analysis_priorities.length > 0 ? (
+                        <ul className="alignment-list">
+                          {uploadState.result.target_alignment.analysis_priorities.map((item) => (
+                            <li key={item.priority}>
+                              <div className="alignment-item-header">
+                                <strong>{item.display_label}</strong>
+                                <span>{formatAlignmentItemStatus(item.status)}</span>
+                              </div>
+                              {item.evidence[0] ? (
+                                <p>{item.evidence[0].detail}</p>
+                              ) : (
+                                <p>Metadata was not available for this priority.</p>
+                              )}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : (
+                        <p className="section-empty-state">No analysis priorities selected.</p>
+                      )}
+                    </section>
+
+                    <section aria-labelledby="target-role-alignment-title">
+                      <h5 id="target-role-alignment-title">Target Role Context</h5>
+                      <dl className="metadata-summary-list">
+                        <div>
+                          <dt>Submitted role</dt>
+                          <dd>
+                            {uploadState.result.target_alignment.target_role.target_role ||
+                              "Not provided"}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Controlled profile state</dt>
+                          <dd>
+                            {formatTargetRoleMappingStatus(
+                              uploadState.result.target_alignment.target_role.status,
+                            )}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Controlled profile</dt>
+                          <dd>
+                            {uploadState.result.target_alignment.target_role.controlled_profile ||
+                              "Not mapped"}
+                          </dd>
+                        </div>
+                      </dl>
+                    </section>
+                  </div>
+                </div>
               )}
             </section>
 
