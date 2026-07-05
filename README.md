@@ -12,23 +12,31 @@ CareerBoost AI focuses on one core outcome: helping early-career candidates unde
 
 ## Product Preview
 
-The screenshots below are verified captures from the running local application using the fictional demo resume in [assets/demo/careerboost-demo-resume.pdf](assets/demo/careerboost-demo-resume.pdf). They reflect the current deterministic resume intake pipeline: upload validation, PDF text extraction, metadata preparation, and dashboard rendering. Saved analyses can be downloaded as standalone HTML reports; AI scoring, AI-generated recommendations, and PDF export are not implemented yet.
+The screenshots below are verified captures from the running local application using the fictional demo resume in [assets/demo/careerboost-demo-resume.pdf](assets/demo/careerboost-demo-resume.pdf). They reflect the current Sprint 5 product flow: target criteria, deterministic target alignment, improvement guidance, saved analysis history, result detail, and standalone HTML report download. AI scoring, AI-generated recommendations, hiring prediction, and PDF export are not implemented.
+
+### Home
+
+![CareerBoost AI home page](assets/screenshots/home-desktop.png)
+
+### Upload CV with Target Criteria
+
+![CareerBoost AI upload page with target criteria](assets/screenshots/upload-target-criteria-desktop.png)
 
 ### Analysis Dashboard
 
-![CareerBoost AI desktop analysis dashboard](assets/screenshots/dashboard-desktop.png)
+![CareerBoost AI dashboard with target alignment and improvement guidance](assets/screenshots/dashboard-improvement-guidance-desktop.png)
 
-### Responsive Experience
+### Saved History and Result Detail
 
-![CareerBoost AI mobile analysis dashboard](assets/screenshots/dashboard-mobile.png)
+| Saved History | Result Detail |
+| --- | --- |
+| ![CareerBoost AI saved analysis history](assets/screenshots/history-desktop.png) | ![CareerBoost AI saved result detail](assets/screenshots/result-detail-desktop.png) |
 
-### Resume Analysis Flow
+### Standalone HTML Report
 
-| Upload | Processing | Result | Error Recovery |
-| --- | --- | --- | --- |
-| ![Desktop upload page](assets/screenshots/upload-desktop.png) | ![Desktop processing state](assets/screenshots/processing-desktop.png) | ![Desktop dashboard result](assets/screenshots/dashboard-desktop.png) | ![Desktop structured error state](assets/screenshots/error-desktop.png) |
+![CareerBoost AI standalone HTML report preview](assets/screenshots/html-report-preview-desktop.png)
 
-Flow represented: Upload → Validation → Extraction → Deterministic Analysis Metadata → Dashboard.
+Responsive captures are maintained in [assets/screenshots](assets/screenshots) and documented in [docs/DEMO_ASSETS.md](docs/DEMO_ASSETS.md).
 
 ## Implemented Capabilities and Planned Version 1.0 Work
 

@@ -35,6 +35,7 @@ human-readable changelog format inspired by [Keep a Changelog](https://keepachan
 - Deterministic improvement guidance generated from existing resume analysis metadata, exposed in upload results, saved results, and standalone HTML reports.
 - API contract documentation for health, upload, history, result retrieval, delete, and HTML report endpoints.
 - Manual testing guide covering local demo flows, target criteria, history, saved results, report download, invalid uploads, responsive checks, and keyboard smoke testing.
+- Refreshed verified Sprint 5 product demo screenshots covering Home, Target Criteria, Target Alignment, Improvement Guidance, History, Result detail, report download, and standalone HTML report preview.
 
 ### Changed
 
