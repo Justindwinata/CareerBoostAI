@@ -245,6 +245,17 @@ See [docs/MANUAL_TESTING.md](docs/MANUAL_TESTING.md) for the full demo validatio
 
 Docker setup commands will be added after Docker validation is unblocked.
 
+## Project ZIP Archive
+
+Create a clean source-only ZIP archive for backup, submission, or portfolio review:
+
+```bash
+python3 scripts/build_project_zip.py
+python3 scripts/verify_project_zip.py
+```
+
+The generated archive is saved under `dist/` and is intentionally not committed. See [Project ZIP Packaging Guide](docs/PROJECT_ZIP_PACKAGING_GUIDE.md) for inclusion rules, exclusions, manifest details, and regeneration steps.
+
 ## Documentation Index
 
 Existing documentation:
@@ -259,6 +270,7 @@ Existing documentation:
 - [Manual Testing Guide](docs/MANUAL_TESTING.md)
 - [Development Guide](docs/DEVELOPMENT.md)
 - [Demo Assets Guide](docs/DEMO_ASSETS.md)
+- [Project ZIP Packaging Guide](docs/PROJECT_ZIP_PACKAGING_GUIDE.md)
 - [Sprint 1 Completion Report](docs/SPRINT_1_COMPLETION_REPORT.md)
 - [Sprint 1.5 Completion Report](docs/SPRINT_1_5_COMPLETION_REPORT.md)
 - [Sprint 4 Completion Report](docs/SPRINT_4_COMPLETION_REPORT.md)
