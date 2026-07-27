@@ -23,6 +23,7 @@ FORBIDDEN_FOLDER_PREFIXES = (
     "target/",
     ".gradle/",
     "__pycache__/",
+    ".cache/",
     ".pytest_cache/",
     ".mypy_cache/",
     ".ruff_cache/",
@@ -51,6 +52,16 @@ FORBIDDEN_MODEL_PATTERNS = (
     "*.ckpt",
     "*.h5",
     "*.keras",
+)
+
+FORBIDDEN_LOCAL_ARTIFACT_PATTERNS = (
+    ".coverage",
+    ".coverage.*",
+    "*.db",
+    "*.sqlite",
+    "*.sqlite.db",
+    "*.sqlite3",
+    "*.sqlite3-*",
 )
 
 IMPORTANT_FILE_CANDIDATES = (
@@ -137,6 +148,9 @@ def verify_zip(project_root: Path) -> VerificationResult:
 
             if matches_any_pattern(Path(name).name, FORBIDDEN_MODEL_PATTERNS):
                 failures.append(f"Large model/checkpoint artifact included: {name}")
+
+            if matches_any_pattern(Path(name).name, FORBIDDEN_LOCAL_ARTIFACT_PATTERNS):
+                failures.append(f"Local runtime artifact included: {name}")
 
         for important_file in project_has_any(project_root, IMPORTANT_FILE_CANDIDATES):
             if important_file not in name_set:

@@ -28,10 +28,12 @@ FORBIDDEN_DIR_NAMES = {
     ".gradle",
     ".idea",
     ".ipynb_checkpoints",
+    ".cache",
     ".mypy_cache",
     ".pytest_cache",
     ".ruff_cache",
     ".venv",
+    ".vscode",
     "__pycache__",
     "build",
     "checkpoints",
@@ -81,6 +83,9 @@ FORBIDDEN_GLOB_PATTERNS = (
     "*.pyo",
     "*.rar",
     "*.safetensors",
+    "*.sqlite",
+    "*.sqlite.db",
+    "*.sqlite3",
     "*.swp",
     "*.tar",
     "*.tar.gz",
@@ -88,6 +93,8 @@ FORBIDDEN_GLOB_PATTERNS = (
     "*.tmp",
     "*.war",
     "*.zip",
+    ".coverage",
+    ".coverage.*",
 )
 
 FORBIDDEN_PATH_PATTERNS = (
